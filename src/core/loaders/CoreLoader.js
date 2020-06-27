@@ -1,7 +1,7 @@
 import Collection from 'discord.js'
-import EventManager from './EventManager.js'
-import CommandManager from './CommandManager.js'
-import ModuleManager from './ModuleManager.js'
+import EventLoader from './EventLoader.js'
+import CommandLoader from './CommandLoader.js'
+import ModuleLoader from './ModuleLoader.js'
 import Logger from '../Logger.js'
 import { promises as fs } from 'fs';
 
@@ -18,10 +18,14 @@ export default class CoreManager {
     constructor(client) {
         const logger = new Logger('CoreManager');
         try {
+            //TODO: Wait for moduleloader to finish, load cmd/event, finally send token
             internalCustomCheck()
-            CommandManager.init(client, new Logger("CommandManager"))
-            EventManager.init(client, new Logger("EventManager"))
-            ModuleManager.init(client, new Logger("ModuleManager"))
+            ModuleLoader.init(client, new Logger("ModuleLoader"))
+
+            CommandLoader.init(client, new Logger("CommandLoader"))
+            EventLoader.init(client, new Logger("EventLoader"))
+
+            client.login(process.env.DISCORD_BOT_TOKEN)
         }catch(err) {
             logger.servere('Manager loading failure:', err)
         }

@@ -1,0 +1,104 @@
+import { Collection } from "discord.js"
+import Chokidar from 'chokidar'
+import { promises as fs } from 'fs';
+import path from 'path'
+
+import Logger from '../Logger.js'
+import EventManager from '../managers/EventManager.js'
+import EventEmitter from 'events'
+
+const eventEmitter = new EventEmitter();
+const folders = ['src/events','events'];
+const IGNORED_EVENTS = ['raw','debug']
+
+export default {
+    init(client, log) {
+        this.loadEvents(client, log)
+        //this.setupWatcher()
+        this.manager = new EventManager(client);
+
+        //Catch all events, pass to EventManager
+        patchEmitter(client, this.manager)
+    },
+    setupWatcher() {
+        const watch = Chokidar.watch(['src/events','events'], {
+            ignored: /(^|[\/\\])\../,
+            ignoreInitial: true,
+            persistent: true
+        })
+        .on('add', filepath => {
+            log.debug('Detected a new event (',filepath,'). Restart to load')
+        })
+        .on('change',filepath => {
+            const filename = filepath.replace(/^.*[\\\/]/, '')
+            .split(".").slice(0,-1).join(".")
+            //log.debug(`Watcher: Detected file change for module ${filename}, reloading...`)
+            this.manager.reloadEvent(filename, { custom: true })
+            .then(() => log.info(`Watcher: Reloaded event ${filename} successfully`))
+            .catch(err => {
+                log.error(`Watcher: Failed to auto reload event ${filename}: `, err)
+            })
+        })
+    },
+    async loadEvents(client, log) {
+        let normal = 0, custom = 0
+        for(let i=0; i<folders.length; i++) {
+            const isCoreEvent = i == 0;
+            const folder = folders[i];
+            const filepath = path.join(client.ROOT_DIR,folder);
+            await fs.readdir(filepath)
+            .then(files => {
+                files.forEach(async file => {
+                    if(file.split(".").slice(-1)[0] !== "js") return; //has to be .js file *cough* folder that doesnt exist *cough*
+                    const eventName = file.split(".");
+                    eventName.pop();
+                    try {
+                        const event = await import(`file://${filepath}/${file}`);
+                        if(isCoreEvent) { //core
+                            if(!event || !event.default || typeof event.default !== 'function') {
+                                return log.warn(`Event ${file} is not setup correctly!`);
+                            }
+                        }else{ //custom
+                            if(!event || (!event.before && !event.after)) {
+                                return log.warn(`Custom Event ${file} is not setup correctly!`);
+                            }
+                        }
+                        //this is probably still broken. Event manager doesnt care about .once. property
+                        const logger = new Logger(eventName[0])
+                        const once = eventName.length >= 2 && eventName[1].toLowerCase() === "once";
+                        this.manager.registerEvent(eventName[0], { once, core: isCoreEvent})
+                        .catch(err => {
+                            log.error(`Event ${file} was not loaded by EventManager: \n ${err.stack}`)
+                        })
+                        //delete require.cache[require.resolve(`${filepath}/${file}`)];
+                        if(isCoreEvent) normal++; else custom++;
+                    }catch(err) {
+                        log.error(`Event ${file} had an error:\n    ${err.stack}`);
+                    }
+                });
+            }).catch(err => {
+                if(err.code === "ENOENT") {
+                    log.warn(`${folder} directory does not exist.`)
+                }else{
+                    log.error(`Loading${folder} failed:\n    ${err.stack}`);
+                }
+            })
+        }
+        log.success(`Loaded ${normal} core events, ${custom} custom events`)
+    }
+}
+
+//replace client.emit with custom emit that sends events to EventManager
+function patchEmitter(emitter, manager) {
+	const oldEmit = emitter.emit;
+	emitter.emit = function() {
+        const args = Array.prototype.slice.call(arguments);
+		const name = args.shift();
+		//console.log(require('util').inspect(arguments[1],{depth:0}))
+        if(!IGNORED_EVENTS.includes(name)) {
+            manager.event(name,args)
+        }
+		oldEmit.apply(emitter, arguments);
+    }
+    return eventEmitter    
+}

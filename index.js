@@ -1,5 +1,7 @@
 import * as Discord from 'discord.js';
-import StartupManager from './src/core/Startup.js';
+import EnvLoader from './src/core/EnvLoader.js'
+import Functions from './src/core/Functions.js'
+import CoreManager from './src/core/loaders/CoreLoader.js'
 
 const client = new Discord.Client({
     disableEveryone: true,
@@ -9,7 +11,9 @@ const client = new Discord.Client({
 });
 
 
-new StartupManager(client);
+EnvLoader(client)
+Functions(client)
+new CoreManager(client);
 
 //final error catch area
 process.on('error',(err) => {

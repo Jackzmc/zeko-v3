@@ -1,121 +1,138 @@
-import { Collection } from "discord.js"
-import Chokidar from 'chokidar'
-import { promises as fs } from 'fs';
 import path from 'path'
+import Logger from '../Logger.js'
 
-export default {
-    init(client, log) {
-        this.setupWatcher()
-        loadModules(client, log)
-    },
-    setupWatcher() {
-        const watch = Chokidar.watch(['src/modules','modules'], {
-            ignored: /(^|[\/\\])\../,
-            ignoreInitial: true,
-            persistent: true
-        })
-        .on('add', filepath => log.debug('Detected a new module (',filepath,'). Restart to load'))
-        .on('change', filepath => {
-            if((/(loaders)(\\|\/)/.test(filepath))) return; //dont want it to load core loaders
-            const filename = filepath.replace(/^.*[\\\/]/, '')
-            .split(".").slice(0,-1).join(".")
-            //log.debug(`Watcher: Detected file change for module ${filename}, reloading...`)
-            client.moduleManager.reloadModule(filename,{custom:true})
+let instance, logger;
+
+export default class {
+    
+    constructor(client) {
+        this.modules = {},
+        this.client = client;
+        logger = new Logger("ModuleManager")
+        instance = this
+    }
+
+    static getInstance() {
+        return instance;
+    }
+
+    reloadModule(name) {
+        return new Promise((resolve,reject) => {
+            const module = this.modules[name];
+            if(!module) reject(new Error(`ModuleManager: No module found for ${name}`));
+            if(module.reloadable != null && !module.reloadable) {
+                reject(new Error(`ModuleManager: Module ${name} cannot be reloaded.`))
+                logger.warn(`Reloading module ${name} failed: Not Reloadable`)
+                return;
+            }
+
+            this._reload(module)
             .then(() => {
-                log.info(`Watcher: Reloaded module ${filename} successfully`)
-            })
-            .catch(err => {
-                log.error(`Watcher: Failed to auto reload module ${filename}: ${process.env.PRODUCTION?err.message:err.stack}`)
+                logger.info(`Successfully reloaded module ${name}`)
+                resolve();
+            }).catch(err => {
+                logger.error(`Reloading module ${name} failed: ${err.message}`);
+                reject(err);
             })
         })
     }
-}
-const folders = ['src/modules','modules'];
-async function loadModules(client, log) {
-    let custom = 0;
-    let normal = 0;
-    const promises = [];
-    for(let i=0;i<folders.length;i++) {
-        const folder = folders[i];
-        const txt_custom = (i==0)?'Custom ' : '';
-        const filepath = path.join(client.ROOT_DIR,folder);
-        //read the folder path, and get dirs. Same as commands fetching basically
-        await fs.readdir(filepath,{withFileTypes:true})
-        .then(files => {
-            files.forEach(dirent => {
-                if(dirent.isDirectory()) {
-                    if(dirent.name === "loaders") return; //dont load the loaders with module manager
-                    const sub_filepath = path.join(filepath,dirent.name);
-                    fs.readdir(sub_filepath)
-                    .then(sub_files => {
-                        sub_files.forEach(f => {
-                            if(f.split(".").slice(-1)[0] !== "js") return;
-                            if(f.startsWith("_")) return;
-                            promises.push(new Promise((resolve,reject) => {
-                                try {
-                                    let props = require(`${sub_filepath}/${f}`);
-                                    if(!props.config) props.config = {}
-                                    props.config.name = f.split(".")[0];
-                                    props.config.core = (i==0);
-                                    props.config.group = dirent.name;
-                                    
-                                    client.moduleManager.registerModule(props)
-                                    .then(() => {
-                                        if(i==0) custom++; else normal++;
-                                        resolve();
-                                    })
-                                    .catch(err => {
-                                        log.error(`${txt_custom} Module ${f} was not loaded by ModuleManager: \n ${err.message}`)
-                                        reject(err);
-                                    })
-                                }catch(err) {
-                                    log.error(`${txt_custom} Module ${f} had an error:\n    ${err.stack}`);
-                                    reject(err);
-                                }
-                            }))
-                        })
-                    })
-                    .catch(err => {
-                        log.error(`Loading group ${dirent.name} failed:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
-                    })
-                }else {
-                    const f = dirent.name;
-                    if(f.split(".").slice(-1)[0] !== "js") return;
-                    if(f.startsWith("_")) return;
-                    promises.push(new Promise((resolve,reject) => {
-                        try {
-                            let props = require(`${filepath}/${f}`);
-                            if(!props.config) props.config = {}
-                            props.config.name = f.split(".")[0];
-                            props.config.core = (i==0);
-                            client.moduleManager.registerModule(props)
-                            .then(() => {
-                                if(i==0) custom++; else normal++;
-                                resolve();
-                            })
-                            .catch(err => {
-                                log.error(`${txt_custom} Module ${f} was not loaded by ModuleManager: \n ${process.env.PRODUCTION?err.message:err.stack}`)
-                                reject(err);
-                            })
-                        }catch(err) {
-                            log.error(`${txt_custom} Module ${f} had an error:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
-                            reject(err);
-                        }
-                    }))
-                }
-            });
-        }).catch(err => {
-            if(err.code === "ENOENT") {
-                log.warn(`${txt_custom} ${folder} directory does not exist.`)
-            }else {
-                log.error(`Loading ${txt_custom}${folder} failed:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
+
+    registerModule(module) {
+        const _this = this;
+        return new Promise(async(resolve,reject) => {
+            
+            if(!module.config) reject(new Error(`Invalid module registered.`));
+            try {
+                this._moduleCheck(module)
+                const logger = new Logger(module.config.name, {type:'module'})
+                _this.modules[module.config.name] = module;
+
+                if(module.config.command) this._registerCommandModule(module);
+                if(module.init) await module.init(_this.client,logger);
+
+
+                //logger.debug(`Registered${module.config.core?" Core ":" "}${module.config.command?"Command ":""}Module ${module.config.name}`);
+                resolve();
+            }catch(err) {
+                reject(err);
             }
         })
     }
-    await Promise.all(promises)
-    .then(() => {
-        log.success(`Loaded ${normal} core modules, ${custom} custom modules`)
-    }).catch(() => {
-        //errors are already logged in the promises
-    })
+    getModule(query) {
+        return this.modules[query];
+    }
+    getModules(opts = {names:false}) {
+        //{type: 'custom'}
+        let filtered;
+        if(opts.type) {
+            if(opts.type === "custom") {
+                filtered = this.modules.filter(v => !v.config.core)
+            }else if(opts.type === "core") {
+                filtered = this.modules.filter(v => v.config.core);
+            }else{
+                throw new Error("Unknown type specified of module");
+            }
+        }else{
+            filtered = this.modules;
+        }
+
+        if(opts.names) {
+            return Object.keys(this.modules)
+        }else{
+            return this.modules;
+        }
+    }
+
+    ///#region PRIVATE METHODS
+    _reload(module) {
+        const _this = this;
+        return new Promise(async(resolve,reject) => {
+            try {
+                //delete this.modules[module.config.name];
+                const _logger = new Logger(module.config.name,{type:'module'})
+                if(module.exit) await module.exit(this.client,_logger);
+                
+                const filepath = path.join(_this.client.ROOT_DIR,module.config.core?"src/modules/":"modules/",`${module.config.name}.js`)
+                try {
+                    delete require.cache[require.resolve(filepath)];
+                    const newModule = require(filepath)
+                    if(!newModule.config) newModule.config = {}
+                    newModule.config.name = module.config.name;
+                    newModule.config.core = module.config.core;
+                    //do logic on register modules
+                    _this.modules[module.config.name] = newModule;
+                    if(newModule.init) await newModule.init(_this.client,_logger);
+                    resolve();
+                } catch(err) {
+                    if(err.code === 'ENOENT') {
+                        reject(new Error("Module does not exist"))
+                    }else{
+                        reject(err);
+                    }
+                }
+            }catch(err) {
+                reject(err);   
+            }
+        })
+    }
+    _moduleCheck(module) {
+        const failed_dependencies = [];
+        const failed_envs = [];
+        if(module.config.dependencies) module.config.dependencies.forEach(v => {
+            try {
+                require.resolve(v)
+            } catch(e) {
+                failed_dependencies.push(v);
+            }
+        })
+        if(module.config.envs) module.config.envs.forEach(v => {
+            if(!process.env[v]) failed_envs.push(v);
+        })
+        if(failed_dependencies.length > 0) {
+            logger.warn(`Module ${module.config.name} missing dependencies: ${failed_dependencies.join(" ")}`);
+        }else if(failed_envs.length > 0) {
+            logger.warn(`Module ${module.config.name} missing envs: ${failed_envs.join(" ")}`);
+        }
+    }
+    /////#endregion
 }
