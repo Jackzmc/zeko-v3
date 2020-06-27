@@ -53,18 +53,18 @@ export default {
                     const eventName = file.split(".");
                     eventName.pop();
                     try {
-                        const event = await import(`file://${filepath}/${file}`);
+                        const eventObject = await import(`file://${filepath}/${file}`);
                         if(isCoreEvent) { //core
-                            if(!event || !event.default || typeof event.default !== 'function') {
+                            if(!eventObject || !eventObject.default || typeof eventObject.default !== 'function') {
                                 return log.warn(`Event ${file} is not setup correctly!`);
                             }
                         }else{ //custom
-                            if(!event || (!event.before && !event.after)) {
+                            if(!eventObject || !eventObject.default || (!eventObject.before && !eventObject.after)) {
                                 return log.warn(`Custom Event ${file} is not setup correctly!`);
                             }
                         }
                         //this is probably still broken. Event manager doesnt care about .once. property
-                        const logger = new Logger(eventName[0])
+                        
                         const once = eventName.length >= 2 && eventName[1].toLowerCase() === "once";
                         this.manager.registerEvent(eventName[0], { once, core: isCoreEvent})
                         .catch(err => {

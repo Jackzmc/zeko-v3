@@ -1,4 +1,11 @@
 import got from 'got'
-export default function(client, logger) {
-    logger.info(`Bot now ready`);
+import CoreEvent from '../core/types/CoreEvent.js'
+export default class extends CoreEvent {
+    once(/* args */) {
+        //Fires only once.
+    }
+    every(/* args */) {
+        //Fires every time.
+        this.logger.info(`Bot now ready`);
+    }
 }
