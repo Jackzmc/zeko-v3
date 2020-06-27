@@ -11,7 +11,7 @@ export default class {
      */
     before(/* args */) {
         return new Promise((resolve,reject) => {
-            resolve()
+            resolve(false)
         })
     }
     //Things to run AFTER core event fires.

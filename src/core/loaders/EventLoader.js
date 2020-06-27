@@ -54,19 +54,13 @@ export default {
                     eventName.pop();
                     try {
                         const eventObject = await import(`file://${filepath}/${file}`);
-                        if(isCoreEvent) { //core
-                            if(!eventObject || !eventObject.default || typeof eventObject.default !== 'function') {
-                                return log.warn(`Event ${file} is not setup correctly!`);
-                            }
-                        }else{ //custom
-                            if(!eventObject || !eventObject.default || (!eventObject.before && !eventObject.after)) {
-                                return log.warn(`Custom Event ${file} is not setup correctly!`);
-                            }
+                        if(!eventObject || !eventObject.default || typeof eventObject.default !== 'function') {
+                            const prefix = isCoreEvent ? '' : 'Custom '
+                            return log.warn(`${prefix}Event ${file} is not setup correctly!`);
                         }
+
                         //this is probably still broken. Event manager doesnt care about .once. property
-                        
-                        const once = eventName.length >= 2 && eventName[1].toLowerCase() === "once";
-                        this.manager.registerEvent(eventName[0], { once, core: isCoreEvent})
+                        this.manager.registerEvent(eventName[0], isCoreEvent)
                         .catch(err => {
                             log.error(`Event ${file} was not loaded by EventManager: \n ${err.stack}`)
                         })

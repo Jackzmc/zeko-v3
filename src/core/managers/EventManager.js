@@ -24,13 +24,11 @@ export default class {
         if(custom) {
             Promise.resolve(custom.event.before(...args))
             .then(beforeResponse => {
-                let cancelled = (r instanceof Object) ? r.cancel : false;
-                if(!cancelled && custom.event.after) {
+                if(beforeResponse !== true && custom.event.after) {
                     if(core) {
                         Promise.resolve(core.event.every(...args))
-                        .then(r => {
-                            let cancelled = (r instanceof Object) ? r.cancel : false;
-                            if(!cancelled) custom.event.after(...args);
+                        .then(coreResponse => {
+                            if(coreResponse !== true) custom.event.after(...args);
                         }).catch(err => {
                             logger.error(`Core Event ${name} errored: ${process.env.PRODUCTION?err.message:err.stack}`)
                         })
@@ -46,11 +44,11 @@ export default class {
             })
         }
     }
-    registerEvent(name, opts = { once: false, core: false }) {
+    registerEvent(name, isCore) {
         const _this = this;
         return new Promise(async(resolve,reject) => {
             try {
-                const filepath = path.join(_this.client.ROOT_DIR, opts.core?"src/events":"events",`${name}.js`)
+                const filepath = path.join(_this.client.ROOT_DIR, isCore?"src/events":"events",`${name}.js`)
                 //delete require.cache[require.resolve(_path)];
                 const event_src = await import(`file://${filepath}`);
                 const event = new event_src.default(this.client, new Logger(name))
@@ -58,12 +56,11 @@ export default class {
                 const registeredEvent = {
                     event,
                     config: {
-                        core: opts.core,
+                        core: isCore,
                         name,
-                        once: opts.once
                     }
                 }
-                if(opts.core) {
+                if(isCore) {
                     _this.events.core.set(name, registeredEvent)
                 }else{
                     _this.events.custom.set(name, registeredEvent)
