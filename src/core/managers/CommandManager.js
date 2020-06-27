@@ -7,7 +7,9 @@ const groups = []
 const commands = new Collection();
 const aliases = new Collection();
 
-export default function(client, logger) {
+export default { init, commands, aliases, groups }
+
+function init(client, logger) {
     if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
         const watch = Chokidar.watch(['src/commands','commands'], {
             ignored: /(^|[\/\\])\../,

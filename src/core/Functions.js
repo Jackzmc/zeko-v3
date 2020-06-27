@@ -14,7 +14,6 @@ export default function(client, CoreManager) {
     //load variables
     client.PREFIX = process.env.BOT_PREFIX || ">"
     client.ROOT_DIR = path.resolve(__dirname,"../../"); //push root dir into path
-    console.log(__dirname)
     //client.utils = require('../utils.js')(client)
 }
 
