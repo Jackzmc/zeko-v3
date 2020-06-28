@@ -18,4 +18,9 @@ export default class {
     after() {
 
     }
+
+    //Runs after bot termination or reload.
+    exit() {
+
+    }
 }

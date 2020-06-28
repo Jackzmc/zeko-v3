@@ -22,4 +22,8 @@ export default class {
             flags: {}
         }
     }*/
+
+    exit() {
+        
+    }
 }

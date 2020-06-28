@@ -4,10 +4,6 @@ export default class {
         this.logger = logger;
     }
 
-    initalize() {
-        
-    }
-
     exit() {
 
     }
