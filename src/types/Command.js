@@ -14,12 +14,12 @@ export default class {
         }
     }
 
-    help() {
+    /*help() {
         return {
             name: [],
             description: 'A base command.',
             usage: '',
             flags: {}
         }
-    }
+    }*/
 }

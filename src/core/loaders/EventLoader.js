@@ -13,9 +13,9 @@ const IGNORED_EVENTS = ['raw','debug']
 
 export default {
     init(client, log) {
+        this.manager = new EventManager(client);
         this.loadEvents(client, log)
         //this.setupWatcher()
-        this.manager = new EventManager(client);
 
         //Catch all events, pass to EventManager
         patchEmitter(client, this.manager)
@@ -54,15 +54,19 @@ export default {
                     eventName.pop();
                     try {
                         const eventObject = await import(`file://${filepath}/${file}`);
-                        if(!eventObject || !eventObject.default || typeof eventObject.default !== 'function') {
-                            const prefix = isCoreEvent ? '' : 'Custom '
-                            return log.warn(`${prefix}Event ${file} is not setup correctly!`);
+                        //Test for invalid. Only log if there IS content (don't error on empty files)
+                        if(!eventObject || !eventObject.default) {
+                            if(eventObject.default && typeof eventObject.default !== 'function') {
+                                const prefix = isCoreEvent ? '' : 'Custom '
+                                log.warn(`${prefix}Event ${file} is not setup correctly!`);
+                            }
+                            return;
                         }
 
                         //this is probably still broken. Event manager doesnt care about .once. property
                         this.manager.registerEvent(eventName[0], isCoreEvent)
                         .catch(err => {
-                            log.error(`Event ${file} was not loaded by EventManager: \n ${err.stack}`)
+                            log.error(`Event ${file} was not loaded by EventLoader: \n ${err.stack}`)
                         })
                         //delete require.cache[require.resolve(`${filepath}/${file}`)];
                         if(isCoreEvent) normal++; else custom++;

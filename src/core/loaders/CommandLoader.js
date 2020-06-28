@@ -3,14 +3,23 @@ import Chokidar from 'chokidar'
 import { promises as fs } from 'fs';
 import path from 'path'
 
-const groups = []
-const commands = new Collection();
-const aliases = new Collection();
+import CommandManager from '../managers/CommandManager.js'
 
-export default { init, commands, aliases, groups }
+const folders = ['src/commands','commands'];
 
-function init(client, logger) {
-    if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
+let logger;
+
+export default { 
+    init(client, _logger) {
+        if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
+            this.setupWatcher();
+        }
+        logger = _logger;
+        this.manager = new CommandManager(client)
+        client.managers.CommandManager = this.manager;
+        this.loadCommands(client, logger)
+    },
+    setupWatcher() {
         const watch = Chokidar.watch(['src/commands','commands'], {
             ignored: /(^|[\/\\])\../,
             ignoreInitial: true,
@@ -24,7 +33,7 @@ function init(client, logger) {
             let filename = filepath.replace(/^.*[\\\/]/, '')
             //Ignore non .js files or starting with _
             if(filename.split(".").slice(-1)[0] !== "js" || filename.startsWith("_")) return;
-            filename = file.split(".").slice(0,-1).join(".")
+            filename = filename.split(".").slice(0,-1).join(".")
             //set timeout, sometimes it gets a change before file is complete. Should port to the other 2 _watchers
             setTimeout(() => {
                 try {
@@ -49,135 +58,69 @@ function init(client, logger) {
                 }
             },500)
         })
-    }
-    loadCommands(client, logger).then(() => {
-
-    })
-    .catch(err => {
-        logger.servere('Failed to load commands: ', err)
-    })
-}
-const folders = ['src/commands','commands'];
-async function loadCommands(client, log) {
-    //just set the folders it should load from
-    let custom = 0;
-    let normal = 0;
-    const promises = [];
-    for(let i=0 ; i < folders.length; i++) {
-        const folder = folders[i];
-        const txt_custom = (i==1)?' Custom' : ''; //ugly solution, but checks if its a custom command
-        const filepath = path.join(client.ROOT_DIR, folder);
-        await fs.readdir(filepath,{ withFileTypes:true }) //read directory, returns directs which can check if folder, to support cmd groups
-        .then(files => {
-            files.forEach(dirent => {
-                if(dirent.isDirectory()) {
-                    const sub_filepath = path.join(filepath,dirent.name);
-                    fs.readdir(sub_filepath)
-                    .then(sub_files => {
-                        sub_files.forEach(f => {
-                            //ignore files that arent *.js, or have _ prefixed
-                            if(f.split(".").slice(-1)[0] !== "js") return;
-                            if(f.startsWith("_")) return;
-                            promises.push(new Promise((resolve,reject) => {
-                                try {
-                                    //load file, check required properties (help,config,run)
-                                    let props = require(`${sub_filepath}/${f}`);
-                                    if(!props.help || !props.config) {
-                                        log.warn(`${txt_custom} ${f} has no config or help value.`);
-                                        return resolve();
-                                    }
-                                    if(!props.run) {
-                                        log.warn(`${txt_custom} ${f} has no run function.`);
-                                        return resolve();
-                                    }
-                                    props.help.description = props.help.description||'[No description provided]'
-                                    props.config.group = dirent.name;
-                                    if(!client.commandGroups.includes(dirent.name)) client.commandGroups.push(dirent.name)
-                                    props.config.core = (i==0);
-                                    //allows support for name to be an array or a single string
-                                    if(Array.isArray(props.help.name)) {
-                                        if(props.help.name.length === 0) {
-                                            log.warn(`${f} has no names or aliases defined.`)
-                                        }else{
-                                            const name = props.help.name.shift();
-                                            props.help.name.forEach(alias => {
-                                                client.aliases.set(alias,name);
-                                            })
-                                            client.commands.set(name,props);
-                                        }
-                                    }else{
-                                        client.commands.set(props.help.name, props);
-                                    }
-                                    const logger = new client.Logger(props.help.name,{type:'command'})
-                                    if(props.init) props.init(client,logger);
-                                    if(i==1) custom++; else normal++;
-                                    resolve();
-                                }catch(err) {
-                                    log.error(`${txt_custom} Command ${f} had an error:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
-                                    reject(err);
-                                }
-                            }))
+    },
+    async loadCommands(client, log) {
+        for(let i=0 ; i < folders.length; i++) {
+            const isCore = i == 0;
+            const folder = folders[i];
+            const filepath = path.join(client.ROOT_DIR, folder);
+            await fs.readdir(filepath, { withFileTypes:true }) //read directory, returns directs which can check if folder, to support cmd groups
+            .then(files => {
+                files.forEach(dirent => {
+                    if(dirent.isDirectory()) {
+                        const sub_filepath = path.join(filepath, dirent.name);
+                        fs.readdir(sub_filepath)
+                        .then(sub_files => {
+                            sub_files.forEach(file => {
+                                //ignore files that arent *.js, or have _ prefixed
+                                testCommand(this, sub_filepath, file, isCore, dirent.name);
+                            })
                         })
-                    })
+                    }else{
+                        //same as above, dont run if not *.js or prefixed with _
+                        const file = dirent.name;
+                        testCommand(this, filepath, file, isCore);
+                    }
+                });
+            })
+            .catch(err => {
+                if(err.code === 'ENOENT') {
+                    log.warn(`${folder} directory does not exist.`)
                 }else{
-                    //same as above, dont run if not *.js or prefixed with _
-                    const f = dirent.name;
-                    if(f.split(".").slice(-1)[0] !== "js") return;
-                    if(f.startsWith("_")) return;
-                    promises.push(new Promise((resolve,reject) => {
-                        try {
-                            //load file, check required properties (help,config,run)
-                            let props = require(`${filepath}/${f}`);
-                            if(!props.help || !props.config) {
-                                log.warn(`${txt_custom} ${f} has no config or help value.`);
-                                return resolve();
-                            }
-                            if(!props.run) {
-                                log.warn(`${txt_custom} ${f} has no run function.`);
-                                return resolve();
-                            }
-                            props.help.description = props.help.description||'[No description provided]'
-                            props.config.core = (i==0);
-                            props.config.group = null;
-                            //allows support for name to be an array or a single string
-                            if(Array.isArray(props.help.name)) {
-                                if(props.help.name.length === 0) {
-                                    log.warn(`${f} has no names or aliases defined.`)
-                                }else{
-                                    const name = props.help.name.shift();
-                                    props.help.name.forEach(alias => {
-                                        client.aliases.set(alias,name);
-                                    })
-                                    client.commands.set(name,props);
-                                }
-                            }else{
-                                client.commands.set(props.help.name, props);
-                            }
-                            const logger = new client.Logger(props.help.name,{type:'command'})
-                            if(props.init) props.init(client,logger);
-                            if(i==1) custom++; else normal++;
-                            resolve();
-                        }catch(err) {
-                            log.error(`${txt_custom} Command ${f} had an error:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
-                            reject(err);
-                        }
-                    }))
+                    log.error(`Loading ${folder} failed:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
                 }
-            });
+            })
+        }    
+    }
+}
+
+async function testCommand(_this, filepath, file, isCore, group) {
+    //ignore files that arent *.js, or have _ prefixed
+    if(file.split(".").slice(-1)[0] !== "js") return;
+    if(file.startsWith("_")) return;
+    try {
+        const commandObject = await import(`file://${filepath}/${file}`);
+        //Test for invalid. Only log if there IS content (don't error on empty files)
+        if(!commandObject || !commandObject.default) {
+            if(commandObject.default && typeof commandObject.default !== 'function') {
+                const prefix = isCore ? '' : 'Custom '
+                logger.warn(`${prefix}Command ${file} is not setup correctly!`);
+            }
+            return;
+        }
+
+        const filename = file.split(".").shift();
+
+        //this is probably still broken. Event manager doesnt care about .once. property
+        //registerCommand(filename, isCore, [opt] groupName)
+        _this.manager.registerCommand(filename, isCore, group)
+        .then(() => {
+            return isCore ? {core: true} : {custom: true}
         })
         .catch(err => {
-            if(err.code === 'ENOENT') {
-                log.warn(`${txt_custom} ${folder} directory does not exist.`)
-            }else{
-                log.error(`Loading${txt_custom} ${folder} failed:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
-            }
+            logger.error(`Command ${file} was not loaded by CommandLoader:\n    ${err.stack}`)
         })
+    }catch(err) {
+        logger.error(`Command ${file} had an error:\n    ${err.stack}`);
     }
-    Promise.all(promises)
-    .then(() => {
-        log.success(`Loaded ${normal} core commands, ${custom} custom commands`)
-    }).catch(() => {
-        //errors are already logged in the promises
-    })
-
 }

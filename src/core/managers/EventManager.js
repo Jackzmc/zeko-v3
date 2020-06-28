@@ -52,6 +52,11 @@ export default class {
                 //delete require.cache[require.resolve(_path)];
                 const event_src = await import(`file://${filepath}`);
                 const event = new event_src.default(this.client, new Logger(name))
+                if(isCore && (typeof event.every !== "function" && typeof event.once !== "function")) {
+                    return reject(new Error("Invalid CoreEvent class: Missing valid 'every' or 'once' method"))
+                }else if(!isCore && typeof event.before !== "function" && typeof event.after !== "function") {
+                    return reject(new Error("Invalid (Custom) Event class: Missing valid 'before' or 'after' method"))
+                }
                 
                 const registeredEvent = {
                     event,
