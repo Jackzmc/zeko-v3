@@ -36,4 +36,9 @@ jobs:
         # The path to a JSDoc configuration file
         config_file: "jsdoc.conf.json" # optional
         # The path to a Markdown file to be used as a the front page
-        front_page: README.md # optional
+        front_page: README.md # optional 
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: docs
+        path: docs
