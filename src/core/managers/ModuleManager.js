@@ -69,7 +69,7 @@ export default class {
             import(`file://${filepath}`)
             .then(moduleFile => {
                 const prefix = group ? `${group}/` : ''
-                const module = new moduleFile.default(this.client, new Logger(group_prefix + name))
+                const module = new moduleFile.default(this.client, new Logger(prefix + name))
                 if(!module.config || typeof module.config !== "function" ) {
                     return reject(new Error("Invalid Module class: Missing 'config' method"))
                 }
