@@ -28,7 +28,7 @@ jobs:
       uses: andstor/jsdoc-action@v1.2.0
       with:
         # Source directory to build documentation from
-        source_dir: ".src" # optional
+        source_dir: "./src" # optional
         # Output folder for the generated documentation
         output_dir: "./docs" # optional
         # Recurse into subdirectories when scanning for source files
