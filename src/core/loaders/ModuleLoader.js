@@ -68,9 +68,9 @@ export default {
                             log.error(`Loading group ${dirent.name} failed:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
                         })
                     }else {
-                        const f = dirent.name;
-                        if(f.split(".").slice(-1)[0] !== "js") return;
-                        if(f.startsWith("_")) return;
+                        const file = dirent.name;
+                        if(file.split(".").slice(-1)[0] !== "js") return;
+                        if(file.startsWith("_")) return;
                         this.manager.registerModule(file, isCore, null)
                         .catch(err => {
                             log.error(`Module ${file} was not loaded by ModuleManager: \n ${err.message}`)
