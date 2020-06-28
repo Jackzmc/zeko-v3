@@ -65,10 +65,10 @@ export default class {
         const _this = this;
         return new Promise(async(resolve,reject) => {
             const root =  path.join(_this.client.ROOT_DIR, isCore?'src/modules':'modules')
-            const filepath = group !== null ? path.join(root, `${name}.js`) : path.join(root, `${group}/${name}.js`)
+            const filepath = group ? path.join(root, `${group}/${name}.js`) : path.join(root, `${name}.js`)
             import(`file://${filepath}`)
             .then(moduleFile => {
-                const prefix = group !== null ? `${group}/` : ''
+                const prefix = group ? `${group}/` : ''
                 const module = new moduleFile.default(this.client, new Logger(group_prefix + name))
                 if(!module.config || typeof module.config !== "function" ) {
                     return reject(new Error("Invalid Module class: Missing 'config' method"))
