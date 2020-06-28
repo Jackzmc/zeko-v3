@@ -36,8 +36,10 @@ export default class {
                 const registeredCommand = {
                     help,
                     group,
+                    isCore,
                     config,
-                    command
+                    command,
+                    name: cmdName
                 }
                 this.commands.set(cmdName, registeredCommand);
                 if(Array.isArray(help.name) && help.name.length > 0) {
@@ -56,17 +58,32 @@ export default class {
         })
     }
 
-    getCommand(name) {
+    getCommand(name, includeHidden) {
         const command = this.commands.get(name);
         if(!command) {
             const alias = this.aliases.get(name);
             if(alias) {
-                return this.commands.get(alias)
+                return (!includeHidden && command.config.hidden) ? null : this.commands.get(alias)
             }else{
                 return null;
             }
         }else{
-            return command;
+            return (!includeHidden && command.config.hidden) ? null : command;
+        }
+    }
+
+    getCommands(grouped, includeHidden, onlyKeys) {
+        if(grouped) {
+            let object = {}
+            this.commands.forEach((cmd,key) => {
+                const group = cmd.isCore ? 'core' : ((group === "default") ? 'misc' : cmd.group);
+
+                if(!object[group]) object[group] = []
+                if(includeHidden || !cmd.config.hidden) object[group].push(onlyKeys?key:cmd);
+            })
+            return object;
+        }else{
+            return includeHidden ? this.commands.filter(v => !v.config.hidden) : this.commands
         }
     }
 
