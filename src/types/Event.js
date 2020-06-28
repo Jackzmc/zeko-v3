@@ -1,3 +1,7 @@
+/**
+ @module types/Event
+ @description The Event class, custom events inherit
+*/
 export default class {
     constructor(client, logger) {
         this.client = client;
@@ -6,20 +10,32 @@ export default class {
 
     /**
      * Fires before the core event (if exists) is fired. Must return a promise.
+     * Return a promise of true if core/after events should be cancelled
      *
-     * @returns Promise
+     * @param {*} all Any discord.js event properties
+     *
+     * @returns Promise<Boolean>
      */
     before(/* args */) {
         return new Promise((resolve,reject) => {
             resolve(false)
         })
     }
-    //Things to run AFTER core event fires.
+    //
+     /**
+     * Fires after custom before event, and core event fired if not cancelled.
+     *
+     * @param {*} all Any discord.js event properties
+     *
+     */
     after() {
 
     }
 
-    //Runs after bot termination or reload.
+    /**
+     * Runs after bot termination or reload.
+     *
+     */
     exit() {
 
     }

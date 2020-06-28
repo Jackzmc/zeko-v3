@@ -1,3 +1,6 @@
+/**
+ @module core:managers/CommandManager
+*/
 import path from 'path'
 import Logger from '../Logger.js'
 import { Collection } from 'discord.js';
@@ -12,6 +15,14 @@ export default class {
         logger = new Logger('EventManager');
     }
 
+    /**
+     * Registers a command with the CommandManager
+     *
+     * @param {string} name The display name of the command. Also used as ID
+     * @param {boolean} isCore Is the plugin a core plugin? 
+     * @param {string} [group="default"] The command's group or null/default for misc
+     * @returns Promise<>
+     */
     registerCommand(name, isCore, group = "default") {
         const _this = this;
         return new Promise((resolve, reject) => {
@@ -52,12 +63,20 @@ export default class {
                 if(group.trim().length > 0 && group !== "default" && !this.groups.includes(group)) {
                     this.groups.push(group)
                 }
+                resolve()
             
             })
             .catch(err => reject(err))
         })
     }
 
+    /**
+     * Get a command by the name
+     *
+     * @param {string} name The id/name of the command (one provided in RegisterCommand)
+     * @param {boolean} includeHidden Should hidden commands (cmd.config.hidden) be provided?
+     * @returns CommandContainer
+     */
     getCommand(name, includeHidden) {
         const command = this.commands.get(name);
         if(!command) {
@@ -72,6 +91,14 @@ export default class {
         }
     }
 
+    /**
+     * Get a collection of commands
+     *
+     * @param {boolean} grouped Should they be put in a object by group name?
+     * @param {boolean} includeHidden Should hidden commands be provided?
+     * @param {boolean} onlyKeys True: Only provide keynames. False: Provide CommandContainer
+     * @returns CommandContainer or Object<Groupname, CommandContainer>
+     */
     getCommands(grouped, includeHidden, onlyKeys) {
         if(grouped) {
             let object = {}
@@ -87,6 +114,11 @@ export default class {
         }
     }
 
+    /**
+     * Get the list of groups
+     *
+     * @returns array of group names
+     */
     getGroups() {
         return this.groups
     }

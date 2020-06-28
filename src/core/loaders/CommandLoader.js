@@ -1,3 +1,7 @@
+/**
+ @module core:loaders/CommandLoader
+ @description Loads the commands from /src/commands and /commands and loads them in [CommandManager]{@link core/managers/CommandManager}
+*/
 import { Collection } from "discord.js"
 import Chokidar from 'chokidar'
 import { promises as fs } from 'fs';

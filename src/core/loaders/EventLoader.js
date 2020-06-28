@@ -1,3 +1,7 @@
+/** 
+@module core:loaders/EventLoader
+@description Loads all event files
+*/
 import { Collection } from "discord.js"
 import Chokidar from 'chokidar'
 import { promises as fs } from 'fs';

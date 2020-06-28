@@ -1,3 +1,7 @@
+/** 
+ @module core:managers/ModuleManager
+ @description Manages all registered modules
+*/
 import path from 'path'
 import Logger from '../Logger.js'
 
@@ -16,6 +20,13 @@ export default class {
         return instance;
     }
 
+
+    /**
+     * Reload a module. Not working with ESM Modules
+     *
+     * @param {string} name Module name
+     * @returns Promise<>
+     */
     reloadModule(name) {
         return new Promise((resolve,reject) => {
             const module = this.modules[name];
@@ -37,6 +48,13 @@ export default class {
         })
     }
 
+
+    /**
+     * Register a {@link types/Module} in the ModuleManager
+     *
+     * @param {Module} module
+     * @returns Promise<>
+     */
     registerModule(module) {
         const _this = this;
         return new Promise(async(resolve,reject) => {
@@ -58,6 +76,14 @@ export default class {
             }
         })
     }
+
+
+    /**
+     *
+     *
+     * @param {string} query The name of the module
+     * @returns {@link types/Module}
+     */
     getModule(query) {
         return this.modules[query];
     }

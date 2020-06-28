@@ -1,3 +1,7 @@
+/** 
+@module core:loaders/ModuleLoader
+@description Loads all module files
+*/
 import { Collection } from "discord.js"
 import Chokidar from 'chokidar'
 import { promises as fs } from 'fs';

@@ -1,6 +1,11 @@
+/**  
+  @module core:managers/EventManager
+  @description Manages the events, and passes fired events to registered event handlers
+*/
+
 import path from 'path'
 import Logger from '../Logger.js'
-let logger, instance;
+let logger
 
 export default class {
     constructor(client) {
@@ -10,13 +15,15 @@ export default class {
         }
         this.client = client;
         logger = new Logger('EventManager',{ type: 'module' });
-        instance = this;
     }
 
-    static getInstance() {
-        return instance;
-    }
-
+    
+    /**
+     * All events fire this method
+     *
+     * @param {string} name The name of event
+     * @param {*} args Any discord.js event arguments
+     */
     event(name, args) {
         if(name.toLowerCase() === "guildmemberspeaking") return;
         const core = this.getCoreEvent(name);
@@ -44,6 +51,15 @@ export default class {
             })
         }
     }
+
+
+    /**
+     * Register an event handler for EventManager
+     *
+     * @param {string} name Name of the event
+     * @param {boolean} isCore Is the event a core event? (Internal use only)
+     * @returns Promise<>
+     */
     registerEvent(name, isCore) {
         const _this = this;
         return new Promise(async(resolve,reject) => {
@@ -77,13 +93,34 @@ export default class {
         })
     }
 
+
+    /**
+     * Attempt to fetch a core event by name
+     *
+     * @param {string} query The name of the event
+     * @returns EventObject
+     */
     getCoreEvent(query) {
         return this.events.core.get(query)
     } 
+
+    /**
+     * Attempt to fetch a custom event by name
+     *
+     * @param {string} query The name of the event
+     * @returns EventObject
+     */
     getCustomEvent(query) {
         return this.events.custom.get(query)
     }
 
+    
+    /**
+     * Returns all events, either name or full object.
+     *
+     * @param {boolean} [namesOnly=true] Should only the names of the events be provided
+     * @returns Array[string] or Array[EventObject]
+     */
     getEvents(namesOnly = true) {
         if(namesOnly) {
             return {

@@ -1,3 +1,7 @@
+/**
+ @module core:Database
+ @description Only used for core atm. Exposes rethinkdb instance.
+*/
 import rethinkdb from 'rethinkdbdash'
 
 const r = rethinkdb({

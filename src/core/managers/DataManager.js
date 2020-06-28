@@ -1,3 +1,7 @@
+/**
+ @module core:managers/DataManager
+ @description WIP
+*/
 import r from '../Database.js'
 
 export default class {

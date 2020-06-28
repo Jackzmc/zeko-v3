@@ -109,3 +109,4 @@ modules
 .vscode
 
 !src/**
+docs/

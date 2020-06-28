@@ -1,4 +1,8 @@
-import Collection from 'discord.js'
+/**
+ * @module core:loaders/CoreLoader
+ * @desc Loads all the other loaders and setups the client.
+ */
+
 import EventLoader from './EventLoader.js'
 import CommandLoader from './CommandLoader.js'
 import ModuleLoader from './ModuleLoader.js'
