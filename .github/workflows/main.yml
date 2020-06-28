@@ -22,12 +22,18 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    # Runs a single command using the runners shell
-    - name: Run a one-line script
-      run: echo Hello, world!
 
     # Runs a set of commands using the runners shell
-    - name: Run a multi-line script
-      run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
+    - name: JSDoc Action
+      uses: andstor/jsdoc-action@v1.2.0
+      with:
+        # Source directory to build documentation from
+        source_dir: ".src" # optional
+        # Output folder for the generated documentation
+        output_dir: "./docs" # optional
+        # Recurse into subdirectories when scanning for source files
+        recurse: true # optional
+        # The path to a JSDoc configuration file
+        config_file: "jsdoc.conf.json" # optional
+        # The path to a Markdown file to be used as a the front page
+        front_page: README.md # optional
