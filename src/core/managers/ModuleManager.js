@@ -52,7 +52,7 @@ export default class {
         })
     }
 
-
+    //TODO: Strip out .js extenstion incase.
     /**
      * Register a {@link types/Module} in the ModuleManager
      *
@@ -65,7 +65,7 @@ export default class {
         const _this = this;
         return new Promise(async(resolve,reject) => {
             const root =  path.join(_this.client.ROOT_DIR, isCore?'src/modules':'modules')
-            const filepath = group ? path.join(root, `${group}/${name}.js`) : path.join(root, `${name}.js`)
+            const filepath = group ? path.join(root, `${group}/${name}`) : path.join(root, `${name}`)
             import(`file://${filepath}`)
             .then(moduleFile => {
                 const prefix = group ? `${group}/` : ''
