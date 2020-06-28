@@ -81,11 +81,8 @@ export default class {
                         name,
                     }
                 }
-                if(isCore) {
-                    _this.events.core.set(name, registeredEvent)
-                }else{
-                    _this.events.custom.set(name, registeredEvent)
-                }
+                const type = isCore ? 'core' : 'custom'
+                _this.events[type].set(name, registeredEvent)
                 resolve();
             }catch(err) {
                 reject(err);

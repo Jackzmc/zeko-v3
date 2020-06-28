@@ -27,7 +27,7 @@ export default class {
         const _this = this;
         return new Promise((resolve, reject) => {
             const root =  path.join(_this.client.ROOT_DIR, isCore?'src/commands':'commands')
-            let filepath = group == "default" ? path.join(root, `${name}.js`) : path.join(root, `${group}/${name}.js`)
+            const filepath = group == "default" ? path.join(root, `${name}.js`) : path.join(root, `${group}/${name}.js`)
 
             import(`file://${filepath}`)
             .then(commandObject => {

@@ -55,31 +55,13 @@ export default {
                         const sub_filepath = path.join(filepath,dirent.name);
                         fs.readdir(sub_filepath)
                         .then(sub_files => {
-                            sub_files.forEach(f => {
-                                if(f.split(".").slice(-1)[0] !== "js") return;
-                                if(f.startsWith("_")) return;
-                                promises.push(new Promise((resolve,reject) => {
-                                    try {
-                                        let props = require(`${sub_filepath}/${f}`);
-                                        if(!props.config) props.config = {}
-                                        props.config.name = f.split(".")[0];
-                                        props.config.core = (i==0);
-                                        props.config.group = dirent.name;
-                                        
-                                        this.manager.registerModule(props)
-                                        .then(() => {
-                                            if(isCore) normal++ ; elsecustom++
-                                            resolve();
-                                        })
-                                        .catch(err => {
-                                            log.error(`Module ${f} was not loaded by ModuleManager: \n ${err.message}`)
-                                            reject(err);
-                                        })
-                                    }catch(err) {
-                                        log.error(`Module ${f} had an error:\n    ${err.stack}`);
-                                        reject(err);
-                                    }
-                                }))
+                            sub_files.forEach(file => {
+                                if(file.split(".").slice(-1)[0] !== "js") return;
+                                if(file.startsWith("_")) return;
+                                this.manager.registerModule(file, isCore, dirent.name)
+                                .catch(err => {
+                                    log.error(`Module ${dirent.name}/${file} was not loaded by ModuleManager: \n ${err.message}`)
+                                })
                             })
                         })
                         .catch(err => {
@@ -89,26 +71,10 @@ export default {
                         const f = dirent.name;
                         if(f.split(".").slice(-1)[0] !== "js") return;
                         if(f.startsWith("_")) return;
-                        promises.push(new Promise((resolve,reject) => {
-                            try {
-                                let props = require(`${filepath}/${f}`);
-                                if(!props.config) props.config = {}
-                                props.config.name = f.split(".")[0];
-                                props.config.core = (i==0);
-                                this.manager.registerModule(props)
-                                .then(() => {
-                                    if(i==0) custom++; else normal++;
-                                    resolve();
-                                })
-                                .catch(err => {
-                                    log.error(`Module ${f} was not loaded by ModuleManager: \n ${process.env.PRODUCTION?err.message:err.stack}`)
-                                    reject(err);
-                                })
-                            }catch(err) {
-                                log.error(`Module ${f} had an error:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
-                                reject(err);
-                            }
-                        }))
+                        this.manager.registerModule(file, isCore, null)
+                        .catch(err => {
+                            log.error(`Module ${file} was not loaded by ModuleManager: \n ${err.message}`)
+                        })
                     }
                 });
             }).catch(err => {

@@ -10,7 +10,11 @@ let instance, logger;
 export default class {
     
     constructor(client) {
-        this.modules = {},
+        //Prevents custom overriding core modules
+        this.modules = {
+            core: new Map(),
+            custom: new Map()
+        }
         this.client = client;
         logger = new Logger("ModuleManager")
         instance = this
@@ -52,28 +56,39 @@ export default class {
     /**
      * Register a {@link types/Module} in the ModuleManager
      *
-     * @param {Module} module
+     * @param {string} name The name of the module to fetch
+     * @param {boolean} isCore Is the module a core module?
+     * @param {string} [group] The group (subfolder) of the module
      * @returns Promise<>
      */
-    registerModule(module) {
+    registerModule(name, isCore, group) {
         const _this = this;
         return new Promise(async(resolve,reject) => {
-            
-            if(!module.config) reject(new Error(`Invalid module registered.`));
-            try {
-                this._moduleCheck(module)
-                const logger = new Logger(module.config.name, {type:'module'})
-                _this.modules[module.config.name] = module;
+            const root =  path.join(_this.client.ROOT_DIR, isCore?'src/modules':'modules')
+            const filepath = group !== null ? path.join(root, `${name}.js`) : path.join(root, `${group}/${name}.js`)
+            import(`file://${filepath}`)
+            .then(moduleFile => {
+                const prefix = group !== null ? `${group}/` : ''
+                const module = new moduleFile.default(this.client, new Logger(group_prefix + name))
+                if(!module.config || typeof module.config !== "function" ) {
+                    return reject(new Error("Invalid Module class: Missing 'config' method"))
+                }
 
-                if(module.config.command) this._registerCommandModule(module);
-                if(module.init) await module.init(_this.client,logger);
+                const config = module.config();
+                delete module.config;
 
+                const registeredModule = {
+                    config,
+                    isCore,
+                    group,
+                    module
+                }
 
-                //logger.debug(`Registered${module.config.core?" Core ":" "}${module.config.command?"Command ":""}Module ${module.config.name}`);
-                resolve();
-            }catch(err) {
-                reject(err);
-            }
+                const type = isCore ? 'core' : 'custom'
+                this.modules[type].set(config.name||name, registeredModule);
+                resolve()
+            })
+            .catch(err => reject(err))
         })
     }
 
