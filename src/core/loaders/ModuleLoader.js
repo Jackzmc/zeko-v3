@@ -101,11 +101,11 @@ export default {
                                     resolve();
                                 })
                                 .catch(err => {
-                                    log.error(`${txt_custom} Module ${f} was not loaded by ModuleManager: \n ${process.env.PRODUCTION?err.message:err.stack}`)
+                                    log.error(`Module ${f} was not loaded by ModuleManager: \n ${process.env.PRODUCTION?err.message:err.stack}`)
                                     reject(err);
                                 })
                             }catch(err) {
-                                log.error(`${txt_custom} Module ${f} had an error:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
+                                log.error(`Module ${f} had an error:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
                                 reject(err);
                             }
                         }))
@@ -113,9 +113,9 @@ export default {
                 });
             }).catch(err => {
                 if(err.code === "ENOENT") {
-                    log.warn(`${txt_custom} ${folder} directory does not exist.`)
+                    log.warn(`${folder} directory does not exist.`)
                 }else {
-                    log.error(`Loading ${txt_custom}${folder} failed:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
+                    log.error(`Loading ${folder} failed:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
                 }
             })
         }
