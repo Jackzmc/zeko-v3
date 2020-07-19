@@ -136,6 +136,13 @@ export default class {
         }
     }
 
+    get coreLoaded() {
+        return this.modules.core.size;
+    } 
+    get customLoaded() {
+        return this.modules.custom.size;
+    }
+
     ///#region PRIVATE METHODS
     _reload(module) {
         const _this = this;
