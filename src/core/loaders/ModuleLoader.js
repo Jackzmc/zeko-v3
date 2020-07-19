@@ -12,13 +12,13 @@ import ModuleManager from '../managers/ModuleManager.js'
 const folders = ['src/modules','modules'];
 
 
-export default {
-    init(client, log) {
+export default class {
+    constructor(client, logger) {
         //this.setupWatcher()
-        this.loadModules(client, log)
+        this.loadModules()
         this.manager = new ModuleManager(client);
         client.managers.ModuleManager = this.manager;
-    },
+    }
     setupWatcher() {
         const watch = Chokidar.watch(['src/modules','modules'], {
             ignored: /(^|[\/\\])\../,
@@ -39,15 +39,15 @@ export default {
                 log.error(`Watcher: Failed to auto reload module ${filename}: ${process.env.PRODUCTION?err.message:err.stack}`)
             })
         })
-    },
-    async loadModules(client, log) {
+    }
+    async loadModules() {
         let custom = 0;
         let normal = 0;
         const promises = [];
         for(let i=0;i<folders.length;i++) {
             const isCore = i == 0
             const folder = folders[i];
-            const filepath = path.join(client.ROOT_DIR,folder);
+            const filepath = path.join(this.client.ROOT_DIR,folder);
             //read the folder path, and get dirs. Same as commands fetching basically
             await fs.readdir(filepath,{ withFileTypes : true })
             .then(files => {
@@ -61,12 +61,12 @@ export default {
                                 if(file.startsWith("_")) return;
                                 this.manager.registerModule(file, isCore, dirent.name)
                                 .catch(err => {
-                                    log.error(`Module ${dirent.name}/${file} was not loaded by ModuleManager:\n`, err)
+                                    this.logger.error(`Module ${dirent.name}/${file} was not loaded by ModuleManager:\n`, err)
                                 })
                             })
                         })
                         .catch(err => {
-                            log.error(`Loading group ${dirent.name} failed:\n`, err);
+                            this.logger.error(`Loading group ${dirent.name} failed:\n`, err);
                         })
                     }else {
                         const file = dirent.name;
@@ -74,21 +74,21 @@ export default {
                         if(file.startsWith("_")) return;
                         this.manager.registerModule(file, isCore, null)
                         .catch(err => {
-                            log.error(`Module ${file} was not loaded by ModuleManager:\n`, err)
+                            this.logger.error(`Module ${file} was not loaded by ModuleManager:\n`, err)
                         })
                     }
                 });
             }).catch(err => {
                 if(err.code === "ENOENT") {
-                    log.warn(`${folder} directory does not exist.`)
+                    this.logger.warn(`${folder} directory does not exist.`)
                 }else {
-                    log.error(`Loading ${folder} failed:\n`, err);
+                    this.logger.error(`Loading ${folder} failed:\n`, err);
                 }
             })
         }
         await Promise.all(promises)
         .then(() => {
-            log.success(`Loaded ${normal} core modules, ${custom} custom modules`)
+            this.logger.success(`Loaded ${normal} core modules, ${custom} custom modules`)
         }).catch(() => {
             //errors are already logged in the promises
         })

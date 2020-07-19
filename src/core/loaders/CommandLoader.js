@@ -2,7 +2,6 @@
  @module core:loaders/CommandLoader
  @description Loads the commands from /src/commands and /commands and loads them in [CommandManager]{@link core/managers/CommandManager}
 */
-import { Collection } from "discord.js"
 import Chokidar from 'chokidar'
 import { promises as fs } from 'fs';
 import path from 'path'
@@ -11,18 +10,16 @@ import CommandManager from '../managers/CommandManager.js'
 
 const folders = ['src/commands','commands'];
 
-let logger;
-
-export default { 
-    init(client, _logger) {
+export default class{ 
+    constructor(client, logger) {
         if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
             //this.setupWatcher();
         }
-        logger = _logger;
+        this.logger = logger;
         this.manager = new CommandManager(client)
         client.managers.CommandManager = this.manager;
-        this.loadCommands(client, logger)
-    },
+        this.loadCommands()
+    }
     setupWatcher() {
         const watch = Chokidar.watch(['src/commands','commands'], {
             ignored: /(^|[\/\\])\../,
@@ -30,7 +27,7 @@ export default {
             persistent: true
         })
         .on('add',_path => {
-            logger.debug('Detected a new command (',_path,'). Restart to load')
+            this.logger.debug('Detected a new command (',_path,'). Restart to load')
         })
         .on('change', filepath => {
             //TODO: allow support for group loading
@@ -43,7 +40,7 @@ export default {
                 try {
                     //delete command from map, load it, initalize it, and then add it back if successful
                     commands.delete(filename);
-                    const command_path = (/(src)(\\|\/)/.test(filepath)) ? path.join(client.ROOT_DIR,"src/commands") : path.join(client.ROOT_DIR,"commands");
+                    const command_path = (/(src)(\\|\/)/.test(filepath)) ? path.join(this.client.ROOT_DIR,"src/commands") : path.join(client.ROOT_DIR,"commands");
                     const filepath = require.resolve(path.join(command_path, filename))
                     delete require.cache[filepath]
 
@@ -53,21 +50,21 @@ export default {
                         const _logger = new client.Logger(filename, { type:'command' });
                         command_file.init(client, _logger)
                     }
-                    if(!command_file.run) logger.warn(`Watcher: File ${filename} is missing run property`)
+                    if(!command_file.run) this.logger.warn(`Watcher: File ${filename} is missing run property`)
 
                     commands.set(filename,command_file);
-                    logger.info(`Watcher: Reloaded command ${filename} successfully`)
+                    this.logger.info(`Watcher: Reloaded command ${filename} successfully`)
                 }catch(err) {
-                    logger.error(`Watcher: ${filename} Failed Reload:\n`, err)
+                    this.logger.error(`Watcher: ${filename} Failed Reload:\n`, err)
                 }
             },500)
         })
-    },
-    async loadCommands(client, log) {
+    }
+    async loadCommands() {
         for(let i=0 ; i < folders.length; i++) {
             const isCore = i == 0;
             const folder = folders[i];
-            const filepath = path.join(client.ROOT_DIR, folder);
+            const filepath = path.join(this.client.ROOT_DIR, folder);
             await fs.readdir(filepath, { withFileTypes:true }) //read directory, returns directs which can check if folder, to support cmd groups
             .then(files => {
                 files.forEach(dirent => {
@@ -89,9 +86,9 @@ export default {
             })
             .catch(err => {
                 if(err.code === 'ENOENT') {
-                    log.warn(`${folder} directory does not exist.`)
+                    this.logger.warn(`${folder} directory does not exist.`)
                 }else{
-                    log.error(`Loading ${folder} failed:\n`, err);
+                    this.logger.error(`Loading ${folder} failed:\n`, err);
                 }
             })
         }    
@@ -108,7 +105,7 @@ async function testCommand(_this, filepath, file, isCore, group) {
         if(!commandObject || !commandObject.default) {
             if(commandObject.default && typeof commandObject.default !== 'function') {
                 const prefix = isCore ? '' : 'Custom '
-                logger.warn(`${prefix}Command ${file} is not setup correctly!`);
+                _this.logger.warn(`${prefix}Command ${file} is not setup correctly!`);
             }
             return;
         }

@@ -24,9 +24,9 @@ export default class CoreManager {
         try {
             //TODO: Wait for moduleloader to finish, load cmd/event, finally send token
             internalCustomCheck()
-            ModuleLoader.init(client, new Logger("ModuleLoader"))
+            new ModuleLoader(client, new Logger("ModuleLoader"))
 
-            CommandLoader.init(client, new Logger("CommandLoader"))
+            new CommandLoader(client, new Logger("CommandLoader"))
             EventLoader.init(client, new Logger("EventLoader"))
 
             client.login(process.env.DISCORD_BOT_TOKEN)
