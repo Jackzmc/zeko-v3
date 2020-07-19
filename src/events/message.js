@@ -1,12 +1,10 @@
 import CoreEvent from '../core/types/CoreEvent.js'
 import getopts from 'getopts'
 
-let cmdManager;
-
 export default class extends CoreEvent {
     constructor(client, logger) {
         super(client, logger);
-        cmdManager = client.managers.CommandManager;
+        this.cmdManager = client.managers.CommandManager;
     }
     every(msg) {
         return new Promise((resolve, reject) => {
@@ -17,7 +15,7 @@ export default class extends CoreEvent {
                 
                 if(/\s/.test(this.client.PREFIX)) args.shift(); //shift if prefix has space
                 const command_name = /\s/.test(this.client.PREFIX) ? args.shift().toLowerCase() : args.shift().slice(this.client.PREFIX.length).toLowerCase();
-                const cmd = cmdManager.getCommand(command_name)
+                const cmd = this.cmdManager.getCommand(command_name)
                 if(cmd) {
                     try {
                         //parse arguments with getopts package (--flag)
