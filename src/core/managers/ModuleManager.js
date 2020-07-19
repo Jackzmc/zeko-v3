@@ -24,14 +24,13 @@ export default class {
         return instance;
     }
 
-
     /**
      * Reload a module. Not working with ESM Modules
      *
      * @param {string} name Module name
      * @returns Promise<>
      */
-    reloadModule(name) {
+    /*reloadModule(name) {
         return new Promise((resolve,reject) => {
             const module = this.modules[name];
             if(!module) reject(new Error(`ModuleManager: No module found for ${name}`));
@@ -50,7 +49,7 @@ export default class {
                 reject(err);
             })
         })
-    }
+    }*/
 
     //TODO: Strip out .js extenstion incase.
     /**
@@ -79,13 +78,13 @@ export default class {
 
                 const registeredModule = {
                     config,
-                    isCore,
                     group,
                     module
                 }
 
                 const type = isCore ? 'core' : 'custom'
-                this.modules[type].set(config.name||name, registeredModule);
+                const registeredName = name.toLowerCase().replace('.js', '');
+                this.modules[type].set(registeredName, registeredModule);
                 resolve()
             })
             .catch(err => reject(err))
@@ -99,8 +98,8 @@ export default class {
      * @param {string} query The name of the module
      * @returns {@link types/Module}
      */
-    getCustomModule(query ) {
-        return this.modules.custom[query];
+    getCustomModule(query) {
+        return this.modules.custom.get(query.toLowerCase());
     }
 
     /**
@@ -109,10 +108,16 @@ export default class {
      * @param {string} query The name of the module
      * @returns {@link types/Module}
      */
-     getCoreModule(query ) {
-        return this.modules.core[query];
+    getCoreModule(query) {
+        return this.modules.core.get(query.toLowerCase());
     }
 
+    get coreLoaded() {
+        return this.modules.core.size;
+    } 
+    get customLoaded() {
+        return this.modules.custom.size;
+    }
 
     getModules(opts = {names:false}) {
         //{type: 'custom'}
