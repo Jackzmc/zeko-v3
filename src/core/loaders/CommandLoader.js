@@ -120,9 +120,9 @@ async function testCommand(_this, filepath, file, isCore, group) {
             return isCore ? {core: true} : {custom: true}
         })
         .catch(err => {
-            logger.error(`CommandManager failed to load command ${file}:\n`, err)
+            _this.logger.error(`CommandManager failed to load command ${file}:\n`, err)
         })
     }catch(err) {
-        logger.error(`Command ${file} had an error:\n`, err)
+        _this.logger.error(`Command ${file} had an error:\n`, err)
     }
 }
