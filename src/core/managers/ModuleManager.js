@@ -94,14 +94,26 @@ export default class {
 
 
     /**
-     *
+     * Retrieve custom module by query
      *
      * @param {string} query The name of the module
      * @returns {@link types/Module}
      */
-    getModule(query) {
-        return this.modules[query];
+    getCustomModule(query ) {
+        return this.modules.custom[query];
     }
+
+    /**
+     * Retrieve a core module by query
+     *
+     * @param {string} query The name of the module
+     * @returns {@link types/Module}
+     */
+     getCoreModule(query ) {
+        return this.modules.core[query];
+    }
+
+
     getModules(opts = {names:false}) {
         //{type: 'custom'}
         let filtered;
