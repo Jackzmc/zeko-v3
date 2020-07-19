@@ -16,7 +16,7 @@ let logger;
 export default { 
     init(client, _logger) {
         if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
-            this.setupWatcher();
+            //this.setupWatcher();
         }
         logger = _logger;
         this.manager = new CommandManager(client)
@@ -58,7 +58,7 @@ export default {
                     commands.set(filename,command_file);
                     logger.info(`Watcher: Reloaded command ${filename} successfully`)
                 }catch(err) {
-                    loggger.error(`Watcher: ${filename} Failed Reload:\n`, err)
+                    logger.error(`Watcher: ${filename} Failed Reload:\n`, err)
                 }
             },500)
         })
