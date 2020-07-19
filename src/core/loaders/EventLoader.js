@@ -18,6 +18,7 @@ const IGNORED_EVENTS = ['raw','debug']
 export default {
     init(client, log) {
         this.manager = new EventManager(client);
+        client.managers.EventManager = this.manager;
         this.loadEvents(client, log)
         //this.setupWatcher()
 

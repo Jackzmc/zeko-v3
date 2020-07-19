@@ -17,6 +17,7 @@ export default {
         //this.setupWatcher()
         this.loadModules(client, log)
         this.manager = new ModuleManager(client);
+        client.managers.ModuleManager = this.manager;
     },
     setupWatcher() {
         const watch = Chokidar.watch(['src/modules','modules'], {
