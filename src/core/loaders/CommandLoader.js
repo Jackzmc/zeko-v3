@@ -125,6 +125,6 @@ async function testCommand(_this, filepath, file, isCore, group) {
             logger.error(`Command ${file} was not loaded by CommandLoader:\n    ${err.stack}`)
         })
     }catch(err) {
-        logger.error(`Command ${file} had an error:\n    ${err.stack}`);
+        logger.error(`Command ${file} had an error:\n`, err)
     }
 }

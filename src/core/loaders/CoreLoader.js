@@ -31,7 +31,7 @@ export default class CoreManager {
 
             client.login(process.env.DISCORD_BOT_TOKEN)
         }catch(err) {
-            logger.servere('Manager loading failure:', err)
+            logger.servere('Manager loading failure:\n', err)
         }
         //CommandManager.Load()
     }

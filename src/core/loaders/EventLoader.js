@@ -75,14 +75,14 @@ export default {
                         //delete require.cache[require.resolve(`${filepath}/${file}`)];
                         if(isCoreEvent) normal++; else custom++;
                     }catch(err) {
-                        log.error(`Event ${file} had an error:\n    ${err.stack}`);
+                        log.error(`Event ${file} had an error:\n`, err);
                     }
                 });
             }).catch(err => {
                 if(err.code === "ENOENT") {
                     log.warn(`${folder} directory does not exist.`)
                 }else{
-                    log.error(`Loading${folder} failed:\n    ${err.stack}`);
+                    log.error(`Loading${folder} failed:\n`, err);
                 }
             })
         }

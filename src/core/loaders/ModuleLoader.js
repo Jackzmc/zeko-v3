@@ -60,12 +60,12 @@ export default {
                                 if(file.startsWith("_")) return;
                                 this.manager.registerModule(file, isCore, dirent.name)
                                 .catch(err => {
-                                    log.error(`Module ${dirent.name}/${file} was not loaded by ModuleManager: \n ${err.message}`)
+                                    log.error(`Module ${dirent.name}/${file} was not loaded by ModuleManager:\n`, err)
                                 })
                             })
                         })
                         .catch(err => {
-                            log.error(`Loading group ${dirent.name} failed:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
+                            log.error(`Loading group ${dirent.name} failed:\n`, err);
                         })
                     }else {
                         const file = dirent.name;
@@ -73,7 +73,7 @@ export default {
                         if(file.startsWith("_")) return;
                         this.manager.registerModule(file, isCore, null)
                         .catch(err => {
-                            log.error(`Module ${file} was not loaded by ModuleManager: \n ${err.message}`)
+                            log.error(`Module ${file} was not loaded by ModuleManager:\n`, err)
                         })
                     }
                 });
@@ -81,7 +81,7 @@ export default {
                 if(err.code === "ENOENT") {
                     log.warn(`${folder} directory does not exist.`)
                 }else {
-                    log.error(`Loading ${folder} failed:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
+                    log.error(`Loading ${folder} failed:\n`, err);
                 }
             })
         }
