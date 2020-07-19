@@ -15,6 +15,9 @@ const folders = ['src/modules','modules'];
 export default class {
     constructor(client, logger) {
         //this.setupWatcher()
+        this.client = client;
+        this.logger = logger;
+
         this.loadModules()
         this.manager = new ModuleManager(client);
         client.managers.ModuleManager = this.manager;
@@ -47,7 +50,7 @@ export default class {
         for(let i=0;i<folders.length;i++) {
             const isCore = i == 0
             const folder = folders[i];
-            const filepath = path.join(this.client.ROOT_DIR,folder);
+            const filepath = path.join(this.client.ROOT_DIR, folder);
             //read the folder path, and get dirs. Same as commands fetching basically
             await fs.readdir(filepath,{ withFileTypes : true })
             .then(files => {
