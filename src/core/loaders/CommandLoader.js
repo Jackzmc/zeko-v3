@@ -58,7 +58,7 @@ export default {
                     commands.set(filename,command_file);
                     logger.info(`Watcher: Reloaded command ${filename} successfully`)
                 }catch(err) {
-                    loggger.error(`Watcher: ${filename} Failed Reload: ${process.env.PRODUCTION?err.message:err.stack}`)
+                    loggger.error(`Watcher: ${filename} Failed Reload:\n`, err)
                 }
             },500)
         })
@@ -91,7 +91,7 @@ export default {
                 if(err.code === 'ENOENT') {
                     log.warn(`${folder} directory does not exist.`)
                 }else{
-                    log.error(`Loading ${folder} failed:\n    ${process.env.PRODUCTION?err.message:err.stack}`);
+                    log.error(`Loading ${folder} failed:\n`, err);
                 }
             })
         }    
@@ -122,7 +122,7 @@ async function testCommand(_this, filepath, file, isCore, group) {
             return isCore ? {core: true} : {custom: true}
         })
         .catch(err => {
-            logger.error(`Command ${file} was not loaded by CommandLoader:\n    ${err.stack}`)
+            logger.error(`CommandManager failed to load command ${file}:\n`, err)
         })
     }catch(err) {
         logger.error(`Command ${file} had an error:\n`, err)
