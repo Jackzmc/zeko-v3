@@ -62,6 +62,7 @@ export default class{
         })
     }
     async loadCommands() {
+        const promises = [];
         for(let i=0 ; i < folders.length; i++) {
             const isCore = i == 0;
             const folder = folders[i];
@@ -75,13 +76,19 @@ export default class{
                         .then(sub_files => {
                             sub_files.forEach(file => {
                                 //ignore files that arent *.js, or have _ prefixed
-                                testCommand(this, sub_filepath, file, isCore, dirent.name);
+                                promises.push(new Promise((resolve) => {
+                                    testCommand(this, sub_filepath, file, isCore, dirent.name)
+                                    .then(() => resolve())
+                                }))
                             })
                         })
                     }else{
                         //same as above, dont run if not *.js or prefixed with _
                         const file = dirent.name;
-                        testCommand(this, filepath, file, isCore);
+                        promises.push(new Promise((resolve) => {
+                            testCommand(this, filepath, file, isCore)
+                            .then(() => resolve())
+                        }))
                     }
                 });
             })
@@ -92,7 +99,12 @@ export default class{
                     this.logger.error(`Loading ${folder} failed:\n`, err);
                 }
             })
-        }    
+        }
+        
+        Promise.all(promises)
+        .then(() => {
+            this.logger.success(`Loaded ${this.manager.commandsCount} commands and ${this.manager.aliasesCount} aliases`)
+        })
     }
 }
 

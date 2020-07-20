@@ -124,7 +124,7 @@ export default class {
      *
      * @readonly
      */
-    get count() {
+    get commandsCount() {
         return this.commands.size;
     }
     /**

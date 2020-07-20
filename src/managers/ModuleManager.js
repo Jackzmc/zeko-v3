@@ -1,5 +1,5 @@
 /** 
- @module core:managers/ModuleManager
+ @module managers/ModuleManager
  @description Manages all registered modules
 */
 import path from 'path'
