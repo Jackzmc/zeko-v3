@@ -31,7 +31,7 @@ export default class {
 
             import(`file://${filepath}`)
             .then(commandObject => {
-                const command = new commandObject.default(this.client, new Logger(`${group}/${name}`))
+                const command = new commandObject.default(this.client, new Logger(`cmd/${name}`))
                 if(!command.help || !command.run || typeof command.run !== "function" || typeof command.help !== "function") {
                     return reject(new Error("Invalid Command class: Missing valid 'run' or 'help' method"))
                 }
