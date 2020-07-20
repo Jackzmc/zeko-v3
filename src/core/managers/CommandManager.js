@@ -4,15 +4,15 @@
 import path from 'path'
 import Logger from '../Logger.js'
 import { Collection } from 'discord.js';
-let logger;
 
 export default class {
     constructor(client) {
         this.commands = new Collection();
         this.aliases = new Collection();
         this.groups = [];
+        
         this.client = client;
-        logger = new Logger('CommandManager');
+        this.logger = new Logger('CommandManager');
     }
 
     /**
@@ -119,6 +119,22 @@ export default class {
         }
     }
 
+    /**
+     * Get the the total number of commands registered
+     *
+     * @readonly
+     */
+    get count() {
+        return this.commands.size;
+    }
+    /**
+     * Get the the total number of aliases registered
+     *
+     * @readonly
+     */
+    get aliasesCount() {
+        return this.aliases.size;
+    }
     /**
      * Get the list of groups
      *
