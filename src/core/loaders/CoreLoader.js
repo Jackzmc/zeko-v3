@@ -9,16 +9,7 @@ import ModuleLoader from './ModuleLoader.js'
 import Logger from '../../Logger.js'
 import { promises as fs } from 'fs';
 
-//Purpose: Loads all the other managers.
-
 export default class CoreLoader {
-    //commands
-    /*_commands = new Collection()
-    _alias = new Collection()
-    _events = new Collection()
-    _groups = []*/
-
-
     constructor(client) {
         const logger = new Logger('CoreLoader');
         try {

@@ -18,6 +18,7 @@ export default class {
         this.manager = new EventManager(client);
         client.managers.EventManager = this.manager;
         this.logger = log;
+        this.client = client;
         this.loadEvents()
         //this.setupWatcher()
 
