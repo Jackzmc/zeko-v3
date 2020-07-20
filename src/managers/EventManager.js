@@ -14,7 +14,7 @@ export default class {
             custom: new Map(),
         }
         this.client = client;
-        logger = new Logger('EventManager',{ type: 'module' });
+        logger = new Logger('EventManager');
     }
 
     
@@ -109,6 +109,26 @@ export default class {
      */
     getCustomEvent(query) {
         return this.events.custom.get(query)
+    }
+
+
+    /**
+     * Get the total number of core events loaded
+     *
+     * @readonly
+     */
+    get coreLoaded() {
+        return this.events.core.size;
+    }
+
+    
+    /**
+     * Get the total number of custom events loaded
+     *
+     * @readonly
+     */
+    get customLoaded() {
+        return this.events.custom.size;
     }
 
     

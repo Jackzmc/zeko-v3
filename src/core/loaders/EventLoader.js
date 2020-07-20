@@ -2,12 +2,10 @@
 @module core:loaders/EventLoader
 @description Loads all event files
 */
-import { Collection } from "discord.js"
 import Chokidar from 'chokidar'
 import { promises as fs } from 'fs';
 import path from 'path'
 
-import Logger from '../../Logger.js'
 import EventManager from '../../managers/EventManager.js'
 import EventEmitter from 'events'
 
@@ -15,16 +13,17 @@ const eventEmitter = new EventEmitter();
 const folders = ['src/events','events'];
 const IGNORED_EVENTS = ['raw','debug']
 
-export default {
-    init(client, log) {
+export default class {
+    constructor(client, log) {
         this.manager = new EventManager(client);
         client.managers.EventManager = this.manager;
-        this.loadEvents(client, log)
+        this.logger = log;
+        this.loadEvents()
         //this.setupWatcher()
 
         //Catch all events, pass to EventManager
         patchEmitter(client, this.manager)
-    },
+    }
     setupWatcher() {
         const watch = Chokidar.watch(['src/events','events'], {
             ignored: /(^|[\/\\])\../,
@@ -32,25 +31,25 @@ export default {
             persistent: true
         })
         .on('add', filepath => {
-            log.debug('Detected a new event (',filepath,'). Restart to load')
+            this.logger.debug('Detected a new event (',filepath,'). Restart to load')
         })
         .on('change',filepath => {
             const filename = filepath.replace(/^.*[\\\/]/, '')
             .split(".").slice(0,-1).join(".")
             //log.debug(`Watcher: Detected file change for module ${filename}, reloading...`)
             this.manager.reloadEvent(filename, { custom: true })
-            .then(() => log.info(`Watcher: Reloaded event ${filename} successfully`))
+            .then(() => this.logger.info(`Watcher: Reloaded event ${filename} successfully`))
             .catch(err => {
-                log.error(`Watcher: Failed to auto reload event ${filename}: `, err)
+                this.logger.error(`Watcher: Failed to auto reload event ${filename}: `, err)
             })
         })
-    },
-    async loadEvents(client, log) {
-        let normal = 0, custom = 0
+    }
+    async loadEvents() {
+        const promises = [];
         for(let i=0; i<folders.length; i++) {
             const isCoreEvent = i == 0;
             const folder = folders[i];
-            const filepath = path.join(client.ROOT_DIR,folder);
+            const filepath = path.join(this.client.ROOT_DIR,folder);
             await fs.readdir(filepath)
             .then(files => {
                 files.forEach(async file => {
@@ -63,31 +62,36 @@ export default {
                         if(!eventObject || !eventObject.default) {
                             if(eventObject.default && typeof eventObject.default !== 'function') {
                                 const prefix = isCoreEvent ? '' : 'Custom '
-                                log.warn(`${prefix}Event ${file} is not setup correctly!`);
+                                this.logger.warn(`${prefix}Event ${file} is not setup correctly!`);
                             }
                             return;
                         }
 
                         //this is probably still broken. Event manager doesnt care about .once. property
-                        this.manager.registerEvent(eventName[0], isCoreEvent)
-                        .catch(err => {
-                            log.error(`Event ${file} was not loaded by EventLoader: \n ${err.stack}`)
-                        })
+                        promises.push(new Promise(resolve => {
+                            this.manager.registerEvent(eventName[0], isCoreEvent)
+                            .catch(err => {
+                                this.logger.error(`Event ${file} was not loaded by EventLoader: \n ${err.stack}`)
+                            })
+                            .finally(() => resolve())
+                        }))
                         //delete require.cache[require.resolve(`${filepath}/${file}`)];
-                        if(isCoreEvent) normal++; else custom++;
                     }catch(err) {
                         log.error(`Event ${file} had an error:\n`, err);
                     }
                 });
             }).catch(err => {
                 if(err.code === "ENOENT") {
-                    log.warn(`${folder} directory does not exist.`)
+                    this.logger.warn(`${folder} directory does not exist.`)
                 }else{
-                    log.error(`Loading${folder} failed:\n`, err);
+                    this.logger.error(`Loading${folder} failed:\n`, err);
                 }
             })
         }
-        log.success(`Loaded ${normal} core events, ${custom} custom events`)
+        Promise.all(promises)
+        .then(() => {
+            this.logger.success(`Loaded ${this.manager.coreLoaded} core events, ${this.manager.customLoaded} custom events`)
+        })
     }
 }
 

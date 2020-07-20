@@ -27,7 +27,7 @@ export default class CoreLoader {
             new ModuleLoader(client, new Logger("ModuleLoader")).loadModules()
             .then(() => {
                 new CommandLoader(client, new Logger("CommandLoader"))
-                EventLoader.init(client, new Logger("EventLoader"))
+                new EventLoader(client, new Logger("EventLoader"))
             })
 
             client.login(process.env.DISCORD_BOT_TOKEN)
