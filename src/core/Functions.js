@@ -2,7 +2,6 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import Utils from '../Utils.js'
 
-const moduleURL = new URL(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default function(client) {

@@ -20,6 +20,7 @@
     "getopts": "^2.2.5",
     "got": "^11.3.0",
     "node-opus": "^0.3.3",
+    "rethinkdbdash": "^2.3.31",
     "typescript": "^3.9.5"
   }
 }
