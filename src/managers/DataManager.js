@@ -1,8 +1,8 @@
 /**
- @module core:managers/DataManager
+ @module managers/DataManager
  @description WIP
 */
-import r from '../Database.js'
+import r from '../core/Database.js'
 import Logger from '../Logger.js'
 
 import path from 'path'

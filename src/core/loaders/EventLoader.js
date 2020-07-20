@@ -7,8 +7,8 @@ import Chokidar from 'chokidar'
 import { promises as fs } from 'fs';
 import path from 'path'
 
-import Logger from '../Logger.js'
-import EventManager from '../managers/EventManager.js'
+import Logger from '../../Logger.js'
+import EventManager from '../../managers/EventManager.js'
 import EventEmitter from 'events'
 
 const eventEmitter = new EventEmitter();

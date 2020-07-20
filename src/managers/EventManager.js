@@ -1,5 +1,5 @@
 /**  
-  @module core:managers/EventManager
+  @module managers/EventManager
   @description Manages the events, and passes fired events to registered event handlers
 */
 

@@ -7,7 +7,7 @@ import Chokidar from 'chokidar'
 import { promises as fs } from 'fs';
 import path from 'path'
 
-import ModuleManager from '../managers/ModuleManager.js'
+import ModuleManager from '../../managers/ModuleManager.js'
 
 const folders = ['src/modules','modules'];
 

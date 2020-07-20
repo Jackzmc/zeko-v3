@@ -6,7 +6,7 @@
 import EventLoader from './EventLoader.js'
 import CommandLoader from './CommandLoader.js'
 import ModuleLoader from './ModuleLoader.js'
-import Logger from '../Logger.js'
+import Logger from '../../Logger.js'
 import { promises as fs } from 'fs';
 
 //Purpose: Loads all the other managers.

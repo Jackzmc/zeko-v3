@@ -1,5 +1,5 @@
 /**
- @module core:managers/CommandManager
+ @module managers/CommandManager
 */
 import path from 'path'
 import Logger from '../Logger.js'

@@ -6,7 +6,7 @@ import Chokidar from 'chokidar'
 import { promises as fs } from 'fs';
 import path from 'path'
 
-import CommandManager from '../managers/CommandManager.js'
+import CommandManager from '../../managers/CommandManager.js'
 
 const folders = ['src/commands','commands'];
 
