@@ -11,7 +11,7 @@ import { promises as fs } from 'fs';
 
 //Purpose: Loads all the other managers.
 
-export default class CoreManager {
+export default class CoreLoader {
     //commands
     /*_commands = new Collection()
     _alias = new Collection()
@@ -20,7 +20,7 @@ export default class CoreManager {
 
 
     constructor(client) {
-        const logger = new Logger('CoreManager');
+        const logger = new Logger('CoreLoader');
         try {
             //TODO: Wait for moduleloader to finish, load cmd/event, finally send token
             internalCustomCheck()

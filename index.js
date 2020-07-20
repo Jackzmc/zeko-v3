@@ -1,7 +1,7 @@
 import * as Discord from 'discord.js';
 import EnvLoader from './src/core/EnvLoader.js'
 import Functions from './src/core/Functions.js'
-import CoreManager from './src/core/loaders/CoreLoader.js'
+import CoreLoader from './src/core/loaders/CoreLoader.js'
 
 const client = new Discord.Client({
     disableEveryone: true,
@@ -13,7 +13,7 @@ const client = new Discord.Client({
 
 EnvLoader(client)
 Functions(client)
-new CoreManager(client);
+new CoreLoader(client);
 
 //final error catch area
 process.on('error',(err) => {
