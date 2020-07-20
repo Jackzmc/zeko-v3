@@ -110,3 +110,5 @@ modules
 
 !src/**
 docs/
+
+data
