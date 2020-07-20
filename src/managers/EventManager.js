@@ -98,7 +98,7 @@ export default class {
      * @returns EventObject
      */
     getCoreEvent(query) {
-        return this.events.core.get(query)
+        return this.events.core.get(query.toLowerCase())
     } 
 
     /**
@@ -108,9 +108,8 @@ export default class {
      * @returns EventObject
      */
     getCustomEvent(query) {
-        return this.events.custom.get(query)
+        return this.events.custom.get(query.toLowerCase())
     }
-
 
     /**
      * Get the total number of core events loaded
@@ -120,7 +119,6 @@ export default class {
     get coreLoaded() {
         return this.events.core.size;
     }
-
     
     /**
      * Get the total number of custom events loaded
@@ -133,22 +131,26 @@ export default class {
 
     
     /**
-     * Returns all events, either name or full object.
+     * Returns all event objects
      *
-     * @param {boolean} [namesOnly=true] Should only the names of the events be provided
-     * @returns Array[string] or Array[EventObject]
+     * @returns {Object} List of registered events, separated by core or custom.
      */
-    getEvents(namesOnly = true) {
-        if(namesOnly) {
-            return {
-                core:Object.keys(this.events.core.values()),
-                custom:Object.keys(this.events.custom.values())
-            }
-        }else{
-            return {
-                core: this.events.core.values(),
-                custom: this.events.custom.values()
-            }
+    getEvents() {
+        return {
+            core: this.events.core.values(),
+            custom: this.events.custom.values()
+        }
+    }
+
+    /**
+     * Returns all event names registered
+     *
+     * @returns {Object} List of registered events, separated by core or custom
+     */
+    getEventsNames() {
+        return {
+            core: Object.keys(this.events.core.values()),
+            custom: Object.keys(this.events.custom.values())
         }
     }
 

@@ -47,7 +47,7 @@ export default class {
     }
     async loadEvents() {
         const promises = [];
-        for(let i=0; i<folders.length; i++) {
+        for(let i = 0; i < folders.length; i++) {
             const isCoreEvent = i == 0;
             const folder = folders[i];
             const filepath = path.join(this.client.ROOT_DIR,folder);
@@ -72,7 +72,7 @@ export default class {
                         promises.push(new Promise(resolve => {
                             this.manager.registerEvent(eventName[0], isCoreEvent)
                             .catch(err => {
-                                this.logger.error(`Event ${file} was not loaded by EventLoader: \n ${err.stack}`)
+                                this.logger.error(`Event ${file} was not loaded by EventLoader:`, err)
                             })
                             .finally(() => resolve())
                         }))
