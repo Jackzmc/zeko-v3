@@ -47,7 +47,7 @@ export default class {
         }else if(core) {
             Promise.resolve(core.event.every(...args))
             .catch(err => {
-                logger.error(`Core Event ${name} errored: ${err.message}`)
+                logger.error(`Core Event '${name}' errored:\n`, err)
             })
         }
     }

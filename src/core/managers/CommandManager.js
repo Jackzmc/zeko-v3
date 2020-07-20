@@ -12,7 +12,7 @@ export default class {
         this.aliases = new Collection();
         this.groups = [];
         this.client = client;
-        logger = new Logger('EventManager');
+        logger = new Logger('CommandManager');
     }
 
     /**
@@ -52,10 +52,10 @@ export default class {
                     command,
                     name: cmdName
                 }
-                this.commands.set(cmdName, registeredCommand);
+                this.commands.set(cmdName.toLowerCase(), registeredCommand);
                 if(Array.isArray(help.name) && help.name.length > 0) {
                     help.name.forEach(alias => {
-                        this.aliases.set(alias, cmdName)
+                        this.aliases.set(alias.toLowerCase(), cmdName.toLowerCase())
                     })
                 }
 
@@ -82,7 +82,12 @@ export default class {
         if(!command) {
             const alias = this.aliases.get(name);
             if(alias) {
-                return (!includeHidden && command.config.hidden) ? null : this.commands.get(alias)
+                const command = this.commands.get(alias)
+                if(command && (includeHidden || !command.config.hidden)) {
+                    return command
+                }else {
+                    return null;
+                }
             }else{
                 return null;
             }
