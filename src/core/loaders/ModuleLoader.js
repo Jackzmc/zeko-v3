@@ -43,8 +43,7 @@ export default class {
         })
     }
     async loadModules() {
-        let custom = 0;
-        let normal = 0;
+        let custom = 0, core = 0;
         const promises = [];
         for(let i=0;i<folders.length;i++) {
             const isCore = i == 0
@@ -61,10 +60,15 @@ export default class {
                             sub_files.forEach(file => {
                                 if(file.split(".").slice(-1)[0] !== "js") return;
                                 if(file.startsWith("_")) return;
-                                this.manager.registerModule(file, isCore, dirent.name)
-                                .catch(err => {
-                                    this.logger.error(`Module ${dirent.name}/${file} was not loaded by ModuleManager:\n`, err)
-                                })
+                                
+                                promises.push(new Promise((resolve) => {
+                                    this.manager.registerModule(file, isCore, dirent.name)
+                                    .catch(err => {
+                                        this.logger.error(`Module ${dirent.name}/${file} was not loaded by ModuleManager:\n`, err)
+                                    })
+                                    .finally(() => resolve())
+                                }))
+                                
                             })
                         })
                         .catch(err => {
@@ -74,10 +78,14 @@ export default class {
                         const file = dirent.name;
                         if(file.split(".").slice(-1)[0] !== "js") return;
                         if(file.startsWith("_")) return;
-                        this.manager.registerModule(file, isCore, null)
-                        .catch(err => {
-                            this.logger.error(`Module ${file} was not loaded by ModuleManager:\n`, err)
-                        })
+
+                        promises.push(new Promise((resolve) => {
+                            this.manager.registerModule(file, isCore, null)
+                            .catch(err => {
+                                this.logger.error(`Module ${file} was not loaded by ModuleManager:\n`, err)
+                            })
+                            .finally(() => resolve())
+                        }))
                     }
                 });
             }).catch(err => {
@@ -88,11 +96,9 @@ export default class {
                 }
             })
         }
-        await Promise.all(promises)
+        Promise.all(promises)
         .then(() => {
-            this.logger.success(`Loaded ${normal} core modules, ${custom} custom modules`)
-        }).catch(() => {
-            //errors are already logged in the promises
+            this.logger.success(`Loaded ${this.manager.coreLoaded} core modules, ${this.manager.customLoaded} custom modules`)
         })
     }
 }
