@@ -18,7 +18,6 @@ export default class {
         this.client = client;
         this.logger = logger;
 
-        this.loadModules()
         this.manager = new ModuleManager(client);
         client.managers.ModuleManager = this.manager;
     }
