@@ -11,8 +11,8 @@ const r = rethinkdb({
     silent: true
 })
 
-r.tableCreate('settings')
-r.tableCreate('data')
+r.tableCreate('settings').run().catch(() => {})
+r.tableCreate('data').run().catch(() => {})
 
 export default function(client, logger) {
     const port = parseInt(process.env.RETHINKDB_PORT)||28015;
