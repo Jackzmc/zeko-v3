@@ -33,7 +33,7 @@ export default class {
             }
             return subpath;
         }else{
-            return path.resolve(__dirname, '../../../data');
+            return path.resolve(__dirname, '../../data');
         }
     }
 }
