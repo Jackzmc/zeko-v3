@@ -17,6 +17,11 @@ import { Collection } from 'discord.js';
  */
 
 export default class {
+    /**
+     * Create a new CommandManager
+     *
+     * @param {Client} client The current discord.js client
+     */
     constructor(client) {
         this.commands = new Collection();
         this.aliases = new Collection();

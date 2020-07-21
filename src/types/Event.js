@@ -2,7 +2,18 @@
  @module types/Event
  @description The Event class, custom events inherit
 */
+
+/**
+ * @property {Client} client Discord.js client
+ * @property {Logger} logger Logger for class
+ */
 export default class {
+    /**
+     * Create a new event
+     *
+     * @param {Client} client The current discord.js client
+     * @param {Logger} logger A logger for the class to use
+     */
     constructor(client, logger) {
         this.client = client;
         this.logger = logger;

@@ -33,8 +33,7 @@ export default class {
     /**
      * Create a new ModuleManager
      *
-     * @param {...*} args Any arguments to pass to log
-     * @memberof Logger
+     * @param {Client} client The current discord.js client
      */
     constructor(client) {
         //Prevents custom overriding core modules

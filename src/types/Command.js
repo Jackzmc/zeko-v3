@@ -25,7 +25,18 @@
  * @property {string} description A description of what the flag does
  * @property {string[]} aliases Any aliases of the flag that can be used
  */
+
+/**
+ * @property {Client} client Discord.js client
+ * @property {Logger} logger Logger for class
+ */
 export default class {
+    /**
+     * Create a new command 
+     *
+     * @param {Client} client The current discord.js client
+     * @param {Logger} logger A logger for the class to use
+     */
     constructor(client, logger) {
         this.client = client;
         this.logger = logger;

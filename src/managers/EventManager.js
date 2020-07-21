@@ -28,6 +28,11 @@ let logger
 
 
 export default class {
+    /**
+     * Create a new EventManager
+     *
+     * @param {Client} client The current discord.js client
+     */
     constructor(client) {
         this.events = {
             core: new Map(),
