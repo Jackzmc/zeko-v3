@@ -182,7 +182,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line131">line 131</a>
+        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line138">line 138</a>
     </li></ul></dd>
     
 
@@ -244,7 +244,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line140">line 140</a>
+        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line147">line 147</a>
     </li></ul></dd>
     
 
@@ -272,7 +272,7 @@
     
 
     
-    <h4 class="name" id="event"><span class="type-signature"></span>event<span class="signature">(name, args)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="event"><span class="type-signature"></span>event<span class="signature">(name, &hellip;args)</span><span class="type-signature"></span></h4>
     
 
     
@@ -304,6 +304,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -329,6 +331,14 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -351,6 +361,16 @@
             
             </td>
 
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
             
 
             
@@ -396,7 +416,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line40">line 40</a>
+        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line47">line 47</a>
     </li></ul></dd>
     
 
@@ -533,7 +553,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line112">line 112</a>
+        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line119">line 119</a>
     </li></ul></dd>
     
 
@@ -680,7 +700,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line122">line 122</a>
+        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line129">line 129</a>
     </li></ul></dd>
     
 
@@ -726,7 +746,7 @@
     
 
     
-    <h4 class="name" id="getEvents"><span class="type-signature"></span>getEvents<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="getEvents"><span class="type-signature"></span>getEvents<span class="signature">()</span><span class="type-signature"> &rarr; {EventList}</span></h4>
     
 
     
@@ -778,7 +798,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line150">line 150</a>
+        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line157">line 157</a>
     </li></ul></dd>
     
 
@@ -807,7 +827,7 @@
 
         
 <div class="param-desc">
-    <p>List of registered events, separated by core or custom.</p>
+    <p>List of registered events</p>
 </div>
 
 
@@ -818,7 +838,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Object</span>
+<span class="param-type">EventList</span>
 
 
     </dd>
@@ -836,7 +856,7 @@
     
 
     
-    <h4 class="name" id="getEventsNames"><span class="type-signature"></span>getEventsNames<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="getEventsNames"><span class="type-signature"></span>getEventsNames<span class="signature">()</span><span class="type-signature"> &rarr; {EventList}</span></h4>
     
 
     
@@ -888,7 +908,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line162">line 162</a>
+        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line169">line 169</a>
     </li></ul></dd>
     
 
@@ -917,7 +937,7 @@
 
         
 <div class="param-desc">
-    <p>List of registered events, separated by core or custom</p>
+    <p>List of registered events names</p>
 </div>
 
 
@@ -928,7 +948,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Object</span>
+<span class="param-type">EventList</span>
 
 
     </dd>
@@ -946,7 +966,7 @@
     
 
     
-    <h4 class="name" id="registerEvent"><span class="type-signature"></span>registerEvent<span class="signature">(name, isCore)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="registerEvent"><span class="type-signature"></span>registerEvent<span class="signature">(name, isCore<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -978,7 +998,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -1003,7 +1027,19 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>Name of the event</p></td>
@@ -1026,7 +1062,23 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
             
 
             <td class="description last"><p>Is the event a core event? (Internal use only)</p></td>
@@ -1070,7 +1122,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line76">line 76</a>
+        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line83">line 83</a>
     </li></ul></dd>
     
 
@@ -1098,11 +1150,19 @@
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    <p>Promise&lt;&gt;</p>
-</div>
 
 
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
 
     
 
@@ -1117,6 +1177,155 @@
         <h3 class="subsection-title">Type Definitions</h3>
 
         
+                
+<h4 class="name" id="~EventList">EventList</h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>core</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;RegisteredEvent></span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>List of all core events</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>custom</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;RegisteredEvent></span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>List of all custom events</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="managers_EventManager.js.html">managers/EventManager.js</a>, <a href="managers_EventManager.js.html#line22">line 22</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
                 
 <h4 class="name" id="~RegisteredEvent">RegisteredEvent</h4>
 
@@ -1422,7 +1631,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Mon Jul 20 2020 22:46:03 GMT-0500 (Central Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Mon Jul 20 2020 22:48:40 GMT-0500 (Central Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

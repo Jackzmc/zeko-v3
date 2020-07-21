@@ -19,6 +19,13 @@ let logger
  * @property {string} name - The registered name of the event
  */ 
 
+/**
+ * @typedef {Object} EventList
+ * @property {RegisteredEvent[]|string} core - List of all core events
+ * @property {RegisteredEvent[]|string} custom - List of all custom events
+ */
+ 
+
 
 export default class {
     constructor(client) {
@@ -35,7 +42,7 @@ export default class {
      * All events fire this method
      *
      * @param {string} name The name of event
-     * @param {*} args Any discord.js event arguments
+     * @param {...*} args Any discord.js event arguments
      */
     event(name, args) {
         if(name.toLowerCase() === "guildmemberspeaking") return;
@@ -70,10 +77,10 @@ export default class {
      * Register an event handler for EventManager
      *
      * @param {string} name Name of the event
-     * @param {boolean} isCore Is the event a core event? (Internal use only)
-     * @returns Promise<>
+     * @param {boolean} [isCore=false] Is the event a core event? (Internal use only)
+     * @returns {Promise}
      */
-    registerEvent(name, isCore) {
+    registerEvent(name, isCore = flase) {
         return new Promise(async(resolve,reject) => {
             try {
                 const filepath = path.join(this.client.ROOT_DIR, isCore?"src/events":"events",`${name}.js`)
@@ -145,7 +152,7 @@ export default class {
     /**
      * Returns all event objects
      *
-     * @returns {Object} List of registered events, separated by core or custom.
+     * @returns {EventList} List of registered events
      */
     getEvents() {
         return {
@@ -157,7 +164,7 @@ export default class {
     /**
      * Returns all event names registered
      *
-     * @returns {Object} List of registered events, separated by core or custom
+     * @returns {EventList} List of registered events names
      */
     getEventsNames() {
         return {
