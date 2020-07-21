@@ -109,6 +109,5 @@ modules/
 .vscode
 
 !src/**
-docs/
 
 data

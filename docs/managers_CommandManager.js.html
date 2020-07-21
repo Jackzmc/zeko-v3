@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: managers/CommandManager.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: managers/CommandManager.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ @module managers/CommandManager
+*/
+import path from 'path'
+import Logger from '../Logger.js'
+import { Collection } from 'discord.js';
+
+export default class {
+    constructor(client) {
+        this.commands = new Collection();
+        this.aliases = new Collection();
+        this.groups = [];
+        
+        this.client = client;
+        this.logger = new Logger('CommandManager');
+    }
+
+    /**
+     * Registers a command with the CommandManager
+     *
+     * @param {string} name The display name of the command. Also used as ID
+     * @param {boolean} isCore Is the plugin a core plugin? 
+     * @param {string} [group="default"] The command's group or null/default for misc
+     * @returns Promise&lt;>
+     */
+    registerCommand(name, isCore, group = "default") {
+        const _this = this;
+        return new Promise((resolve, reject) => {
+            const root =  path.join(_this.client.ROOT_DIR, isCore?'src/commands':'commands')
+            const filepath = group == "default" ? path.join(root, `${name}.js`) : path.join(root, `${group}/${name}.js`)
+
+            import(`file://${filepath}`)
+            .then(commandObject => {
+                const command = new commandObject.default(this.client, new Logger(`cmd/${name}`))
+                if(!command.help || !command.run || typeof command.run !== "function" || typeof command.help !== "function") {
+                    return reject(new Error("Invalid Command class: Missing valid 'run' or 'help' method"))
+                }
+
+                const help = command.help();
+                const config = command.config ? command.config() : {}
+
+                const cmdName = Array.isArray(help.name) ? help.name.shift() : help.name
+                if(!cmdName) return reject(new Error('Name field is empty or is an empty array.'))
+
+                delete command.help;
+                delete command.config;
+                const registeredCommand = {
+                    help,
+                    group,
+                    isCore,
+                    config,
+                    command,
+                    name: cmdName
+                }
+                this.commands.set(cmdName.toLowerCase(), registeredCommand);
+                if(Array.isArray(help.name) &amp;&amp; help.name.length > 0) {
+                    help.name.forEach(alias => {
+                        this.aliases.set(alias.toLowerCase(), cmdName.toLowerCase())
+                    })
+                }
+
+                //Add to list of groups.
+                if(group.trim().length > 0 &amp;&amp; group !== "default" &amp;&amp; !this.groups.includes(group)) {
+                    this.groups.push(group)
+                }
+                resolve()
+            
+            })
+            .catch(err => reject(err))
+        })
+    }
+
+    /**
+     * Get a command by the name
+     *
+     * @param {string} name The id/name of the command (one provided in RegisterCommand)
+     * @param {boolean} includeHidden Should hidden commands (cmd.config.hidden) be provided?
+     * @returns CommandContainer
+     */
+    getCommand(name, includeHidden) {
+        const command = this.commands.get(name);
+        if(!command) {
+            const alias = this.aliases.get(name);
+            if(alias) {
+                const command = this.commands.get(alias)
+                if(command &amp;&amp; (includeHidden || !command.config.hidden)) {
+                    return command
+                }else {
+                    return null;
+                }
+            }else{
+                return null;
+            }
+        }else{
+            return (!includeHidden &amp;&amp; command.config.hidden) ? null : command;
+        }
+    }
+
+    /**
+     * Get a collection of commands
+     *
+     * @param {boolean} grouped Should they be put in a object by group name?
+     * @param {boolean} includeHidden Should hidden commands be provided?
+     * @param {boolean} onlyKeys True: Only provide keynames. False: Provide CommandContainer
+     * @returns CommandContainer or Object&lt;Groupname, CommandContainer>
+     */
+    getCommands(grouped, includeHidden, onlyKeys) {
+        if(grouped) {
+            let object = {}
+            this.commands.forEach((cmd,key) => {
+                const group = cmd.isCore ? 'core' : ((group === "default") ? 'misc' : cmd.group);
+
+                if(!object[group]) object[group] = []
+                if(includeHidden || !cmd.config.hidden) object[group].push(onlyKeys?key:cmd);
+            })
+            return object;
+        }else{
+            return includeHidden ? this.commands.filter(v => !v.config.hidden) : this.commands
+        }
+    }
+
+    /**
+     * Get the the total number of commands registered
+     *
+     * @readonly
+     */
+    get commandsCount() {
+        return this.commands.size;
+    }
+    /**
+     * Get the the total number of aliases registered
+     *
+     * @readonly
+     */
+    get aliasesCount() {
+        return this.aliases.size;
+    }
+    /**
+     * Get the list of groups
+     *
+     * @returns array of group names
+     */
+    getGroups() {
+        return this.groups
+    }
+
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="core_Database.html">core:Database</a></li><li><a href="core_loaders_CommandLoader.html">core:loaders/CommandLoader</a></li><li><a href="core_loaders_CoreLoader.html">core:loaders/CoreLoader</a></li><li><a href="core_loaders_EventLoader.html">core:loaders/EventLoader</a></li><li><a href="core_loaders_ModuleLoader.html">core:loaders/ModuleLoader</a></li><li><a href="core_types_CoreEvent.html">core:types/CoreEvent</a></li><li><a href="module-managers_CommandManager.html">managers/CommandManager</a></li><li><a href="module-managers_DataManager.html">managers/DataManager</a></li><li><a href="module-managers_EventManager.html">managers/EventManager</a></li><li><a href="module-managers_ModuleManager.html">managers/ModuleManager</a></li><li><a href="module-types_Event.html">types/Event</a></li><li><a href="module-Utils.html">Utils</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Mon Jul 20 2020 21:46:56 GMT-0500 (Central Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
