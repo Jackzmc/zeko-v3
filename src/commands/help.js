@@ -81,9 +81,11 @@ export default class extends Command {
             const value = Array.isArray(cmd.help.examples) ? cmd.help.examples.join("\n") : cmd.help.examples
             fields.push({name:'Examples',value:value.replace(PREFIX_REGEX,this.client.PREFIX)});
         }
+        const USAGE_STR = cmd.help.usage ? `\n**Usage: **\`${this.client.PREFIX}${cmd.help.usage.replace(PREFIX_REGEX,"")}\`` : ''
+
         return {embed:{
             title:`${this.client.PREFIX}${cmd.name}`,
-            description:`${cmd.help.description.replace(PREFIX_REGEX,this.client.PREFIX)}\n**Usage: **\`${this.client.PREFIX}${cmd.help.usage.replace(PREFIX_REGEX,"")}\``,
+            description:`${cmd.help.description.replace(PREFIX_REGEX,this.client.PREFIX)}${USAGE_STR}`,
             fields
         }}
     }
