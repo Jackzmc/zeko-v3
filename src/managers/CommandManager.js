@@ -5,6 +5,17 @@ import path from 'path'
 import Logger from '../Logger.js'
 import { Collection } from 'discord.js';
 
+/**
+ * See {@link types/Command} for information of CommandConfigOptions and CommandHelpOptions
+ * @typedef {Object} RegisteredCommand
+ * @property {CommandConfigOptions} config - Command configuration object
+ * @property {CommandHelpOptions} help- Command help object
+ * @property {?string} group - The group the module belongs to
+ * @property {boolean} isCore - Is the command a core command?
+ * @property {string} name - The registered name of the command
+ * @property {types/Command} command - The actual command class
+ */
+
 export default class {
     constructor(client) {
         this.commands = new Collection();
@@ -21,7 +32,7 @@ export default class {
      * @param {string} name The display name of the command. Also used as ID
      * @param {boolean} isCore Is the plugin a core plugin? 
      * @param {string} [group="default"] The command's group or null/default for misc
-     * @returns Promise<>
+     * @returns {Promise}
      */
     registerCommand(name, isCore, group = "default") {
         const _this = this;
@@ -74,10 +85,10 @@ export default class {
      * Get a command by the name
      *
      * @param {string} name The id/name of the command (one provided in RegisterCommand)
-     * @param {boolean} includeHidden Should hidden commands (cmd.config.hidden) be provided?
-     * @returns CommandContainer
+     * @param {boolean} [includeHidden=false] Should hidden commands (cmd.config.hidden) be provided?
+     * @returns {?RegisteredCommand}
      */
-    getCommand(name, includeHidden) {
+    getCommand(name, includeHidden = false) {
         const command = this.commands.get(name);
         if(!command) {
             const alias = this.aliases.get(name);
@@ -102,7 +113,7 @@ export default class {
      * @param {boolean} grouped Should they be put in a object by group name?
      * @param {boolean} includeHidden Should hidden commands be provided?
      * @param {boolean} onlyKeys True: Only provide keynames. False: Provide CommandContainer
-     * @returns CommandContainer or Object<Groupname, CommandContainer>
+     * @returns {RegisteredCommand} 
      */
     getCommands(grouped, includeHidden, onlyKeys) {
         if(grouped) {
@@ -138,7 +149,7 @@ export default class {
     /**
      * Get the list of groups
      *
-     * @returns array of group names
+     * @returns {string[]} List of group names
      */
     getGroups() {
         return this.groups

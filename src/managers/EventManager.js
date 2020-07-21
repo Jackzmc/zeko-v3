@@ -7,6 +7,19 @@ import path from 'path'
 import Logger from '../Logger.js'
 let logger
 
+/**
+ * @typedef {Object} RegisteredEvent
+ * @property {RegisteredEventConfig} config - Config options
+ * @property {types/Event} event - The actual event class
+ */
+
+/**
+ * @typedef {Object} RegisteredEventConfig
+ * @property {boolean} core - Is event a core event?
+ * @property {string} name - The registered name of the event
+ */ 
+
+
 export default class {
     constructor(client) {
         this.events = {

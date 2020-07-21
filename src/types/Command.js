@@ -4,13 +4,13 @@
 */
 
 /**
- * @typedef {Object} ConfigOptions
+ * @typedef {Object} CommandConfigOptions
  * @property {boolean} [usageIfNotSet=true] - Should a help message be printed if no arguments are provided?
  * @property {boolean} [hideFlags] - Should any configured flags be hidden in the help menu?
  */
 
 /**
- * @typedef {Object} HelpOptions
+ * @typedef {Object} CommandHelpOptions
  * @property {string|string[]} name The name of the command, or array of aliases (first will be name)
  * @property {string} description The description of the command
  * @property {string} [usage] How to use the command
@@ -20,7 +20,7 @@
  */
 
 /**
- * @typedef {Object} FlagOptions
+ * @typedef {Object} CommandFlagOptions
  * @property {String|Boolean|Number|Object|string} type The primitive type of the flag, String, Boolean, etc. Can also be string version
  * @property {string} description A description of what the flag does
  * @property {string[]} aliases Any aliases of the flag that can be used
@@ -47,7 +47,7 @@ export default class {
     /**
      * Sets any settings for the command
      *
-     * @returns {ConfigOptions} Any settings
+     * @returns {CommandConfigOptions} Any settings
      */
     config() {
         return {
@@ -59,7 +59,7 @@ export default class {
     /**
      * Sets the meta information for the command
      *
-     * @returns {HelpOptions} All help options
+     * @returns {CommandHelpOptions} All help options
      */
     help() {
         return {

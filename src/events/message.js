@@ -15,7 +15,7 @@ export default class extends CoreEvent {
                 
                 if(/\s/.test(this.client.PREFIX)) args.shift(); //shift if prefix has space
                 const command_name = /\s/.test(this.client.PREFIX) ? args.shift().toLowerCase() : args.shift().slice(this.client.PREFIX.length).toLowerCase();
-                const cmd = this.cmdManager.getCommand(command_name)
+                const cmd = this.cmdManager.getCommand(command_name, true)
                 if(cmd) {
                     try {
                         //parse arguments with getopts package (--flag)
