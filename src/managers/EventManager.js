@@ -61,10 +61,9 @@ export default class {
      * @returns Promise<>
      */
     registerEvent(name, isCore) {
-        const _this = this;
         return new Promise(async(resolve,reject) => {
             try {
-                const filepath = path.join(_this.client.ROOT_DIR, isCore?"src/events":"events",`${name}.js`)
+                const filepath = path.join(this.client.ROOT_DIR, isCore?"src/events":"events",`${name}.js`)
                 //delete require.cache[require.resolve(_path)];
                 const event_src = await import(`file://${filepath}`);
                 const event = new event_src.default(this.client, new Logger(`event/${name}`))
@@ -82,7 +81,7 @@ export default class {
                     }
                 }
                 const type = isCore ? 'core' : 'custom'
-                _this.events[type].set(name, registeredEvent)
+                this.events[type].set(name, registeredEvent)
                 resolve();
             }catch(err) {
                 reject(err);
