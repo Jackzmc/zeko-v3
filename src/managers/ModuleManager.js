@@ -93,9 +93,8 @@ export default class {
      * @returns {Promise} Resolves if success, rejects if err
      */
     registerModule(name, isCore = false, group) {
-        const _this = this;
         return new Promise(async(resolve,reject) => {
-            const root =  path.join(_this.client.ROOT_DIR, isCore?'src/modules':'modules')
+            const root =  path.join(this.client.ROOT_DIR, isCore?'src/modules':'modules')
             const filepath = group ? path.join(root, `${group}/${name}`) : path.join(root, `${name}`)
             import(`file://${filepath}`)
             .then(moduleFile => {

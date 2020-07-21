@@ -85,7 +85,7 @@ export default class {
      * @param {boolean} [isCore=false] Is the event a core event? (Internal use only)
      * @returns {Promise}
      */
-    registerEvent(name, isCore = flase) {
+    registerEvent(name, isCore = false) {
         return new Promise(async(resolve,reject) => {
             try {
                 const filepath = path.join(this.client.ROOT_DIR, isCore?"src/events":"events",`${name}.js`)
