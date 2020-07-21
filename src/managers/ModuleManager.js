@@ -5,10 +5,37 @@
 import path from 'path'
 import Logger from '../Logger.js'
 
-let instance, logger;
+let instance
+
+/**
+ * @typedef {Object} RegisteredModule
+ * @property {ModuleConfigOptions} config - Module configuration object
+ * @property {?string} group - The group the module belongs to
+ * @property {types/Module} module - The actual module class
+ */
+
+/**
+ * Enum for any filtering types
+ * @readonly
+ * @enum {?string}
+ */
+const Filter = {
+    /** Only show core types */
+    CORE: "core",
+    /** Only show custom types */
+    CUSTOM: "custom",
+    /** Show both types */
+    ALL: null
+};
+
 
 export default class {
-    
+    /**
+     * Create a new ModuleManager
+     *
+     * @param {...*} args Any arguments to pass to log
+     * @memberof Logger
+     */
     constructor(client) {
         //Prevents custom overriding core modules
         this.modules = {
@@ -16,10 +43,17 @@ export default class {
             custom: new Map()
         }
         this.client = client;
-        logger = new Logger("ModuleManager")
+        this.logger = new Logger("ModuleManager")
         instance = this
     }
 
+
+    /**
+     * Acquire the current instance
+     *
+     * @static
+     * @returns {ModuleManager} The current instance
+     */
     static getInstance() {
         return instance;
     }
@@ -51,16 +85,15 @@ export default class {
         })
     }*/
 
-    //TODO: Strip out .js extenstion incase.
     /**
      * Register a {@link types/Module} in the ModuleManager
      *
      * @param {string} name The name of the module to fetch
-     * @param {boolean} isCore Is the module a core module?
+     * @param {boolean} [isCore=false] Is the module a core module?
      * @param {string} [group] The group (subfolder) of the module
-     * @returns Promise<>
+     * @returns {Promise} Resolves if success, rejects if err
      */
-    registerModule(name, isCore, group) {
+    registerModule(name, isCore = false, group) {
         const _this = this;
         return new Promise(async(resolve,reject) => {
             const root =  path.join(_this.client.ROOT_DIR, isCore?'src/modules':'modules')
@@ -98,7 +131,7 @@ export default class {
      * Retrieve custom module by query
      *
      * @param {string} query The name of the module
-     * @returns {@link types/Module}
+     * @returns {?RegisteredModule}
      */
     getCustomModule(query) {
         return this.modules.custom.get(query.toLowerCase());
@@ -108,46 +141,66 @@ export default class {
      * Retrieve a core module by query
      *
      * @param {string} query The name of the module
-     * @returns {@link types/Module}
+     * @returns {?RegisteredModule}
      */
     getCoreModule(query) {
         return this.modules.core.get(query.toLowerCase());
     }
 
+
+    /**
+     * Gets the total number of core modules loaded
+     *
+     * @readonly
+     */
     get coreLoaded() {
         return this.modules.core.size;
     } 
+    /**
+     * Gets the total number of custom modules loaded
+     *
+     * @readonly
+     */
     get customLoaded() {
         return this.modules.custom.size;
     }
 
-    getModules(opts = {names:false}) {
+    /**
+     * Acquire a list of modules
+     *
+     * @param {Filter} [filter] 
+     * @returns {RegisteredModule[]} List of modules
+     */
+    getModules() {
         //{type: 'custom'}
-        let filtered;
-        if(opts.type) {
-            if(opts.type === "custom") {
-                filtered = this.modules.filter(v => !v.config.core)
-            }else if(opts.type === "core") {
-                filtered = this.modules.filter(v => v.config.core);
-            }else{
-                throw new Error("Unknown type specified of module");
+        if(filter) {
+            if(filter === "core") {
+                return this.modules.core.values()
+            }else {
+                return this.modules.custom.values()
             }
         }else{
-            filtered = this.modules;
-        }
-
-        if(opts.names) {
-            return Object.keys(this.modules)
-        }else{
-            return this.modules;
+            return this.modules.core.values().concat(this.modules.custom.values())
         }
     }
 
-    get coreLoaded() {
-        return this.modules.core.size;
-    } 
-    get customLoaded() {
-        return this.modules.custom.size;
+    /**
+     * Get the names of all the loaded modules
+     *
+     * @param {Filter} [filter] 
+     * @returns {string[]} List of modules
+     */
+    getModulesNames(filter) {
+        if(filter) {
+            if(filter === "core") {
+                return this.modules.core.keys()
+            }else {
+                return this.modules.custom.keys()
+            }
+        }else{
+            return this.modules.core.keys().concat(this.modules.custom.keys())
+        }
+
     }
 
     ///#region PRIVATE METHODS
@@ -196,9 +249,9 @@ export default class {
             if(!process.env[v]) failed_envs.push(v);
         })
         if(failed_dependencies.length > 0) {
-            logger.warn(`Module ${module.config.name} missing dependencies: ${failed_dependencies.join(" ")}`);
+            this.logger.warn(`Module ${module.config.name} missing dependencies: ${failed_dependencies.join(" ")}`);
         }else if(failed_envs.length > 0) {
-            logger.warn(`Module ${module.config.name} missing envs: ${failed_envs.join(" ")}`);
+            this.logger.warn(`Module ${module.config.name} missing envs: ${failed_envs.join(" ")}`);
         }
     }
     /////#endregion

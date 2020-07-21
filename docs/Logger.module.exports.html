@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: core:types/CoreEvent</title>
+    <title>JSDoc: Class: module.exports</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: core:types/CoreEvent</h1>
+    <h1 class="page-title">Class: module.exports</h1>
 
     
 
@@ -28,16 +28,89 @@
 
 <header>
     
+        <h2><span class="attribs"><span class="type-signature"></span></span>module.exports<span class="signature">(name)</span><span class="type-signature"></span></h2>
+        
+    
 </header>
 
 <article>
     <div class="container-overview">
     
         
-            <div class="description"><p>The CoreEvent class, core events inherit</p></div>
+
+    
+
+    
+    <h4 class="name" id="module.exports"><span class="type-signature"></span>new module.exports<span class="signature">(name)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Creates an instance of Logger.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
         
 
         
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The name to use for logging purposes</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
 
 
 <dl class="details">
@@ -69,7 +142,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_types_CoreEvent.js.html">core/types/CoreEvent.js</a>, <a href="core_types_CoreEvent.js.html#line1">line 1</a>
+        <a href="Logger.js.html">Logger.js</a>, <a href="Logger.js.html#line15">line 15</a>
     </li></ul></dd>
     
 
@@ -81,7 +154,24 @@
 </dl>
 
 
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     </div>
 
@@ -100,15 +190,38 @@
     
 
     
-        <h3 class="subsection-title">Methods</h3>
 
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>module.exports<span class="signature">(&hellip;args)</span><span class="type-signature"></span></h2>
         
-            
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
 
     
 
     
-    <h4 class="name" id="event"><span class="type-signature"></span>event<span class="signature">(all)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="module.exports"><span class="type-signature"></span>new module.exports<span class="signature">(&hellip;args)</span><span class="type-signature"></span></h4>
     
 
     
@@ -116,7 +229,7 @@
 
 
 <div class="description">
-    <p>Is fired when an event is sent.</p>
+    <p>Create a new ModuleManager</p>
 </div>
 
 
@@ -140,6 +253,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -152,7 +267,7 @@
 
         <tr>
             
-                <td class="name"><code>all</code></td>
+                <td class="name"><code>args</code></td>
             
 
             <td class="type">
@@ -165,10 +280,20 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
 
             
 
-            <td class="description last"><p>Any discord.js event properties</p></td>
+            <td class="description last"><p>Any arguments to pass to log</p></td>
         </tr>
 
     
@@ -209,7 +334,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_types_CoreEvent.js.html">core/types/CoreEvent.js</a>, <a href="core_types_CoreEvent.js.html#line18">line 18</a>
+        <a href="managers_ModuleManager.js.html">managers/ModuleManager.js</a>, <a href="managers_ModuleManager.js.html#line39">line 39</a>
     </li></ul></dd>
     
 
@@ -239,85 +364,8 @@
 
 
 
-        
-            
-
     
-
-    
-    <h4 class="name" id="once"><span class="type-signature"></span>once<span class="signature">(all)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Is fired when an event is sent.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>all</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">*</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Any discord.js event properties</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
+    </div>
 
     
 
@@ -333,50 +381,6 @@
 
     
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_types_CoreEvent.js.html">core/types/CoreEvent.js</a>, <a href="core_types_CoreEvent.js.html#line27">line 27</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
     
 
     

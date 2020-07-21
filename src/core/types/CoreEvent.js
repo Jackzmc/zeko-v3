@@ -13,7 +13,7 @@ export default class {
     /**
      * Is fired when an event is sent.
      *
-     * @param {*} all Any discord.js event properties
+     * @param {...*} any Any discord.js event properties
      */
     event() {
         
@@ -22,7 +22,7 @@ export default class {
     /**
      * Is fired when an event is sent.
      *
-     * @param {*} all Any discord.js event properties
+     * @param {...*} any Any discord.js event properties
      */
      once() {
 

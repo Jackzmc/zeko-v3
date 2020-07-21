@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: core/types/CoreEvent.js</title>
+    <title>JSDoc: Source: types/Module.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: core/types/CoreEvent.js</h1>
+    <h1 class="page-title">Source: types/Module.js</h1>
 
     
 
@@ -27,11 +27,10 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- @module core:types/CoreEvent
- @desc The CoreEvent class, core events inherit
+ @module types/Module
+ @description The module class
 */
 export default class {
-
     constructor(client, logger) {
         this.client = client;
         this.logger = logger;
@@ -39,22 +38,12 @@ export default class {
 
 
     /**
-     * Is fired when an event is sent.
+     * Fired on bot exit or module reload
      *
-     * @param {*} all Any discord.js event properties
      */
-    event() {
-        
+    exit() {
+
     }
-
-    /**
-     * Is fired when an event is sent.
-     *
-     * @param {*} all Any discord.js event properties
-     */
-     once() {
-
-     }
 }</code></pre>
         </article>
     </section>

@@ -12,9 +12,9 @@ export default class {
      * Fires before the core event (if exists) is fired. Must return a promise.
      * Return a promise of true if core/after events should be cancelled
      *
-     * @param {*} all Any discord.js event properties
+     * @param {...*} any Any discord.js event properties
      *
-     * @returns Promise<Boolean>
+     * @returns {Promise<Boolean>} Return true to cancel event
      */
     before(/* args */) {
         return new Promise((resolve,reject) => {
@@ -25,7 +25,7 @@ export default class {
      /**
      * Fires after custom before event, and core event fired if not cancelled.
      *
-     * @param {*} all Any discord.js event properties
+     * @param {...*} any Any discord.js event properties
      *
      */
     after() {
