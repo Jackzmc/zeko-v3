@@ -3,12 +3,14 @@
  * @desc Loads all the other loaders and setups the client.
  */
 
- import EventLoader from './EventLoader.js'
- import CommandLoader from './CommandLoader.js'
- import ModuleLoader from './ModuleLoader.js'
- import Logger from '../../Logger.js'
- import { promises as fs } from 'fs';
- 
+import EventLoader from './EventLoader.js'
+import CommandLoader from './CommandLoader.js'
+import ModuleLoader from './ModuleLoader.js'
+import SettingsManager from '../../managers/SettingsManager.js';
+
+import Logger from '../../Logger.js'
+import { promises as fs } from 'fs';
+
  export default class CoreLoader {
      constructor(client) {
          const logger = new Logger('CoreLoader');
@@ -22,6 +24,7 @@
                      new EventLoader(client, new Logger("EventLoader")).loadEvents()
                  ])
              })
+             client.managers.SettingsManager = new SettingsManager(client);
  
              client.login(process.env.DISCORD_BOT_TOKEN)
          }catch(err) {
