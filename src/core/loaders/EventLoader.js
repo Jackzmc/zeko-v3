@@ -19,7 +19,6 @@ export default class {
         client.managers.EventManager = this.manager;
         this.logger = log;
         this.client = client;
-        this.loadEvents()
         //this.setupWatcher()
 
         //Catch all events, pass to EventManager
@@ -78,7 +77,7 @@ export default class {
                         }))
                         //delete require.cache[require.resolve(`${filepath}/${file}`)];
                     }catch(err) {
-                        log.error(`Event ${file} had an error:\n`, err);
+                        this.logger.error(`Event ${file} had an error:\n`, err);
                     }
                 });
             }).catch(err => {

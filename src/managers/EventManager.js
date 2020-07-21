@@ -1,5 +1,6 @@
 /**  
-  @module managers/EventManager
+  @namespace Managers
+  @module EventManager
   @description Manages the events, and passes fired events to registered event handlers
 */
 
@@ -61,7 +62,6 @@ export default class {
      * @param {...*} args Any discord.js event arguments
      */
     event(name, args) {
-        if(name.toLowerCase() === "guildmemberspeaking") return;
         const core = this.getCoreEvent(name);
         const custom = this.getCustomEvent(name);
         if(custom) {

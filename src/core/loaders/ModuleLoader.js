@@ -43,9 +43,8 @@ export default class {
         })
     }
     async loadModules() {
-        let custom = 0, core = 0;
         const promises = [];
-        for(let i=0;i<folders.length;i++) {
+        for(let i = 0; i < folders.length; i++) {
             const isCore = i == 0
             const folder = folders[i];
             const filepath = path.join(this.client.ROOT_DIR, folder);

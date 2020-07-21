@@ -1,5 +1,6 @@
 /** 
- @module managers/ModuleManager
+ @namespace Managers
+ @module ModuleManager
  @description Manages all registered modules
 */
 import path from 'path'

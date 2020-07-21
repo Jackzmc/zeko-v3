@@ -1,5 +1,6 @@
 /**
- @module managers/DataManager
+ @namespace Managers
+ @module DataManager
  @description WIP
 */
 import r from '../core/Database.js'

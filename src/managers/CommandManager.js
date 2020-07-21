@@ -1,5 +1,6 @@
 /**
- @module managers/CommandManager
+ @namespace Managers
+ @module CommandManager
 */
 import path from 'path'
 import Logger from '../Logger.js'
@@ -38,7 +39,7 @@ export default class {
      * Acquire the current instance
      *
      * @static
-     * @returns {ModuleManager} The current instance
+     * @returns {CommandManager} The current instance
      */
      static getInstance() {
         return instance;

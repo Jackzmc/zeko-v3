@@ -19,7 +19,6 @@ export default class{
         this.logger = logger;
         this.manager = new CommandManager(client)
         client.managers.CommandManager = this.manager;
-        this.loadCommands()
     }
     setupWatcher() {
         const watch = Chokidar.watch(['src/commands','commands'], {
