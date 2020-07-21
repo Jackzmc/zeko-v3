@@ -102,7 +102,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_CommandManager.js.html">managers/CommandManager.js</a>, <a href="managers_CommandManager.js.html#line135">line 135</a>
+        <a href="managers_CommandManager.js.html">managers/CommandManager.js</a>, <a href="managers_CommandManager.js.html#line146">line 146</a>
     </li></ul></dd>
     
 
@@ -164,7 +164,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_CommandManager.js.html">managers/CommandManager.js</a>, <a href="managers_CommandManager.js.html#line127">line 127</a>
+        <a href="managers_CommandManager.js.html">managers/CommandManager.js</a>, <a href="managers_CommandManager.js.html#line138">line 138</a>
     </li></ul></dd>
     
 
@@ -192,7 +192,7 @@
     
 
     
-    <h4 class="name" id="getCommand"><span class="type-signature"></span>getCommand<span class="signature">(name, includeHidden)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getCommand"><span class="type-signature"></span>getCommand<span class="signature">(name, includeHidden<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; (nullable) {RegisteredCommand}</span></h4>
     
 
     
@@ -224,7 +224,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -249,7 +253,19 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>The id/name of the command (one provided in RegisterCommand)</p></td>
@@ -272,7 +288,23 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
             
 
             <td class="description last"><p>Should hidden commands (cmd.config.hidden) be provided?</p></td>
@@ -316,7 +348,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_CommandManager.js.html">managers/CommandManager.js</a>, <a href="managers_CommandManager.js.html#line80">line 80</a>
+        <a href="managers_CommandManager.js.html">managers/CommandManager.js</a>, <a href="managers_CommandManager.js.html#line91">line 91</a>
     </li></ul></dd>
     
 
@@ -344,11 +376,19 @@
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    <p>CommandContainer</p>
-</div>
 
 
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">RegisteredCommand</span>
+
+
+    </dd>
+</dl>
 
     
 
@@ -362,7 +402,7 @@
     
 
     
-    <h4 class="name" id="getCommands"><span class="type-signature"></span>getCommands<span class="signature">(grouped, includeHidden, onlyKeys)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getCommands"><span class="type-signature"></span>getCommands<span class="signature">(grouped, includeHidden, onlyKeys)</span><span class="type-signature"> &rarr; {RegisteredCommand}</span></h4>
     
 
     
@@ -509,7 +549,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_CommandManager.js.html">managers/CommandManager.js</a>, <a href="managers_CommandManager.js.html#line107">line 107</a>
+        <a href="managers_CommandManager.js.html">managers/CommandManager.js</a>, <a href="managers_CommandManager.js.html#line118">line 118</a>
     </li></ul></dd>
     
 
@@ -537,11 +577,19 @@
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    <p>CommandContainer or Object&lt;Groupname, CommandContainer&gt;</p>
-</div>
 
 
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">RegisteredCommand</span>
+
+
+    </dd>
+</dl>
 
     
 
@@ -555,7 +603,7 @@
     
 
     
-    <h4 class="name" id="getGroups"><span class="type-signature"></span>getGroups<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getGroups"><span class="type-signature"></span>getGroups<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;string>}</span></h4>
     
 
     
@@ -607,7 +655,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_CommandManager.js.html">managers/CommandManager.js</a>, <a href="managers_CommandManager.js.html#line143">line 143</a>
+        <a href="managers_CommandManager.js.html">managers/CommandManager.js</a>, <a href="managers_CommandManager.js.html#line154">line 154</a>
     </li></ul></dd>
     
 
@@ -636,10 +684,22 @@
 
         
 <div class="param-desc">
-    <p>array of group names</p>
+    <p>List of group names</p>
 </div>
 
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;string></span>
+
+
+    </dd>
+</dl>
 
     
 
@@ -653,7 +713,7 @@
     
 
     
-    <h4 class="name" id="registerCommand"><span class="type-signature"></span>registerCommand<span class="signature">(name, isCore, group<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="registerCommand"><span class="type-signature"></span>registerCommand<span class="signature">(name, isCore, group<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -844,7 +904,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="managers_CommandManager.js.html">managers/CommandManager.js</a>, <a href="managers_CommandManager.js.html#line26">line 26</a>
+        <a href="managers_CommandManager.js.html">managers/CommandManager.js</a>, <a href="managers_CommandManager.js.html#line37">line 37</a>
     </li></ul></dd>
     
 
@@ -872,11 +932,19 @@
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    <p>Promise&lt;&gt;</p>
-</div>
 
 
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
 
     
 
@@ -887,6 +955,289 @@
         
     
 
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        
+                
+<h4 class="name" id="~RegisteredCommand">RegisteredCommand</h4>
+
+
+
+
+<div class="description">
+    <p>See types/Command for information of CommandConfigOptions and CommandHelpOptions</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>config</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CommandConfigOptions</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Command configuration object</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>help-</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CommandHelpOptions</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Command help object</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>group</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The group the module belongs to</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>isCore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Is the command a core command?</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The registered name of the command</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>command</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">types/Command</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The actual command class</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="managers_CommandManager.js.html">managers/CommandManager.js</a>, <a href="managers_CommandManager.js.html#line8">line 8</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
     
 
     
@@ -906,7 +1257,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Mon Jul 20 2020 22:33:57 GMT-0500 (Central Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Mon Jul 20 2020 22:46:03 GMT-0500 (Central Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
