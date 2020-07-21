@@ -5,7 +5,7 @@
 
 import path from 'path'
 import Logger from '../Logger.js'
-let logger
+let instance;
 
 /**
  * @typedef {Object} RegisteredEvent
@@ -39,7 +39,18 @@ export default class {
             custom: new Map(),
         }
         this.client = client;
-        logger = new Logger('EventManager');
+        this.logger = new Logger('EventManager');
+        instance = this;
+    }
+
+    /**
+     * Acquire the current instance
+     *
+     * @static
+     * @returns {EventManager} The current instance
+     */
+     static getInstance() {
+        return instance;
     }
 
     
@@ -62,7 +73,7 @@ export default class {
                         .then(coreResponse => {
                             if(coreResponse !== true) custom.event.after(...args);
                         }).catch(err => {
-                            logger.error(`Core Event ${name} errored: ${process.env.PRODUCTION?err.message:err.stack}`)
+                            this.logger.error(`Core Event ${name} errored: ${process.env.PRODUCTION?err.message:err.stack}`)
                         })
                     }else{
                         custom.event.after(...args)
@@ -72,7 +83,7 @@ export default class {
         }else if(core) {
             Promise.resolve(core.event.every(...args))
             .catch(err => {
-                logger.error(`Core Event '${name}' errored:\n`, err)
+                this.logger.error(`Core Event '${name}' errored:\n`, err)
             })
         }
     }

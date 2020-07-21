@@ -5,6 +5,8 @@ import path from 'path'
 import Logger from '../Logger.js'
 import { Collection } from 'discord.js';
 
+let instance;
+
 /**
  * See {@link types/Command} for information of CommandConfigOptions and CommandHelpOptions
  * @typedef {Object} RegisteredCommand
@@ -29,6 +31,17 @@ export default class {
         
         this.client = client;
         this.logger = new Logger('CommandManager');
+        instance = this;
+    }
+
+    /**
+     * Acquire the current instance
+     *
+     * @static
+     * @returns {ModuleManager} The current instance
+     */
+     static getInstance() {
+        return instance;
     }
 
     /**
