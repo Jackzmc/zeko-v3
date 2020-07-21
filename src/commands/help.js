@@ -47,10 +47,10 @@ export default class extends Command {
     generateHelpCommand(cmd){
         let fields = [];
         //print information about flags if not hidden
-        if(cmd.config.flags && !cmd.config.hideFlags) {
+        if(cmd.help.flags && !cmd.config.hideFlags) {
             const flags = [];
-            for(const key in cmd.config.flags) {
-                const value = cmd.config.flags[key];
+            for(const key in cmd.help.flags) {
+                const value = cmd.help.flags[key];
                 let type = getType(value);
                 let description = null;
                 //if the value is an object, then parse the sub object 
