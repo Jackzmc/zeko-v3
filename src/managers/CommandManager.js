@@ -7,6 +7,7 @@ import Logger from '../Logger.js'
 import { Collection } from 'discord.js';
 
 let instance;
+//TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that
 
 /**
  * See {@link types/Command} for information of CommandConfigOptions and CommandHelpOptions

@@ -41,10 +41,11 @@ class Settings {
     }
 
     /**
-     * Fetch an option from the database
+     * Fetch an individual setting from the database
      *
-     * @param {string} name Name of the property
-     * @returns {Promise.<RethinkDBResult>}
+     * @param {string} guildID A guildID to manage settings for
+     * @param {string} name Name of the setting
+     * @returns {Promise.<Object>}
      */
     get(guildID, name) {
         return new Promise((resolve, reject) => {
@@ -55,11 +56,12 @@ class Settings {
     }
 
     /**
-     * Sets a property's value
+     * Sets an individual settings's value
      *
-     * @param {string} name Name of the property
-     * @param {*} value The value to set for property
-     * @returns {Promise.<RethinkDBResult>}
+     * @param {string} guildID A guildID to manage settings for
+     * @param {string} name Name of the setting
+     * @param {*} value The new value for the setting
+     * @returns {Promise.<Object>}
      */
     set(guildID, name, value) {
         return new Promise((resolve, reject) => {
@@ -72,7 +74,8 @@ class Settings {
     /**
      * Fetches all settings for category
      *
-     * @returns {Promise.<RethinkDBResult>}
+     * @param {string} guildID A guildID to manage settings for
+     * @returns {Promise.<Object>}
      */
     list(guildID) {
         return new Promise((resolve, reject) => {

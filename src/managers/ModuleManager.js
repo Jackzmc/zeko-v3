@@ -7,7 +7,8 @@ import path from 'path'
 import Logger from '../Logger.js'
 
 let instance
-
+//TODO: change registerModule(String name, ...) to registerModule(Module module, ...)
+ 
 /**
  * @typedef {Object} RegisteredModule
  * @property {ModuleConfigOptions} config - Module configuration object
@@ -103,11 +104,11 @@ export default class {
                     return reject(new Error("Invalid Module class: Not valid module, no valid constructor"))
                 }
                 const module = new moduleFile.default(this.client, new Logger(`mod/${name}`))
-                if(!module.config || typeof module.config !== "function" ) {
+                /*if(!module.config || typeof module.config !== "function" ) {
                     return reject(new Error("Invalid Module class: Missing 'config' method"))
-                }
+                }*/
 
-                const config = module.config();
+                const config = (module.config && typeof module.config === "function") ? module.config() : {};
                 delete module.config;
 
                 const registeredModule = {
