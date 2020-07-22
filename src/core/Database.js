@@ -2,20 +2,26 @@
  @module core:Database
  @description Only used for core atm. Exposes rethinkdb instance.
 */
+import 'dotenv/config.js'
 import rethinkdb from 'rethinkdbdash'
+import Logger from '../Logger.js';
+
+
+const HOST = process.env.RETHINKDB_HOST||'127.0.0.1'
+const PORT = parseInt(process.env.RETHINKDB_PORT)||28015;
+const DB = process.env.RETHINKDB_DB;
 
 const r = rethinkdb({
-    host: process.env.RETHINKDB_HOST,
-    port: parseInt(process.env.RETHINKDB_PORT)||28015,
-    db: process.env.RETHINKDB_DB,
+    host: HOST,
+    port: PORT,
+    db: DB,
     silent: true
 })
 
 r.tableCreate('settings').run().catch(() => {})
 r.tableCreate('data').run().catch(() => {})
 
-export default function(client, logger) {
-    const port = parseInt(process.env.RETHINKDB_PORT)||28015;
-    logger.info(`Connecting to rethinkdb on ${process.env.RETHINKDB_HOST}:${port} for database ${process.env.RETHINKDB_DB}`)
-    return r
-}
+const logger = new Logger("Database");
+logger.info(`Connecting to rethinkdb on ${HOST}:${PORT} for database ${DB}`)
+
+export default r;

@@ -6,7 +6,7 @@
 import Logger from '../Logger.js'
 import r from '../core/Database.js'
 
-export default class{
+export default class {
     /**
      *  Creates a new SettingsManager instance
      * @param {!Client} client A Discord.JS client instance
@@ -22,8 +22,9 @@ export default class{
      *
      * @param {!string} module The name of the module
      */
-    getSettings(module) {
-        const settings = new Settings(module);
+    getSettings(guildID, module) {
+        const settings = new Settings(guildID, module);
+        return settings;
     }
 
 }
@@ -36,16 +37,21 @@ export default class{
 class Settings {
     constructor(module) {
         this.module = module;
+        this.db = r.db('zeko').table('settings');
     }
 
     /**
      * Fetch an option from the database
      *
      * @param {string} name Name of the property
-     * @returns {RethinkDBResult}
+     * @returns {Promise.<RethinkDBResult>}
      */
-    get(name) {
-        return r.table('settings').get(`${this.module}.${name}`).run()
+    get(guildID, name) {
+        return new Promise((resolve, reject) => {
+            this.db.get(guildID)(this.module)(name).run()
+            .then(result => resolve(result))
+            .catch(err => reject(err))
+        })
     }
 
     /**
@@ -53,17 +59,26 @@ class Settings {
      *
      * @param {string} name Name of the property
      * @param {*} value The value to set for property
-     * @returns {RethinkDBResult}
+     * @returns {Promise.<RethinkDBResult>}
      */
-    set(name, value) {
-        return r.table('settings').get(`${this.module}`, {[name]: value}).run()
+    set(guildID, name, value) {
+        return new Promise((resolve, reject) => {
+            this.db.get(guildID).replace({[this.module]: {[name]: value}, guild: guildID}).run()
+            .then(result => resolve(result))
+            .catch(err => reject(err))
+        })
+    }
+
+    /**
+     * Fetches all settings for category
+     *
+     * @returns {Promise.<RethinkDBResult>}
+     */
+    list(guildID) {
+        return new Promise((resolve, reject) => {
+            this.db.get(guildID)(this.module).run()
+            .then(result => resolve(result))
+            .catch(err => reject(err))
+        })
     }
 }
-
-/*
-SettingsManager.getInstance().getSettings("command")
-from cmd:
-this.getSettings() => ^ above
-this.getSettings().getString()
-
-*/
