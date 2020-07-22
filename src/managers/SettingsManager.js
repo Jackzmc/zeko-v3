@@ -18,13 +18,12 @@ export default class {
 
 
     /**
-     * Acquire a {@link Settings} class
+     * Acquire a {@link SettingsCategory} class
      *
-     * @param {!string} module The name of the module
+     * @param {!string} category The name of the category
      */
-    getSettings(guildID, module) {
-        const settings = new Settings(guildID, module);
-        return settings;
+    getCategory(category) {
+        return new SettingsCategory(category);
     }
 
 }
@@ -34,9 +33,13 @@ export default class {
  *
  * @class Settings
  */
-class Settings {
-    constructor(module) {
-        this.module = module;
+class SettingsCategory {
+    /**
+     * 
+     * @param {string} category Name of the category
+     */
+    constructor(category) {
+        this.module = category;
         this.db = r.db('zeko').table('settings');
     }
 
