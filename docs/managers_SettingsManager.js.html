@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>managers/EventManager.js - Documentation</title>
+    <title>managers/SettingsManager.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,7 +29,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">managers/EventManager.js</h1>
+    <h1 class="page-title">managers/SettingsManager.js</h1>
     
 
     
@@ -39,197 +39,95 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**  
-  @namespace Managers
-  @module EventManager
-  @description Manages the events, and passes fired events to registered event handlers
+            <pre class="prettyprint source linenums"><code>/**
+ @namespace Managers
+ @module SettingsManager
+ @description An interface to change/view settings
 */
-
-import path from 'path'
 import Logger from '../Logger.js'
-let instance;
-
-/**
- * @typedef {Object} RegisteredEvent
- * @property {RegisteredEventConfig} config - Config options
- * @property {types/Event} event - The actual event class
- */
-
-/**
- * @typedef {Object} RegisteredEventConfig
- * @property {boolean} core - Is event a core event?
- * @property {string} name - The registered name of the event
- */ 
-
-/**
- * @typedef {Object} EventList
- * @property {RegisteredEvent[]|string} core - List of all core events
- * @property {RegisteredEvent[]|string} custom - List of all custom events
- */
- 
-
+import r from '../core/Database.js'
 
 export default class {
     /**
-     * Create a new EventManager
-     *
-     * @param {Client} client The current discord.js client
+     *  Creates a new SettingsManager instance
+     * @param {!Client} client A Discord.JS client instance
      */
     constructor(client) {
-        this.events = {
-            core: new Map(),
-            custom: new Map(),
-        }
         this.client = client;
-        this.logger = new Logger('EventManager');
-        instance = this;
-    }
-
-    /**
-     * Acquire the current instance
-     *
-     * @static
-     * @returns {EventManager} The current instance
-     */
-     static getInstance() {
-        return instance;
-    }
-
-    
-    /**
-     * All events fire this method
-     *
-     * @param {string} name The name of event
-     * @param {...*} args Any discord.js event arguments
-     */
-    event(name, args) {
-        const core = this.getCoreEvent(name);
-        const custom = this.getCustomEvent(name);
-        if(custom) {
-            Promise.resolve(custom.event.before(...args))
-            .then(beforeResponse => {
-                if(beforeResponse !== true &amp;&amp; custom.event.after) {
-                    if(core) {
-                        Promise.resolve(core.event.every(...args))
-                        .then(coreResponse => {
-                            if(coreResponse !== true) custom.event.after(...args);
-                        }).catch(err => {
-                            this.logger.error(`Core Event ${name} errored: ${process.env.PRODUCTION?err.message:err.stack}`)
-                        })
-                    }else{
-                        custom.event.after(...args)
-                    }
-                }
-            })
-        }else if(core) {
-            Promise.resolve(core.event.every(...args))
-            .catch(err => {
-                this.logger.error(`Core Event '${name}' errored:\n`, err)
-            })
-        }
+        this.logger = new Logger('SettingsManager');
     }
 
 
     /**
-     * Register an event handler for EventManager
+     * Acquire a {@link SettingsCategory} class
      *
-     * @param {string} name Name of the event
-     * @param {boolean} [isCore=false] Is the event a core event? (Internal use only)
-     * @returns {Promise}
+     * @param {!string} category The name of the category
      */
-    registerEvent(name, isCore = false) {
-        return new Promise(async(resolve,reject) => {
-            try {
-                const filepath = path.join(this.client.ROOT_DIR, isCore?"src/events":"events",`${name}.js`)
-                //delete require.cache[require.resolve(_path)];
-                const event_src = await import(`file://${filepath}`);
-                const event = new event_src.default(this.client, new Logger(`event/${name}`))
-                if(isCore &amp;&amp; (typeof event.every !== "function" &amp;&amp; typeof event.once !== "function")) {
-                    return reject(new Error("Invalid CoreEvent class: Missing valid 'every' or 'once' method"))
-                }else if(!isCore &amp;&amp; typeof event.before !== "function" &amp;&amp; typeof event.after !== "function") {
-                    return reject(new Error("Invalid (Custom) Event class: Missing valid 'before' or 'after' method"))
-                }
-                
-                const registeredEvent = {
-                    event,
-                    config: {
-                        core: isCore,
-                        name,
-                    }
-                }
-                const type = isCore ? 'core' : 'custom'
-                this.events[type].set(name, registeredEvent)
-                resolve();
-            }catch(err) {
-                reject(err);
-            }
+    getCategory(category) {
+        return new SettingsCategory(category);
+    }
+
+}
+
+/**
+ * Represents an individual setting category
+ *
+ * @class SettingsCategory
+ */
+class SettingsCategory {
+    /**
+     * 
+     * @param {string} category Name of the category
+     */
+    constructor(category) {
+        this.module = category;
+        this.db = r.db('zeko').table('settings');
+    }
+
+    /**
+     * Fetch an individual setting from the database
+     *
+     * @param {string} guildID A guildID to manage settings for
+     * @param {string} name Name of the setting
+     * @returns {Promise.&lt;Object>}
+     */
+    get(guildID, name) {
+        return new Promise((resolve, reject) => {
+            this.db.get(guildID)(this.module)(name).run()
+            .then(result => resolve(result))
+            .catch(err => reject(err))
         })
     }
 
-
     /**
-     * Attempt to fetch a core event by name
+     * Sets an individual settings's value
      *
-     * @param {string} query The name of the event
-     * @returns EventObject
+     * @param {string} guildID A guildID to manage settings for
+     * @param {string} name Name of the setting
+     * @param {*} value The new value for the setting
+     * @returns {Promise.&lt;Object>}
      */
-    getCoreEvent(query) {
-        return this.events.core.get(query.toLowerCase())
-    } 
-
-    /**
-     * Attempt to fetch a custom event by name
-     *
-     * @param {string} query The name of the event
-     * @returns EventObject
-     */
-    getCustomEvent(query) {
-        return this.events.custom.get(query.toLowerCase())
+    set(guildID, name, value) {
+        return new Promise((resolve, reject) => {
+            this.db.get(guildID).replace({[this.module]: {[name]: value}, guild: guildID}).run()
+            .then(result => resolve(result))
+            .catch(err => reject(err))
+        })
     }
 
     /**
-     * Get the total number of core events loaded
+     * Fetches all settings for category
      *
-     * @readonly
+     * @param {string} guildID A guildID to manage settings for
+     * @returns {Promise.&lt;Object>}
      */
-    get coreLoaded() {
-        return this.events.core.size;
+    list(guildID) {
+        return new Promise((resolve, reject) => {
+            this.db.get(guildID)(this.module).run()
+            .then(result => resolve(result))
+            .catch(err => reject(err))
+        })
     }
-    
-    /**
-     * Get the total number of custom events loaded
-     *
-     * @readonly
-     */
-    get customLoaded() {
-        return this.events.custom.size;
-    }
-
-    
-    /**
-     * Returns all event objects
-     *
-     * @returns {EventList} List of registered events
-     */
-    getEvents() {
-        return {
-            core: this.events.core.values(),
-            custom: this.events.custom.values()
-        }
-    }
-
-    /**
-     * Returns all event names registered
-     *
-     * @returns {EventList} List of registered events names
-     */
-    getEventsNames() {
-        return {
-            core: Object.keys(this.events.core.values()),
-            custom: Object.keys(this.events.custom.values())
-        }
-    }
-
 }</code></pre>
         </article>
     </section>

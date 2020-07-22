@@ -31,7 +31,7 @@ export default class {
 /**
  * Represents an individual setting category
  *
- * @class Settings
+ * @class SettingsCategory
  */
 class SettingsCategory {
     /**

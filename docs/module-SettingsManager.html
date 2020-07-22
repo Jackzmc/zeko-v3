@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>managers/EventManager.js - Documentation</title>
+    <title>module:SettingsManager - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,210 +29,334 @@
 
 <div id="main">
     
-    <h1 class="page-title">managers/EventManager.js</h1>
+    <h1 class="page-title">module:SettingsManager</h1>
     
 
     
 
 
 
+
+<section>
+
+<header>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>/**  
-  @namespace Managers
-  @module EventManager
-  @description Manages the events, and passes fired events to registered event handlers
-*/
+        <h2>
+        module:SettingsManager
+        </h2>
+        
+    
+</header>
 
-import path from 'path'
-import Logger from '../Logger.js'
-let instance;
-
-/**
- * @typedef {Object} RegisteredEvent
- * @property {RegisteredEventConfig} config - Config options
- * @property {types/Event} event - The actual event class
- */
-
-/**
- * @typedef {Object} RegisteredEventConfig
- * @property {boolean} core - Is event a core event?
- * @property {string} name - The registered name of the event
- */ 
-
-/**
- * @typedef {Object} EventList
- * @property {RegisteredEvent[]|string} core - List of all core events
- * @property {RegisteredEvent[]|string} custom - List of all custom events
- */
- 
-
-
-export default class {
-    /**
-     * Create a new EventManager
-     *
-     * @param {Client} client The current discord.js client
-     */
-    constructor(client) {
-        this.events = {
-            core: new Map(),
-            custom: new Map(),
-        }
-        this.client = client;
-        this.logger = new Logger('EventManager');
-        instance = this;
-    }
-
-    /**
-     * Acquire the current instance
-     *
-     * @static
-     * @returns {EventManager} The current instance
-     */
-     static getInstance() {
-        return instance;
-    }
+<article>
+    <div class="container-overview">
+    
+        
+<div class="section-method">
 
     
-    /**
-     * All events fire this method
-     *
-     * @param {string} name The name of event
-     * @param {...*} args Any discord.js event arguments
-     */
-    event(name, args) {
-        const core = this.getCoreEvent(name);
-        const custom = this.getCustomEvent(name);
-        if(custom) {
-            Promise.resolve(custom.event.before(...args))
-            .then(beforeResponse => {
-                if(beforeResponse !== true &amp;&amp; custom.event.after) {
-                    if(core) {
-                        Promise.resolve(core.event.every(...args))
-                        .then(coreResponse => {
-                            if(coreResponse !== true) custom.event.after(...args);
-                        }).catch(err => {
-                            this.logger.error(`Core Event ${name} errored: ${process.env.PRODUCTION?err.message:err.stack}`)
-                        })
-                    }else{
-                        custom.event.after(...args)
-                    }
-                }
-            })
-        }else if(core) {
-            Promise.resolve(core.event.every(...args))
-            .catch(err => {
-                this.logger.error(`Core Event '${name}' errored:\n`, err)
-            })
-        }
-    }
+
+    <h4 class="name" id="module:SettingsManager"><span class="type-signature"></span>new module:SettingsManager<span class="signature">(client<span class="signature-attributes">non-null</span>)</span><span class="type-signature"></span></h4>
+
+    
 
 
-    /**
-     * Register an event handler for EventManager
-     *
-     * @param {string} name Name of the event
-     * @param {boolean} [isCore=false] Is the event a core event? (Internal use only)
-     * @returns {Promise}
-     */
-    registerEvent(name, isCore = false) {
-        return new Promise(async(resolve,reject) => {
-            try {
-                const filepath = path.join(this.client.ROOT_DIR, isCore?"src/events":"events",`${name}.js`)
-                //delete require.cache[require.resolve(_path)];
-                const event_src = await import(`file://${filepath}`);
-                const event = new event_src.default(this.client, new Logger(`event/${name}`))
-                if(isCore &amp;&amp; (typeof event.every !== "function" &amp;&amp; typeof event.once !== "function")) {
-                    return reject(new Error("Invalid CoreEvent class: Missing valid 'every' or 'once' method"))
-                }else if(!isCore &amp;&amp; typeof event.before !== "function" &amp;&amp; typeof event.after !== "function") {
-                    return reject(new Error("Invalid (Custom) Event class: Missing valid 'before' or 'after' method"))
-                }
+
+<div class="description">
+    <p>Creates a new SettingsManager instance</p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="managers_SettingsManager.js.html">managers/SettingsManager.js</a>, <a href="managers_SettingsManager.js.html#line14">line 14</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>client</code></td>
+            
+
+            <td class="type">
+            
                 
-                const registeredEvent = {
-                    event,
-                    config: {
-                        core: isCore,
-                        name,
-                    }
-                }
-                const type = isCore ? 'core' : 'custom'
-                this.events[type].set(name, registeredEvent)
-                resolve();
-            }catch(err) {
-                reject(err);
-            }
-        })
-    }
+<span class="param-type"><code>Client</code></span>
 
 
-    /**
-     * Attempt to fetch a core event by name
-     *
-     * @param {string} query The name of the event
-     * @returns EventObject
-     */
-    getCoreEvent(query) {
-        return this.events.core.get(query.toLowerCase())
-    } 
+            
+            </td>
 
-    /**
-     * Attempt to fetch a custom event by name
-     *
-     * @param {string} query The name of the event
-     * @returns EventObject
-     */
-    getCustomEvent(query) {
-        return this.events.custom.get(query.toLowerCase())
-    }
+            
 
-    /**
-     * Get the total number of core events loaded
-     *
-     * @readonly
-     */
-    get coreLoaded() {
-        return this.events.core.size;
-    }
-    
-    /**
-     * Get the total number of custom events loaded
-     *
-     * @readonly
-     */
-    get customLoaded() {
-        return this.events.custom.size;
-    }
+            
+
+            <td class="description last">
+                <p>A Discord.JS client instance</p>
+                
+            </td>
+        </tr>
 
     
-    /**
-     * Returns all event objects
-     *
-     * @returns {EventList} List of registered events
-     */
-    getEvents() {
-        return {
-            core: this.events.core.values(),
-            custom: this.events.custom.values()
-        }
-    }
+    </tbody>
+</table>
 
-    /**
-     * Returns all event names registered
-     *
-     * @returns {EventList} List of registered events names
-     */
-    getEventsNames() {
-        return {
-            core: Object.keys(this.events.core.values()),
-            custom: Object.keys(this.events.custom.values())
-        }
-    }
 
-}</code></pre>
-        </article>
-    </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+    
+    </div>
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="module-SettingsManager-SettingsCategory.html">SettingsCategory</a></dt>
+            <dd></dd>
+        
+            <dt><a href="module-SettingsManager-SettingsCategory.html">SettingsCategory</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+<div class="section-method">
+
+    
+
+    <h4 class="name" id="getCategory"><span class="type-signature"></span>getCategory<span class="signature">(category<span class="signature-attributes">non-null</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Acquire a SettingsCategory class</p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="managers_SettingsManager.js.html">managers/SettingsManager.js</a>, <a href="managers_SettingsManager.js.html#line25">line 25</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>category</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><code>string</code></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <p>The name of the category</p>
+                
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+        
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 
@@ -242,7 +366,7 @@ export default class {
 <br class="clear">
 
 <footer>
-    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a> on Tue Jul 21 2020 23:52:48 GMT-0500 (Central Daylight Time) using the Minami theme.
+    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a> on Tue Jul 21 2020 23:52:49 GMT-0500 (Central Daylight Time) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>
