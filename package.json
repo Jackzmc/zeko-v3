@@ -1,5 +1,5 @@
 {
-  "name": "zekov3",
+  "name": "zeko-v3",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,7 +8,7 @@
     "doc": "jsdoc -c jsdoc.conf.json"
   },
   "type": "module",
-  "author": "",
+  "author": "Jackzmc",
   "license": "ISC",
   "dependencies": {
     "chalk": "^4.1.0",

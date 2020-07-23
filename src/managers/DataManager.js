@@ -12,6 +12,11 @@ import { fileURLToPath } from 'url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default class {
+    /**
+     *  Creates a new rethinkdb instance, with table selected
+     * @param {!string} table Name of the table to fetch
+     * @returns {RethinkDBInstance}
+     */
     constructor(table = 'data') {
         r.tableCreate(table)
         this.r = r.table(table)
@@ -19,15 +24,6 @@ export default class {
         fs.mkdir(this.constructor.getDataDirectory(), () => {})
 
         this.logger = new Logger(`DataManager/${table}`)
-    }
-
-
-    /**
-     * Gets the current provided table
-     *
-     * @returns {RethinkDBInstance}
-     */
-    getDB() {
         return this.r;
     }
 
