@@ -35,7 +35,7 @@ export default class {
  */
 class SettingsCategory {
     /**
-     * 
+     * Create a new settings category
      * @param {string} category Name of the category
      */
     constructor(category) {

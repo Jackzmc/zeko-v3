@@ -14,11 +14,21 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default class {
     constructor(table = 'data') {
         r.tableCreate(table)
-        this.r = r;
+        this.r = r.table(table)
 
         fs.mkdir(this.constructor.getDataDirectory(), () => {})
 
         this.logger = new Logger(`DataManager/${table}`)
+    }
+
+
+    /**
+     * Gets the current provided table
+     *
+     * @returns {RethinkDBInstance}
+     */
+    getDB() {
+        return this.r;
     }
 
     /**
@@ -36,5 +46,25 @@ export default class {
         }else{
             return path.resolve(__dirname, '../../data');
         }
+    }
+
+
+    /**
+     * Get the guild's rethinkdb instance
+     *
+     * @param {string} guildID discord.js client ID
+     * @returns {RethinkDBInstance}
+     */
+    static getGuildData(guildID) {
+        return this.r.db('data').get(guildID)
+    }
+
+    /**
+     * Get the global data rethinkdb instance
+     *
+     * @returns {RethinkDBInstance}
+     */
+     static getGlobalData() {
+        return this.r.db('data').get("global")
     }
 }
