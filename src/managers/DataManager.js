@@ -19,11 +19,22 @@ export default class {
      */
     constructor(table = 'data') {
         r.tableCreate(table)
-        this.r = r.table(table)
+        this.r = r;
+        const tableInstance = r.table(table)
 
         fs.mkdir(this.constructor.getDataDirectory(), () => {})
 
         this.logger = new Logger(`DataManager/${table}`)
+        return tableInstance;
+    }
+
+
+    /**
+     * Returns internal rethinkdb instance. Useful for using row() method.
+     *
+     * @returns 
+     */
+    getInternalRethink() {
         return this.r;
     }
 
