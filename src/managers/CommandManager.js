@@ -139,7 +139,7 @@ export default class {
         if(grouped) {
             let object = {}
             this.commands.forEach((cmd,key) => {
-                const group = cmd.isCore ? 'core' : ((group === "default") ? 'misc' : cmd.group);
+                const group = cmd.isCore ? 'core' : ((cmd.group === "default") ? 'misc' : cmd.group);
 
                 if(!object[group]) object[group] = []
                 if(includeHidden || !cmd.config.hidden) object[group].push(onlyKeys?key:cmd);
