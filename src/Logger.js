@@ -49,7 +49,7 @@ export default class {
      *
      * @param {...*} args Any arguments to pass to log
      */
-    servere(...args) {
+    severe(...args) {
         console.error(chalk.red(`[${getDate()}] [SEVERE::${this.mod}]`), ...args)
         process.exit(1);
     }
