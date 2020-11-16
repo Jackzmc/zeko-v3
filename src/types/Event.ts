@@ -3,31 +3,37 @@
  @description The Event class, custom events inherit
 */
 
+import { Client } from "discord.js";
+import Logger from '../Logger'
+
 /**
  * @property {Client} client Discord.js client
  * @property {Logger} logger Logger for class
  */
 export default class {
+    protected client: Client;
+    protected logger: Logger;
+
     /**
      * Create a new event
      *
      * @param {Client} client The current discord.js client
      * @param {Logger} logger A logger for the class to use
      */
-    constructor(client, logger) {
+    constructor(client: Client, logger: Logger) {
         this.client = client;
         this.logger = logger;
     }
 
     /**
-     * Fires before the core event (if exists) is fired. Must return a promise.
+     * Fires before the core event (if exists & this is custom event) is fired. Must return a promise.
      * Return a promise of true if core/after events should be cancelled
      *
      * @param {...*} any Any discord.js event properties
      *
-     * @returns {Promise<Boolean>} Return true to cancel event
+     * @returns {Promise<boolean>} Return a promised true to cancel event
      */
-    before(/* args */) {
+    before(...args: any[]): Promise<boolean> | void {
         return new Promise((resolve,reject) => {
             resolve(false)
         })
@@ -39,7 +45,7 @@ export default class {
      * @param {...*} any Any discord.js event properties
      *
      */
-    after() {
+    after(...args: any[]): void {
 
     }
 
@@ -47,7 +53,7 @@ export default class {
      * Runs after bot termination or reload.
      *
      */
-    exit() {
+    exit(): void {
 
     }
 }

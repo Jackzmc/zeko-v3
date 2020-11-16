@@ -4,7 +4,8 @@
 */
 import path from 'path'
 import Logger from '../Logger.js'
-import { Collection } from 'discord.js';
+import { Client, Collection } from 'discord.js';
+import Command, { CommandConfigOptions, CommandHelpOptions } from '../types/Command.js';
 
 let instance;
 //TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that
@@ -19,20 +20,34 @@ let instance;
  * @property {string} name - The registered name of the command
  * @property {types/Command} command - The actual command class
  */
+ 
+export interface RegisteredCommand {
+    config: CommandConfigOptions
+    help: CommandHelpOptions
+    group?: string
+    isCore: boolean
+    name: string
+    command: Command
+}
 
-export default class {
+export default class CommandManager {
     /**
      * Create a new CommandManager
      *
      * @param {Client} client The current discord.js client
      */
-    constructor(client) {
-        this.commands = new Collection();
-        this.aliases = new Collection();
-        this.groups = [];
+    #commands: Collection<string, RegisteredCommand>
+    #aliases: Collection<string, string>
+    #groups: string[]
+    #client: Client
+    #logger: Logger
+    constructor(client: Client) {
+        this.#commands = new Collection();
+        this.#aliases = new Collection();
+        this.#groups = [];
         
-        this.client = client;
-        this.logger = new Logger('CommandManager');
+        this.#client = client;
+        this.#logger = new Logger('CommandManager');
         instance = this;
     }
 
@@ -42,7 +57,7 @@ export default class {
      * @static
      * @returns {CommandManager} The current instance
      */
-     static getInstance() {
+     static getInstance() : CommandManager {
         return instance;
     }
 
@@ -52,17 +67,16 @@ export default class {
      * @param {string} name The display name of the command. Also used as ID
      * @param {boolean} isCore Is the plugin a core plugin? 
      * @param {string} [group="default"] The command's group or null/default for misc
-     * @returns {Promise}
+     * @returns {Promise<RegisteredCommand}
      */
-    registerCommand(name, isCore, group = "default") {
-        const _this = this;
+    registerCommand(name: string, isCore: boolean, group: string = "default") : Promise<RegisteredCommand> {
         return new Promise((resolve, reject) => {
-            const root =  path.join(_this.client.ROOT_DIR, isCore?'src/commands':'commands')
+            const root =  path.join(this.#client.ROOT_DIR, isCore?'src/commands':'commands')
             const filepath = group == "default" ? path.join(root, `${name}.js`) : path.join(root, `${group}/${name}.js`)
 
             import(`file://${filepath}`)
             .then(commandObject => {
-                const command = new commandObject.default(this.client, new Logger(`cmd/${name}`))
+                const command: Command = new commandObject.default(this.#client, new Logger(`cmd/${name}`))
                 if(!command.help || !command.run || typeof command.run !== "function" || typeof command.help !== "function") {
                     return reject(new Error("Invalid Command class: Missing valid 'run' or 'help' method"))
                 }
@@ -83,19 +97,17 @@ export default class {
                     command,
                     name: cmdName
                 }
-                this.commands.set(cmdName.toLowerCase(), registeredCommand);
+                this.#commands.set(cmdName.toLowerCase(), registeredCommand);
                 if(Array.isArray(help.name) && help.name.length > 0) {
                     help.name.forEach(alias => {
-                        this.aliases.set(alias.toLowerCase(), cmdName.toLowerCase())
+                        this.#aliases.set(alias.toLowerCase(), cmdName.toLowerCase())
                     })
                 }
-
                 //Add to list of groups.
-                if(group.trim().length > 0 && group !== "default" && !this.groups.includes(group)) {
-                    this.groups.push(group)
+                if(group.trim().length > 0 && group !== "default" && !this.#groups.includes(group)) {
+                    this.#groups.push(group)
                 }
-                resolve()
-            
+                resolve(registeredCommand)
             })
             .catch(err => reject(err))
         })
@@ -108,12 +120,12 @@ export default class {
      * @param {boolean} [includeHidden=false] Should hidden commands (cmd.config.hidden) be provided?
      * @returns {?RegisteredCommand}
      */
-    getCommand(name, includeHidden = false) {
-        const command = this.commands.get(name);
+    getCommand(name: string, includeHidden:boolean = false) : RegisteredCommand {
+        const command = this.#commands.get(name);
         if(!command) {
-            const alias = this.aliases.get(name);
+            const alias = this.#aliases.get(name);
             if(alias) {
-                const command = this.commands.get(alias)
+                const command = this.#commands.get(alias)
                 if(command && (includeHidden || !command.config.hidden)) {
                     return command
                 }else {
@@ -130,24 +142,21 @@ export default class {
     /**
      * Get a collection of commands
      *
-     * @param {boolean} grouped Should they be put in a object by group name?
      * @param {boolean} includeHidden Should hidden commands be provided?
-     * @param {boolean} onlyKeys True: Only provide keynames. False: Provide CommandContainer
      * @returns {RegisteredCommand} 
      */
-    getCommands(grouped, includeHidden, onlyKeys) {
-        if(grouped) {
-            let object = {}
-            this.commands.forEach((cmd,key) => {
-                const group = cmd.isCore ? 'core' : ((cmd.group === "default") ? 'misc' : cmd.group);
+    getCommandsGrouped(includeHidden?: boolean, onlyKeys?: boolean): { [group: string]: RegisteredCommand[] | string[] } {
+        let object = {}
+        this.#commands.forEach((cmd,key) => {
+            const group = cmd.isCore ? 'core' : ((cmd.group === "default") ? 'misc' : cmd.group);
 
-                if(!object[group]) object[group] = []
-                if(includeHidden || !cmd.config.hidden) object[group].push(onlyKeys?key:cmd);
-            })
-            return object;
-        }else{
-            return includeHidden ? this.commands.filter(v => !v.config.hidden) : this.commands
-        }
+            if(!object[group]) object[group] = []
+            if(includeHidden || !cmd.config.hidden) object[group].push(onlyKeys ? key : cmd);
+        })
+        return object;
+    }
+    getCommands(includeHidden?: boolean) : Collection<string, RegisteredCommand> {
+        return includeHidden ? this.#commands.filter(v => !v.config.hidden) : this.#commands
     }
 
     /**
@@ -155,24 +164,24 @@ export default class {
      *
      * @readonly
      */
-    get commandsCount() {
-        return this.commands.size;
+    get commandsCount() : number {
+        return this.#commands.size;
     }
     /**
      * Get the the total number of aliases registered
      *
      * @readonly
      */
-    get aliasesCount() {
-        return this.aliases.size;
+    get aliasesCount() : number {
+        return this.#aliases.size;
     }
     /**
      * Get the list of groups
      *
      * @returns {string[]} List of group names
      */
-    getGroups() {
-        return this.groups
+    getGroups() : string[] {
+        return this.#groups
     }
 
 }

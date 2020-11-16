@@ -10,13 +10,13 @@ const USE_12_HOUR = process.env.LOG_12_HOUR !== "undefined"
  * @class
  */
 export default class {
-
+    #mod: string;
     /**
      * Creates an instance of Logger.
      * @param {string} name The name to use for logging purposes
      */
-    constructor(name) {
-        this.mod = name
+    constructor(name: string) {
+        this.#mod = name
     }
 
     /**
@@ -24,8 +24,8 @@ export default class {
      *
      * @param {...*} args Any arguments to pass to log
      */
-    log(...args) {
-        console.log(`[${getDate()}] [${this.mod}]`, ...args)
+    log(...args: any[]): void {
+        console.log(`[${getDate()}] [${this.#mod}]`, ...args)
     }
 
     /**
@@ -33,24 +33,24 @@ export default class {
      *
      * @param {...*} args Any arguments to pass to log
      */
-    warn(...args) {
-        console.warn(chalk.yellow(`[${getDate()}] [WARN::${this.mod}]`,...args))
+    warn(...args: any[]): void {
+        console.warn(chalk.yellow(`[${getDate()}] [WARN::${this.#mod}]`,...args))
     }
     /**
      * Error log
      *
      * @param {...*} args Any arguments to pass to log
      */
-    error(...args) {
-        console.error(chalk.red(`[${getDate()}] [ERROR::${this.mod}]`), ...args)
+    error(...args: any[]): void {
+        console.error(chalk.red(`[${getDate()}] [ERROR::${this.#mod}]`), ...args)
     }
     /**
      *  Prints an error and terminates bot
      *
      * @param {...*} args Any arguments to pass to log
      */
-    severe(...args) {
-        console.error(chalk.red(`[${getDate()}] [SEVERE::${this.mod}]`), ...args)
+    severe(...args: any[]): void {
+        console.error(chalk.red(`[${getDate()}] [SEVERE::${this.#mod}]`), ...args)
         process.exit(1);
     }
     /**
@@ -58,8 +58,8 @@ export default class {
      *
      * @param {...*} args Any arguments to pass to log
      */
-    success(...args) {
-        console.info(chalk.green(`[${getDate()}] [INFO::${this.mod}]`), ...args)
+    success(...args: any[]): void {
+        console.info(chalk.green(`[${getDate()}] [INFO::${this.#mod}]`), ...args)
     }
 
     /**
@@ -67,9 +67,9 @@ export default class {
      *
      * @param {...*} args Any arguments to pass to log
      */
-    debug(...args) {
+    debug(...args: any[]): void {
         if(process.env.NODE_ENV !== "production") {
-            console.debug(`[${getDate()}] [DEBUG::${this.mod}]`, ...args)
+            console.debug(chalk.magenta(`[${getDate()}] [DEBUG::${this.#mod}]`), ...args)
         }
     }
 
@@ -78,12 +78,12 @@ export default class {
      *
      * @param {...*} args Any arguments to pass to log
      */
-    info(...args) {
-        console.info(`[${getDate()}] [INFO::${this.mod}]`, ...args)
+    info(...args: any[]): void {
+        console.info(chalk.cyan(`[${getDate()}] [INFO::${this.#mod}]`), ...args)
     }
 
 }
 
-function getDate() {
+function getDate() : string{
     return new Date().toLocaleTimeString('en-US', {hour12:USE_12_HOUR})
 }

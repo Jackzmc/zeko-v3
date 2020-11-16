@@ -1,10 +1,13 @@
+import { Client } from "discord.js";
+import Logger from '../../Logger.js'
 /**
  @module core:types/CoreEvent
  @desc The CoreEvent class, core events inherit
 */
 export default class {
-
-    constructor(client, logger) {
+    protected client: Client;
+    protected logger: Logger;
+    constructor(client: Client, logger: Logger) {
         this.client = client;
         this.logger = logger;
     }
@@ -15,7 +18,7 @@ export default class {
      *
      * @param {...*} any Any discord.js event properties
      */
-    event() {
+    every(...args: any[]) : Promise<boolean> | void {
         
     }
 
@@ -24,7 +27,7 @@ export default class {
      *
      * @param {...*} any Any discord.js event properties
      */
-     once() {
+    once(...args: any[]) : void{
 
-     }
+    }
 }

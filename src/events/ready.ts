@@ -1,4 +1,3 @@
-import got from 'got'
 import CoreEvent from '../core/types/CoreEvent.js'
 export default class extends CoreEvent {
     once(/* args */) {

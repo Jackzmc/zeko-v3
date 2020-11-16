@@ -3,9 +3,10 @@
  @description A collection of utilities to help development
 */
 
-import {inspect } from 'util';
+import { Client } from 'discord.js';
+import { inspect } from 'util';
 
-export default function(client) {
+export default function(client: Client) {
     const token_regex = new RegExp(`(${client.token})`,"g")
     return {
 
@@ -15,7 +16,7 @@ export default function(client) {
          * @param {string} text Text to clean
          * @returns {string} The cleaned text
          */
-        clean(text) {
+        clean(text: string) : string{
             if (typeof(text) !== "string")
                text = inspect(text,{depth:0})
             return text
@@ -31,7 +32,7 @@ export default function(client) {
          * @param {Number} precision The number of decimal points to keep
          * @returns {string} A human-readable filesize (ex: 20 MB, or 5 GB)
          */
-        formatBytes(a,b){
+        formatBytes(a: number, b: number): string {
             if(0==a)return"0 Bytes";var c=1024,d=b||2,e=["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"],f=Math.floor(Math.log(a)/Math.log(c));return parseFloat((a/Math.pow(c,f)).toFixed(d))+" "+e[f]
         }
     }

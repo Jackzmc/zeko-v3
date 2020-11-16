@@ -10,9 +10,10 @@ import SettingsManager from '../../managers/SettingsManager.js';
 
 import Logger from '../../Logger.js'
 import { promises as fs } from 'fs';
+import { Client } from 'discord.js';
 
  export default class CoreLoader {
-     constructor(client) {
+     constructor(client: Client) {
          const logger = new Logger('CoreLoader');
          try {
              //TODO: Wait for moduleloader to finish, load cmd/event, finally send token
@@ -24,11 +25,14 @@ import { promises as fs } from 'fs';
                      new EventLoader(client, new Logger("EventLoader")).loadEvents()
                  ])
              })
+             .catch(err => {
+                logger.severe('Failed to load modules', err)
+             })
              client.managers.SettingsManager = new SettingsManager(client);
  
              client.login(process.env.DISCORD_BOT_TOKEN)
          }catch(err) {
-             logger.servere('Manager loading failure:\n', err)
+             logger.severe('Manager loading failure:\n', err)
          }
          //CommandManager.Load()
      }
