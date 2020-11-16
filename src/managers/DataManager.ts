@@ -38,7 +38,7 @@ export default class DataManager {
     /**
      * Returns internal rethinkdb instance. Useful for using row() method.
      *
-     * @returns 
+     * 
      */
     getInternalRethink() {
         return this.r;

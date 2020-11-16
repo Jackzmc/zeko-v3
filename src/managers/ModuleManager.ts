@@ -64,12 +64,12 @@ export default class ModuleManager {
      */
 
     /**
-     * Register a {@link types/Module} in the ModuleManager
+     * Register a {@link Module} in the ModuleManager
      *
      * @param {string} name The name of the module to fetch
      * @param {boolean} [isCore=false] Is the module a core module?
      * @param {string} [group] The group (subfolder) of the module
-     * @returns {Promise<RegisteredModule} Resolves if success, rejects if err
+     * @returns {Promise<RegisteredModule>} Resolves if successly registered, rejects if err
      */
     registerModule(name: string, isCore: boolean = false, group?: string): Promise<RegisteredModule> {
         return new Promise(async(resolve, reject) => {
@@ -97,7 +97,7 @@ export default class ModuleManager {
     }
     
     /**
-     * Register a {@link types/Module} in the ModuleManager
+     * Register a {@link Module} in the ModuleManager
      *
      * @param {*} moduleClass the module class to attempt to register
      * @param {string} name Name of the module
