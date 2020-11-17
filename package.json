@@ -7,7 +7,7 @@
   "scripts": {
     "start": "tsc && node dist/index.js",
     "dev": "nodemon -e ts --exec \"yarn start || exit 1\"",
-    "doc": "typedoc --out docs src *.ts"
+    "doc": "typedoc --out docs src index.ts"
   },
   "author": "Jackzmc",
   "license": "ISC",
@@ -24,7 +24,6 @@
     "rethinkdbdash": "^2.3.31"
   },
   "devDependencies": {
-    "better-docs": "^2.3.2",
     "minami": "^1.2.3"
   }
 }

@@ -3,6 +3,7 @@ import getopts, { ParsedOptions } from 'getopts'
 import { CommandFlag, CommandFlagOptions, FlagType } from '../types/Command.js'
 import { Client, Message } from 'discord.js';
 import Logger from '../Logger.js'
+import { RegisteredCommand } from '../managers/CommandManager';
 
 export default class extends CoreEvent {
     #cmdManager: any;
@@ -19,12 +20,12 @@ export default class extends CoreEvent {
                 
                 if(/\s/.test(this.client.PREFIX)) args.shift(); //shift if prefix has space
                 const command_name: string = /\s/.test(this.client.PREFIX) ? args.shift().toLowerCase() : args.shift().slice(this.client.PREFIX.length).toLowerCase();
-                const cmd: any = this.#cmdManager.getCommand(command_name, true)
+                const cmd: RegisteredCommand = this.#cmdManager.getCommand(command_name, true)
                 if(cmd) {
                     try {
                         //parse arguments with getopts package (--flag)
-                        const flags_options: FlagParseResult = parseOptions(cmd.config.flags);
-                        const options: ParsedOptions = getopts(msg.cleanContent.split(/ +/g).slice(1), {
+                        const flags_options: FlagParseResult = parseOptions(cmd.help.flags);
+                        const options: ParsedOptions = getopts(msg.content.split(/ +/g).slice(1), {
                             boolean: flags_options.boolean,
                             string: flags_options.string, //includes numbers
                             alias: flags_options.aliases,
@@ -34,7 +35,13 @@ export default class extends CoreEvent {
                         let flags: FlagList = {};
                         //do a final process, parsing number flags as numbers from string, and removing aliases
                         const names = Object.keys(flags_options.aliases).concat(flags_options.boolean,flags_options.string)
+                        if(process.env.DEBUG_FLAGS) {
+                            this.logger.debug('names', names)
+                            this.logger.debug('flag_options', flags_options)
+                            this.logger.debug('options', options)
+                        }
                         for(const key in options) {
+                            
                             if(key === "_") continue;
                             //flags_options.number is object of default values
                             if(!names.includes(key)) continue; //ignore aliases, dont use them
@@ -54,7 +61,7 @@ export default class extends CoreEvent {
                             //const help = cmdManager.getCommand('help').generateHelpCommand(client,cmd);
                             return msg.channel.send(`<HELP IN DEVELOPMENT RIP>`)
                         }
-                        Promise.resolve(cmd.command.run(msg, newArgs, options))
+                        Promise.resolve(cmd.command.run(msg, newArgs, flags))
                         .then(() => resolve(true))
                         .catch(err => {
                             this.logger.warn(`Command ${cmd.name} had an error:`, err.message)
@@ -79,8 +86,8 @@ function parseOptions(flags: CommandFlagOptions = {}) : FlagParseResult {
 	let result = {
 		string: [],
 		number: {},
-		boolean: ['help'],
-		aliases: {help:'h'},
+		boolean: [ 'help' ],
+		aliases: { help: 'h'},
 		defaults: {
 			help: false
 		}
@@ -91,15 +98,15 @@ function parseOptions(flags: CommandFlagOptions = {}) : FlagParseResult {
         switch(flag.type) {
             case FlagType.Number:
                 result.string.push(key)
-                result.number[key] = flag.default
+                result.number[key] = flag.default || 0
                 break;
             case FlagType.Boolean: 
                 result.boolean.push(key)
-                if(flag.default) result.defaults[key] = flag.default
+                result.defaults[key] = flag.default || false
                 break;
             case FlagType.String:
                 result.string.push(key)
-                if(flag.default) result.defaults[key] = flag.default
+                result.defaults[key] = flag.default || null
                 break;
         }
         if(flag.aliases) result.aliases[key] = flag.aliases
