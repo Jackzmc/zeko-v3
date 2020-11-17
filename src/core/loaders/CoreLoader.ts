@@ -26,12 +26,8 @@ export default class CoreLoader {
             //TODO: Wait for moduleloader to finish, load cmd/event, finally send token
             internalCustomCheck()
             moduleLoader.loadModules()
-                .then(() => {
-                    Promise.all([
-                        commandLoader.loadCommands(),
-                        eventLoader.loadEvents()
-                    ])
-                })
+                .then(() => commandLoader.loadCommands())
+                .then(() => eventLoader.loadEvents())
                 .catch(err => {
                     logger.severe('Failed to load modules', err)
                 })
@@ -75,3 +71,4 @@ function internalCustomCheck() {
         } )
     } )
 }
+

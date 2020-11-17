@@ -40,6 +40,7 @@ export default class {
                     eventName.pop();
                     try {
                         //TODO: refactor to just have this.#manager.register((Core)Event, name);
+                        //Also possible reason event loader not stating numbers correctly is the import() promise
                         import(`file://${filepath}/${file}`)
                         .then(eventObject => {
                             //Test for invalid. Only log if there IS content (don't error on empty files)
