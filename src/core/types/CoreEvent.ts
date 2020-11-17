@@ -30,4 +30,8 @@ export default class {
     once(...args: any[]) : void{
 
     }
+
+    exit(): void {
+        
+    }
 }

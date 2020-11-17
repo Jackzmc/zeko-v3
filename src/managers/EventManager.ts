@@ -196,4 +196,17 @@ export default class EventManager {
         }
     }
 
+    exit() {
+        this.#events.core.forEach(event => {
+            if(event.event.exit) {
+                event.event.exit()
+            }
+        })
+        this.#events.custom.forEach(event => {
+            if(event.event.exit) {
+                event.event.exit()
+            }
+        })
+    }
+
 }

@@ -203,35 +203,22 @@ export default class ModuleManager {
 
     }
 
-    /*_reload(module) {
-        const _this = this;
-        return new Promise(async(resolve,reject) => {
-            try {
-                //delete this.modules[module.config.name];
-                const _logger = new Logger(module.config.name,{type:'module'})
-                if(module.exit) await module.exit(this.client,_logger);
-                
-                const filepath = path.join(_this.client.ROOT_DIR,module.config.core?"src/modules/":"modules/",`${module.config.name}.js`)
-                try {
-                    delete require.cache[require.resolve(filepath)];
-                    const newModule = require(filepath)
-                    if(!newModule.config) newModule.config = {}
-                    newModule.config.name = module.config.name;
-                    newModule.config.core = module.config.core;
-                    //do logic on register modules
-                    _this.modules[module.config.name] = newModule;
-                    if(newModule.init) await newModule.init(_this.client,_logger);
-                    resolve();
-                } catch(err) {
-                    if(err.code === 'ENOENT') {
-                        reject(new Error("Module does not exist"))
-                    }else{
-                        reject(err);
-                    }
-                }
-            }catch(err) {
-                reject(err);   
+    
+    /**
+     * Fired when the bot is shutting down. Runs exit code in any module that has it.
+     *
+     * @memberof ModuleManager
+     */
+    exit() {
+        this.#modules.core.forEach(module => {
+            if(module.module.exit) {
+                module.module.exit();
             }
         })
-    }*/
+        this.#modules.custom.forEach(module => {
+            if(module.module.exit) {
+                module.module.exit();
+            }
+        })
+    }
 }

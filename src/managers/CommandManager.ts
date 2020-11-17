@@ -184,4 +184,11 @@ export default class CommandManager {
         return this.#groups
     }
 
+    exit() {
+        this.#commands.forEach(command => {
+            if(command.command.exit) {
+                command.command.exit()
+            }
+        })
+    }
 }
