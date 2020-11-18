@@ -1,8 +1,10 @@
-import Command from "../types/Command.js";
+import Command, { FlagList } from "../types/Command.js";
+import { Message } from 'discord.js';
+import { RegisteredCommand } from '../managers/CommandManager';
 const PREFIX_REGEX = new RegExp(/%(prefix|p)%/,"g")
 
 export default class extends Command {
-    run(msg, args, flags) {
+    run(msg: Message, args: string[], flags: FlagList) {
         if(args[0]) {
             const cmd = this.client.managers.CommandManager.getCommand(args[0].toLowerCase(), false);
             if(!cmd) return msg.channel.send("Couldn't find that command");
@@ -18,7 +20,7 @@ export default class extends Command {
                 //send embed of commands, only if well there is commands
                 msg.author.send({embed:{
                     title:`${group_name} Commands`,
-                    description: cmds.map(cmd => {
+                    description: cmds.map((cmd: RegisteredCommand) => {
                         this.logger.debug
                         const desc = cmd.help.description.replace(/\*\*/g,'\\**')
                         return `**${cmd.name}** - ${desc}`
@@ -44,7 +46,7 @@ export default class extends Command {
         }
     }
 
-    generateHelpCommand(cmd){
+    generateHelpCommand(cmd: RegisteredCommand) {
         let fields = [];
         //print information about flags if not hidden
         if(cmd.help.flags && !cmd.config.hideFlags) {
@@ -74,8 +76,8 @@ export default class extends Command {
             fields = fields.concat(cmd.help.fields)
         } 
         //add example field, filling in %prefix%
-        if(cmd.help.example) {
-            const value = Array.isArray(cmd.help.example) ? cmd.help.example.join("\n") : cmd.help.example
+        if(cmd.help.examples) {
+            const value = Array.isArray(cmd.help.examples) ? cmd.help.examples.join("\n") : cmd.help.examples
             fields.push({name:'Examples',value:value.replace(PREFIX_REGEX,this.client.PREFIX)});
         }else if(cmd.help.examples) {
             const value = Array.isArray(cmd.help.examples) ? cmd.help.examples.join("\n") : cmd.help.examples
@@ -91,7 +93,7 @@ export default class extends Command {
     }
 }
 
-function getType(value) {
+function getType(value: any) {
 	if(typeof value === "object") {
 		return "Object"
 	}else if(value === String || (typeof value === "string" && value.toLowerCase() === "string")) {
