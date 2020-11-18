@@ -107,6 +107,11 @@ export default class CommandManager {
         return registeredCommand;
     }
 
+
+    unregister(command: string): boolean {
+        return this.#commands.delete(command);
+    }
+
     /**
      * Get a command by the name
      *

@@ -32,6 +32,38 @@ export default class{
         this.#logger = logger;
         this.#manager = new CommandManager(client)
         client.managers.CommandManager = this.#manager;
+
+        this.setupWatcher()
+    }
+    
+    setupWatcher() {
+        Chokidar.watch(folders, {
+            ignored: /(^|[\/\\])\../,
+            ignoreInitial: true,
+            persistent: true
+        })
+        .on('add', filepath => this.#logger.debug('Command was added:', filepath))
+        .on('change', (filepath) => {
+            const file = filepath.replace(/^.*[\\\/]/, '')
+            if(file.split(".").slice(-1)[0] !== "js") return;
+            if(file.startsWith("_")) return;
+            const filename = file.split(".").slice(0,-1).join(".")
+            this.#logger.debug(`change detected | ${filename} | ${filepath}`)
+
+            setTimeout(async() => {
+                try {
+                    //delete command from map, load it, initalize it, and then add it back if successful
+                    const result = await CommandManager.getInstance().reload(file)
+                    if(result) {
+                        this.#logger.info(`Watcher: Reloaded command ${filename} successfully`)
+                    }else{
+                        this.#logger.debug(`Command ${file} was not reloaded: 404`)
+                    }
+                }catch(err) {
+                    this.#logger.error(`Watcher: ${filename} Failed Reload: ${process.env.PRODUCTION?err.message:err.stack}`)
+                }
+            },500)
+        })
     }
     async load() {
         const promises: Promise<CommandBit>[] = [];
