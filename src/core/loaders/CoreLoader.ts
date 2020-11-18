@@ -15,6 +15,7 @@ import { Client } from 'discord.js';
 export default class CoreLoader {
     #logger: Logger;
     #client: Client;
+    #shuttingDown: boolean = false
     constructor(client: Client ) {
         const logger = new Logger( 'CoreLoader' );
         this.#logger = logger;
@@ -34,9 +35,7 @@ export default class CoreLoader {
             client.managers.SettingsManager = new SettingsManager(client);
             client.login(process.env.DISCORD_BOT_TOKEN)
             process.on('exit', (code) => {
-                if(code == 0) {
-                    this.gracefulShutdown(false);
-                }
+                this.gracefulShutdown(false);
             })
             process.on('SIGTERM', () => this.gracefulShutdown(true))
             process.on('SIGINT', () => this.gracefulShutdown(true))
@@ -46,11 +45,14 @@ export default class CoreLoader {
         }
     }
     gracefulShutdown(exit: boolean) {
-        this.#logger.info(`Detected shutdown signal. Shutting down managers...`)
-        this.#client.managers.ModuleManager.exit();
-        this.#client.managers.CommandManager.exit();
-        this.#client.managers.EventManager.exit();
-        if(exit) process.exit(0)
+        if(!this.#shuttingDown) {
+            this.#shuttingDown = true;
+            this.#logger.info(`Detected shutdown signal. Shutting down managers...`)
+            this.#client.managers.ModuleManager.exit();
+            this.#client.managers.CommandManager.exit();
+            this.#client.managers.EventManager.exit();
+            if(exit) process.exit(0)
+        }
     }
 }
 function internalCustomCheck() {
