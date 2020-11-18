@@ -31,6 +31,9 @@ export default class extends CoreEvent {
                 const command_name: string = /\s/.test(this.client.PREFIX) ? args.shift().toLowerCase() : args.shift().slice(this.client.PREFIX.length).toLowerCase();
                 const cmd: RegisteredCommand = this.#cmdManager.getCommand(command_name, true)
                 if(cmd) {
+                    if(cmd.config.guildOnly && msg.channel.type === "dm") {
+                        return msg.channel.send('This commanad only works in guilds.')
+                    }
                     try {
                         //parse arguments with getopts package (--flag)
                         const flags_options: FlagParseResult = parseOptions(cmd.help.flags);

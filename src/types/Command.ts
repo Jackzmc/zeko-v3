@@ -8,7 +8,8 @@ import Logger from '../Logger'
 export interface CommandConfigOptions {
     usageIfNotSet?: boolean,
     hideFlags?: boolean
-    hidden?: boolean
+    hidden?: boolean,
+    guildOnly?: boolean
 }
 export interface CommandHelpOptions {
     name: string | string[],
