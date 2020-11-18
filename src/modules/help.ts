@@ -1,15 +1,8 @@
-import Logger from "../Logger.js";
-import { Client } from 'discord.js';
 import Module from '../types/Module.js';
 import { RegisteredCommand } from '../managers/CommandManager.js';
 const PREFIX_REGEX = new RegExp(/%(prefix|p)%/,"g")
 
 export default class HelpModule extends Module {
-    #client: Client;
-    constructor(client: Client, logger: Logger) {
-        super(client, logger);
-        this.#client = client;
-    }
     generateHelpCommand(cmd: RegisteredCommand) {
         let fields = [];
         //print information about flags if not hidden
