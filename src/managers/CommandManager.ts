@@ -74,7 +74,7 @@ export default class CommandManager {
             const root =  path.join(this.#client.ROOT_DIR, isCore?'src/commands':'commands')
             const filepath = group == "default" ? path.join(root, `${name}.js`) : path.join(root, `${group}/${name}.js`)
 
-            import(`file://${filepath}`)
+            import(`file://${filepath}?d=${Date.now()}`)
             .then(commandObject => {
                 const command: Command = new commandObject.default(this.#client, new Logger(`cmd/${name}`))
                 if(!command.help || !command.run || typeof command.run !== "function" || typeof command.help !== "function") {
@@ -111,6 +111,27 @@ export default class CommandManager {
             })
             .catch(err => reject(err))
         })
+    }
+
+    
+    reload(commandName: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            const registeredCommand = this.#commands.get(commandName);
+            if(registeredCommand) {
+                this.unregister(commandName)
+                this.registerCommand(commandName, registeredCommand.isCore, registeredCommand.group)
+                .then(() => resolve(true))
+                .catch((err: Error) => reject(err))
+            }else{
+                resolve(false);
+            }
+        })
+        
+    }
+
+
+    unregister(command: string): boolean {
+        return this.#commands.delete(command);
     }
 
     /**
