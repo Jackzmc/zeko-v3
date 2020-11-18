@@ -89,6 +89,7 @@ export default class ModuleManager {
 
                 const type = isCore ? 'core' : 'custom'
                 const registeredName = name.toLowerCase().replace('.js', '');
+
                 this.#modules[type].set(registeredName, registeredModule);
                 resolve(registeredModule)
             })
@@ -133,7 +134,11 @@ export default class ModuleManager {
      * @param {string} query The name of the module
      * @returns {?RegisteredModule}
      */
-    getCustomModule(query: string) : RegisteredModule {
+    getCustomModule(query: string, moduleOnly: boolean = false) : RegisteredModule | Module {
+        if(moduleOnly) {
+            const registered = this.#modules.custom.get(query.toLowerCase());
+            return registered ? registered.module : null;
+        }
         return this.#modules.custom.get(query.toLowerCase());
     }
 
@@ -143,7 +148,11 @@ export default class ModuleManager {
      * @param {string} query The name of the module
      * @returns {?RegisteredModule}
      */
-    getCoreModule(query: string) : RegisteredModule {
+    getCoreModule(query: string, moduleOnly: boolean = false) : RegisteredModule | Module {
+        if(moduleOnly) {
+            const registered = this.#modules.core.get(query.toLowerCase());
+            return registered ? registered.module : null;
+        }
         return this.#modules.core.get(query.toLowerCase());
     }
 
