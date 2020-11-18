@@ -216,16 +216,21 @@ export default class ModuleManager {
      *
      * @memberof ModuleManager
      */
-    exit() {
-        this.#modules.core.forEach(module => {
-            if(module.module.exit) {
-                module.module.exit();
-            }
-        })
-        this.#modules.custom.forEach(module => {
-            if(module.module.exit) {
-                module.module.exit();
-            }
+    exit(waitable: boolean) {
+        return new Promise((resolve) => {
+            const promises = [];
+            this.#modules.core.forEach(module => {
+                if(module.module.exit) {
+                    promises.push(Promise.resolve(module.module.exit(waitable)));
+                }
+            })
+            this.#modules.custom.forEach(module => {
+                if(module.module.exit) {
+                    promises.push(Promise.resolve(module.module.exit(waitable)));
+                }
+            })
+            Promise.all(promises)
+            .then(() => resolve())
         })
     }
 }

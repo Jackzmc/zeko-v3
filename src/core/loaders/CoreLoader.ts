@@ -48,10 +48,13 @@ export default class CoreLoader {
         if(!this.#shuttingDown) {
             this.#shuttingDown = true;
             this.#logger.info(`Detected shutdown signal. Shutting down managers...`)
-            this.#client.managers.ModuleManager.exit();
-            this.#client.managers.CommandManager.exit();
-            this.#client.managers.EventManager.exit();
-            if(exit) process.exit(0)
+            Promise.all([
+                this.#client.managers.ModuleManager.exit(exit),
+                this.#client.managers.CommandManager.exit(exit),
+                this.#client.managers.EventManager.exit(exit)
+            ]).then(() => {
+                if(exit) process.exit(0)
+            })
         }
     }
 }

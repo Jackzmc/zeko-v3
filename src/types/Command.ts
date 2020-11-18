@@ -83,5 +83,12 @@ export default abstract class Command {
      */
     abstract help(): CommandHelpOptions;
 
-    exit?(): void;
+
+    /**
+     * Called when the bot is shutting down.
+     *
+     * @param {boolean} [waitable] Can the bot wait for any cleanup, or is it shutting down right now. (Async or not)
+     * @memberof Command
+     */
+    exit?(waitable?: boolean): void | Promise<any>;
 }

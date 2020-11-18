@@ -196,16 +196,21 @@ export default class EventManager {
         }
     }
 
-    exit() {
-        this.#events.core.forEach(event => {
-            if(event.event.exit) {
-                event.event.exit()
-            }
-        })
-        this.#events.custom.forEach(event => {
-            if(event.event.exit) {
-                event.event.exit()
-            }
+    exit(waitable: boolean) {
+        return new Promise((resolve) => {
+            const promises = [];
+            this.#events.core.forEach(event => {
+                if(event.event.exit) {
+                    promises.push(Promise.resolve(event.event.exit(waitable)))
+                }
+            })
+            this.#events.custom.forEach(event => {
+                if(event.event.exit) {
+                    promises.push(Promise.resolve(event.event.exit(waitable)))
+                }
+            })
+            Promise.all(promises)
+            .then(() => resolve())
         })
     }
 

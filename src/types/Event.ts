@@ -33,7 +33,7 @@ export default class {
      *
      * @returns {Promise<boolean>} Return a promised true to cancel event
      */
-    before(...args: any[]): Promise<boolean> | void {
+    before?(...args: any[]): Promise<boolean> | void {
         return new Promise((resolve,reject) => {
             resolve(false)
         })
@@ -45,15 +45,14 @@ export default class {
      * @param {...*} any Any discord.js event properties
      *
      */
-    after(...args: any[]): void {
+    after?(...args: any[]): void {
 
     }
 
     /**
      * Runs after bot termination or reload.
      *
+     * @param {boolean} [waitable] Can the bot wait for any cleanup, or is it shutting down right now. (Async or not)
      */
-    exit(): void {
-
-    }
+    exit?(waitable: boolean): void | Promise<any>;
 }

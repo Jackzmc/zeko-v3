@@ -37,8 +37,7 @@ export default class Module {
     /**
      * Fired on bot exit or module reload
      *
+     * * @param {boolean} [waitable] Can the bot wait for any cleanup, or is it shutting down right now. (Async or not)
      */
-    exit(): void {
-
-    }
+    exit?(waitable: boolean): void | Promise<any>;
 }

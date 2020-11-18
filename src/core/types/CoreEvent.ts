@@ -31,7 +31,5 @@ export default class {
 
     }
 
-    exit(): void {
-        
-    }
+    exit?(waitable?: boolean): void | Promise<any>;
 }
