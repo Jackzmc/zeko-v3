@@ -3,13 +3,22 @@ import getopts, { ParsedOptions } from 'getopts'
 import { CommandFlag, CommandFlagOptions, FlagType } from '../types/Command.js'
 import { Client, Message } from 'discord.js';
 import Logger from '../Logger.js'
-import { RegisteredCommand } from '../managers/CommandManager';
+import { RegisteredCommand } from '../managers/CommandManager.js';
+import ModuleManager from '../managers/ModuleManager.js';
+import HelpModule from '../modules/help.js';
 
 export default class extends CoreEvent {
     #cmdManager: any;
+    #generateHelpCommand: Function
     constructor(client: Client, logger: Logger) {
         super(client, logger);
         this.#cmdManager = client.managers.CommandManager;
+        const helpModule = ModuleManager.getInstance().getCoreModule("help", true) as HelpModule
+        if(helpModule) {
+            this.#generateHelpCommand = helpModule.generateHelpCommand
+        }else{
+            logger.warn('Could not find help module, help method disabled.');
+        }
     }
     every(msg: Message): Promise<boolean> {
         return new Promise((resolve, reject) => {
@@ -59,7 +68,12 @@ export default class extends CoreEvent {
                         //show help message if flag: help, or no args & usageIfNotSet is true
                         if(options.help || (cmd.config.usageIfNotSet && newArgs.length == 0)) {
                             //const help = cmdManager.getCommand('help').generateHelpCommand(client,cmd);
-                            return msg.channel.send(`<HELP IN DEVELOPMENT RIP>`)
+                            if(this.#generateHelpCommand) {
+                                this.logger.debug(this.#generateHelpCommand(cmd).embed.fields)
+                                return msg.channel.send(this.#generateHelpCommand(cmd))
+                            }else{
+                                return msg.channel.send("Could not print help command at this time.")
+                            }
                         }
                         Promise.resolve(cmd.command.run(msg, newArgs, flags))
                         .then(() => resolve(true))

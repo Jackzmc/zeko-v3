@@ -25,5 +25,6 @@
         "modules/**/*",
         "discord.d.ts", 
         "index.ts"
-    ]
+    ],
+    "baseUrl": "."
 }
