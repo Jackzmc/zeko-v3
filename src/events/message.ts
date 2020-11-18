@@ -21,7 +21,7 @@ export default class extends CoreEvent {
         }
     }
     every(msg: Message): Promise<boolean> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if(msg.author.bot) return resolve(true); //Ignore bots.
             if(msg.content.startsWith(this.client.PREFIX)) {
                 const args = msg.content.split(/\s+/g);
@@ -72,7 +72,6 @@ export default class extends CoreEvent {
                         if(options.help || (cmd.config.usageIfNotSet && newArgs.length == 0)) {
                             //const help = cmdManager.getCommand('help').generateHelpCommand(client,cmd);
                             if(this.#generateHelpCommand) {
-                                this.logger.debug(this.#generateHelpCommand(cmd).embed.fields)
                                 return msg.channel.send(this.#generateHelpCommand(cmd))
                             }else{
                                 return msg.channel.send("Could not print help command at this time.")

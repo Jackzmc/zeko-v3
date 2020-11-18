@@ -83,7 +83,7 @@ export default class {
                     return 0;
                 })
                 .forEach(moduleBit => {
-                    this.#manager.register(moduleBit.module, moduleBit.name, moduleBit.group)
+                    this.#manager.register(moduleBit.module, moduleBit.name, moduleBit.group, moduleBit.isCore)
                 })
             })
             .then(() => {

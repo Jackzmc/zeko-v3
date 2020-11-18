@@ -8,8 +8,7 @@ import path from 'path'
 import Logger from '../Logger.js'
 import Module from '../types/Module.js';
 
-let instance
-//TODO: change registerModule(String name, ...) to registerModule(Module module, ...)
+let instance: any;
  
 /**
  * @typedef {Object} RegisteredModule
@@ -17,10 +16,10 @@ let instance
  * @property {types/Module} module - The actual module class
  */
 
- export interface RegisteredModule {
+export interface RegisteredModule {
     group?: string
     module: Module
- }
+}
 
 
 export default class ModuleManager {
@@ -89,7 +88,6 @@ export default class ModuleManager {
 
                 const type = isCore ? 'core' : 'custom'
                 const registeredName = name.toLowerCase().replace('.js', '');
-
                 this.#modules[type].set(registeredName, registeredModule);
                 resolve(registeredModule)
             })
