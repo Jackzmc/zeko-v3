@@ -13,7 +13,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default class DataManager {
-    r: unknown;
+    #r: unknown;
     #logger: Logger;
     /**
      *  Creates a new rethinkdb instance, with table selected
@@ -22,7 +22,7 @@ export default class DataManager {
      */
     constructor(table: string = 'data') {
         r.tableCreate(table)
-        this.r = r;
+        this.#r = r;
         const tableInstance = r.table(table)
 
         fs.mkdir(DataManager.getDataDirectory(), () => {})
@@ -31,7 +31,7 @@ export default class DataManager {
         return tableInstance;
     }
 
-    get instance() {
+    get instance(): any {
         return r;
     }
 
@@ -40,8 +40,8 @@ export default class DataManager {
      *
      * 
      */
-    getInternalRethink() {
-        return this.r;
+    getInternalRethink(): any {
+        return this.#r;
     }
 
     /**
