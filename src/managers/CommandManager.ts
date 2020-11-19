@@ -184,7 +184,7 @@ export default class CommandManager {
         return this.#groups
     }
 
-    exit(waitable: boolean) {
+    exit(waitable: boolean): Promise<void>  {
         return new Promise((resolve) => {
             const promises = [];
             this.#commands.forEach(command => {

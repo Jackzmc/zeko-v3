@@ -196,7 +196,7 @@ export default class EventManager {
         }
     }
 
-    exit(waitable: boolean) {
+    exit(waitable: boolean): Promise<void>  {
         return new Promise((resolve) => {
             const promises = [];
             this.#events.core.forEach(event => {

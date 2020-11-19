@@ -216,7 +216,7 @@ export default class ModuleManager {
      *
      * @memberof ModuleManager
      */
-    exit(waitable: boolean) {
+    exit(waitable: boolean): Promise<void> {
         return new Promise((resolve) => {
             const promises = [];
             this.#modules.core.forEach(module => {
