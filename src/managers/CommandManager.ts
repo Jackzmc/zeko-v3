@@ -184,21 +184,17 @@ export default class CommandManager {
         return this.#groups
     }
 
-    exit(waitable: boolean): Promise<void>  {
-        return new Promise((resolve) => {
-            const promises = [];
-            this.#commands.forEach(command => {
-                if(command.command.exit) {
-                    if(waitable) {
-                        promises.push(Promise.resolve(command.command.exit(waitable)))
-                    }else{
-                        command.command.exit(waitable)
-                    }
+    exit(waitable: boolean): Promise<void[]>  {
+        const promises = [];
+        this.#commands.forEach(command => {
+            if(command.command.exit) {
+                if(waitable) {
+                    promises.push(Promise.resolve(command.command.exit(waitable)))
+                }else{
+                    command.command.exit(waitable)
                 }
-            })
-            Promise.all(promises)
-            .then(() => resolve())
+            }
         })
-       
+        return Promise.all(promises)
     }
 }

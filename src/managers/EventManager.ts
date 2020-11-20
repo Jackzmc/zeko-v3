@@ -196,22 +196,19 @@ export default class EventManager {
         }
     }
 
-    exit(waitable: boolean): Promise<void>  {
-        return new Promise((resolve) => {
-            const promises = [];
-            this.#events.core.forEach(event => {
-                if(event.event.exit) {
-                    promises.push(Promise.resolve(event.event.exit(waitable)))
-                }
-            })
-            this.#events.custom.forEach(event => {
-                if(event.event.exit) {
-                    promises.push(Promise.resolve(event.event.exit(waitable)))
-                }
-            })
-            Promise.all(promises)
-            .then(() => resolve())
+    async exit(waitable: boolean): Promise<void[]>  {
+        const promises = [];
+        this.#events.core.forEach(event => {
+            if(event.event.exit) {
+                promises.push(Promise.resolve(event.event.exit(waitable)))
+            }
         })
+        this.#events.custom.forEach(event => {
+            if(event.event.exit) {
+                promises.push(Promise.resolve(event.event.exit(waitable)))
+            }
+        })
+        return Promise.all(promises)
     }
 
 }

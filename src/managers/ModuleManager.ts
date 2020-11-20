@@ -216,21 +216,18 @@ export default class ModuleManager {
      *
      * @memberof ModuleManager
      */
-    exit(waitable: boolean): Promise<void> {
-        return new Promise((resolve) => {
-            const promises = [];
-            this.#modules.core.forEach(module => {
-                if(module.module.exit) {
-                    promises.push(Promise.resolve(module.module.exit(waitable)));
-                }
-            })
-            this.#modules.custom.forEach(module => {
-                if(module.module.exit) {
-                    promises.push(Promise.resolve(module.module.exit(waitable)));
-                }
-            })
-            Promise.all(promises)
-            .then(() => resolve())
+    async exit(waitable: boolean): Promise<void[]> {
+        const promises = [];
+        this.#modules.core.forEach(module => {
+            if(module.module.exit) {
+                promises.push(Promise.resolve(module.module.exit(waitable)));
+            }
         })
+        this.#modules.custom.forEach(module => {
+            if(module.module.exit) {
+                promises.push(Promise.resolve(module.module.exit(waitable)));
+            }
+        })
+        return Promise.all(promises)
     }
 }
