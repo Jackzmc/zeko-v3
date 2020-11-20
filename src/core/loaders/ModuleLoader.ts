@@ -32,104 +32,70 @@ export default class {
         this.#manager = new ModuleManager(client);
         client.managers.ModuleManager = this.#manager;
     }
-    async loadModules() {
-        return new Promise(async(resolve, reject) => {
-            const promises: Promise<ModuleBit>[] = []
-            for(let i = 0; i < folders.length; i++) {
-                const isCore = i == 0
-                const folder = folders[i];
-                let filepath = path.join(this.#client.ROOT_DIR, folder);
-                //read the folder path, and get dirs. Same as commands fetching basically
-                await fs.readdir(filepath, { withFileTypes: true })
-                .then(files => {
-                    files.forEach(dirent => {
-                        if(dirent.isDirectory()) {
-                            const group = dirent.name;
-                            filepath = path.join(filepath, group);
-                            fs.readdir(filepath)
-                            .then(groupFiles => {
-                                groupFiles.forEach(file => {
-                                    if(file.split(".").slice(-1)[0] !== "js") return;
-                                    if(file.startsWith("_")) return;
-
-                                    const bit = loadModule(filepath, file, group, isCore);
-                                    if(bit) promises.push(bit);
-                                    
-                                })
-                            })
-                            .catch(err => {
-                                this.#logger.error(`Loading group ${dirent.name} failed:\n`, err);
-                            })
-                        }else {
-                            const file = dirent.name;
-                            if(file.split(".").slice(-1)[0] !== "js") return;
-                            if(file.startsWith("_")) return;
-
-                            const bit = loadModule(filepath, file, null, isCore);
-                            if(bit) promises.push(bit);
+    async loadModules(): Promise<void> {
+        const promises: Promise<ModuleBit>[] = [];
+        for(const folder of folders) {
+            const isCore = folder.startsWith("src/")
+            let filepath = path.join(this.#client.ROOT_DIR, folder);
+            try {
+                const files = await fs.readdir(filepath, { withFileTypes: true})
+                for(const dirent of files) {
+                    //If it is a directory, it will be a group
+                    let group = null;
+                    if(dirent.isDirectory()) {
+                        group = dirent.name;
+                        const _filepath = path.join(filepath, group);
+                        const folderFiles = await fs.readdir(_filepath);
+                        for(const filename of folderFiles) {
+                            promises.push(loadModule(_filepath, filename, group, isCore))
                         }
-                    });
-                }).catch(err => {
-                    if(err.code === "ENOENT") {
-                        this.#logger.warn(`'${folder}' directory does not exist.`)
-                    }else {
-                        this.#logger.error(`Loading ${folder} failed:\n`, err);
+                    }else{
+                        promises.push(loadModule(filepath, dirent.name, group, isCore));
                     }
-                })
+                }
+            }catch(err) {
+                if(err.code === "ENOENT") {
+                    this.#logger.warn(`'${folder}' directory does not exist.`)
+                }else {
+                    this.#logger.error(`Loading ${folder} failed:\n`, err);
+                }
             }
-            Promise.all(promises)
-            .then(moduleBits => {
-                moduleBits.sort((a: ModuleBit, b: ModuleBit) => {
-                    if(!a.config.loadLate && b.config.loadLate) return -1;
-                    if(a.config.loadLate && !b.config.loadLate) return 1;
-                    return 0;
-                })
-                .forEach(moduleBit => {
-                    this.#manager.register(moduleBit.module, moduleBit.name, moduleBit.group, moduleBit.isCore)
-                })
+        }
+        try {
+            let moduleBits = await Promise.all(promises)
+            moduleBits = moduleBits
+            .filter(bit => bit)
+            .sort((a: ModuleBit, b: ModuleBit) => {
+                if(!a.config.loadLate && b.config.loadLate) return -1;
+                if(a.config.loadLate && !b.config.loadLate) return 1;
+                return 0;
             })
-            .then(() => {
-                this.#logger.success(`Loaded ${this.#manager.coreLoaded} core modules, ${this.#manager.customLoaded} custom modules`)
-                resolve()
-            }).catch(err => reject(err))
-            /*
-            Promise.all(promises)
-            .then(() => {
-                this.#logger.success(`Loaded ${this.#manager.coreLoaded} core modules, ${this.#manager.customLoaded} custom modules`)
-            })
-            .finally(() => resolve())*/
-        })
+            await Promise.all(moduleBits.map(async(moduleBit) => {
+                await this.#manager.register(moduleBit.module, moduleBit.name, moduleBit.group, moduleBit.isCore)
+            }))
+            this.#logger.success(`Loaded ${this.#manager.coreLoaded} core modules, ${this.#manager.customLoaded} custom modules`)
+            return;
+        }catch(err) {
+            //TODO: change logic?
+            this.#logger.severe('A failure occurred while loading modules.\n', err)
+        }
     }
-
     
 }
 
-function loadModule(rootPath: string, filename: string, group?: string, isCore: boolean = false): Promise<ModuleBit> {
-    return new Promise((resolve,reject) => {
-        import(`file://${path.resolve(rootPath, filename)}`)
-        .then(module => {
-            if(!module.default) reject(new Error('Not a valid module, missing default class export.'))
-            if(module.default instanceof Module) {
-                const config: ModuleConfig = module.default.config || {}
-                return resolve({
-                    name: filename,
-                    module,
-                    config,
-                    isCore,
-                    group
-                })
-            }else{
-                //Is not a module,
-                resolve(null);
-            }
-        }).catch(err => {
-            reject(err)
-        })
-    })
-    
-    /*modules.push({
-        file,
+//Either returns a ModuleBit, or will return null if not a valid module (not js file, starts with _, or not a Module class)
+async function loadModule(rootPath: string, filename: string, group?: string, isCore: boolean = false): Promise<ModuleBit> {
+    if(filename.split(".").slice(-1)[0] !== "js") return null;
+    if(filename.startsWith("_")) return null;
+
+    const module = await import(`file://${path.resolve(rootPath, filename)}`);
+    if(!module.default || !module.default.config) return null;
+    const config: ModuleConfig = module.default.config || {}
+    return {
+        name: filename,
+        module,
+        config,
         isCore,
-        group: dirent.name
-    })*/
+        group
+    }
 }
