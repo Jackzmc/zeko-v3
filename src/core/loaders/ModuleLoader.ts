@@ -52,7 +52,8 @@ export default class {
                                     if(file.split(".").slice(-1)[0] !== "js") return;
                                     if(file.startsWith("_")) return;
 
-                                    promises.push(loadModule(filepath, file, group, isCore));
+                                    const bit = loadModule(filepath, file, group, isCore);
+                                    if(bit) promises.push(bit);
                                     
                                 })
                             })
@@ -64,7 +65,8 @@ export default class {
                             if(file.split(".").slice(-1)[0] !== "js") return;
                             if(file.startsWith("_")) return;
 
-                            promises.push(loadModule(filepath, file, null, isCore));
+                            const bit = loadModule(filepath, file, null, isCore);
+                            if(bit) promises.push(bit);
                         }
                     });
                 }).catch(err => {
@@ -107,14 +109,19 @@ function loadModule(rootPath: string, filename: string, group?: string, isCore: 
         import(`file://${path.resolve(rootPath, filename)}`)
         .then(module => {
             if(!module.default) reject(new Error('Not a valid module, missing default class export.'))
-            const config: ModuleConfig = module.default.config || {}
-            return resolve({
-                name: filename,
-                module,
-                config,
-                isCore,
-                group
-            })
+            if(module.default instanceof Module) {
+                const config: ModuleConfig = module.default.config || {}
+                return resolve({
+                    name: filename,
+                    module,
+                    config,
+                    isCore,
+                    group
+                })
+            }else{
+                //Is not a module,
+                resolve(null);
+            }
         }).catch(err => {
             reject(err)
         })
