@@ -61,39 +61,6 @@ export default class ModuleManager {
      * @param {string} name Module name
      * @returns Promise<>
      */
-
-    /**
-     * Register a {@link Module} in the ModuleManager
-     *
-     * @param {string} name The name of the module to fetch
-     * @param {boolean} [isCore=false] Is the module a core module?
-     * @param {string} [group] The group (subfolder) of the module
-     * @returns {Promise<RegisteredModule>} Resolves if successly registered, rejects if err
-     */
-    registerModule(name: string, isCore: boolean = false, group?: string): Promise<RegisteredModule> {
-        return new Promise(async(resolve, reject) => {
-            const root =  path.join(this.#client.ROOT_DIR, isCore?'src/modules':'modules')
-            const filepath = group ? path.join(root, `${group}/${name}`) : path.join(root, `${name}`)
-            import(`file://${filepath}`)
-            .then(moduleFile => {
-                if(!moduleFile.default || typeof moduleFile.default !== "function") {
-                    return reject(new Error("Invalid Module class: Not valid module, no valid constructor"))
-                }
-                const module: Module = new moduleFile.default(this.#client, new Logger(`mod/${name}`))
-
-                const registeredModule = {
-                    group,
-                    module
-                }
-
-                const type = isCore ? 'core' : 'custom'
-                const registeredName = name.toLowerCase().replace('.js', '');
-                this.#modules[type].set(registeredName, registeredModule);
-                resolve(registeredModule)
-            })
-            .catch(err => reject(err))
-        })
-    }
     
     /**
      * Register a {@link Module} in the ModuleManager

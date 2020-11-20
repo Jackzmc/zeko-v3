@@ -64,55 +64,12 @@ export default class CommandManager {
     /**
      * Registers a command with the CommandManager
      *
-     * @param {string} name The display name of the command. Also used as ID
-     * @param {boolean} isCore Is the plugin a core plugin? 
+     * @param {any} commandClass The display name of the command. Also used as ID
+     * @param {string} filename
      * @param {string} [group="default"] The command's group or null/default for misc
+     * @param {boolean} isCore Is the plugin a core plugin? 
      * @returns {Promise<RegisteredCommand}
      */
-    registerCommand(name: string, isCore: boolean, group: string = "default") : Promise<RegisteredCommand> {
-        return new Promise((resolve, reject) => {
-            const root =  path.join(this.#client.ROOT_DIR, isCore?'src/commands':'commands')
-            const filepath = group == "default" ? path.join(root, `${name}.js`) : path.join(root, `${group}/${name}.js`)
-
-            import(`file://${filepath}`)
-            .then(commandObject => {
-                const command: Command = new commandObject.default(this.#client, new Logger(`cmd/${name}`))
-                if(!command.help || !command.run || typeof command.run !== "function" || typeof command.help !== "function") {
-                    return reject(new Error("Invalid Command class: Missing valid 'run' or 'help' method"))
-                }
-
-                const help = command.help();
-                const config = command.config ? command.config() : {}
-
-                const cmdName = Array.isArray(help.name) ? help.name.shift() : help.name
-                if(!cmdName) return reject(new Error('Name field is empty or is an empty array.'))
-
-                delete command.help;
-                delete command.config;
-                const registeredCommand = {
-                    help,
-                    group,
-                    isCore,
-                    config,
-                    command,
-                    name: cmdName
-                }
-                this.#commands.set(cmdName.toLowerCase(), registeredCommand);
-                if(Array.isArray(help.name) && help.name.length > 0) {
-                    help.name.forEach(alias => {
-                        this.#aliases.set(alias.toLowerCase(), cmdName.toLowerCase())
-                    })
-                }
-                //Add to list of groups.
-                if(group.trim().length > 0 && group !== "default" && !this.#groups.includes(group)) {
-                    this.#groups.push(group)
-                }
-                resolve(registeredCommand)
-            })
-            .catch(err => reject(err))
-        })
-    }
-
     async register(commandClass: any, filename: string, group: string = "default", isCore: boolean): Promise<RegisteredCommand> {
         if(!commandClass.default || typeof commandClass.default !== "function") {
             throw new Error('Invalid moduleClass: must be a class.')
