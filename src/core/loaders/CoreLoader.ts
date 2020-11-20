@@ -26,9 +26,9 @@ export default class CoreLoader {
             const eventLoader = new EventLoader(client, new Logger("EventLoader"));
             //TODO: Wait for moduleloader to finish, load cmd/event, finally send token
             internalCustomCheck()
-            moduleLoader.loadModules()
-                .then(() => commandLoader.loadCommands())
-                .then(() => eventLoader.loadEvents())
+            moduleLoader.load()
+                .then(() => commandLoader.load())
+                .then(() => eventLoader.load())
                 .catch(err => {
                     logger.severe('Failed to load modules', err)
                 })

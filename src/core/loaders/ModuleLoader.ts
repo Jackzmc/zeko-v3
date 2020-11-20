@@ -32,7 +32,7 @@ export default class {
         this.#manager = new ModuleManager(client);
         client.managers.ModuleManager = this.#manager;
     }
-    async loadModules(): Promise<void> {
+    async load(): Promise<void> {
         const promises: Promise<ModuleBit>[] = [];
         for(const folder of folders) {
             const isCore = folder.startsWith("src/")
@@ -91,6 +91,7 @@ async function loadModule(rootPath: string, filename: string, group?: string, is
     const module = await import(`file://${path.resolve(rootPath, filename)}`);
     if(!module.default || !module.default.config) return null;
     const config: ModuleConfig = module.default.config || {}
+    
     return {
         name: filename,
         module,

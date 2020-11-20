@@ -8,9 +8,18 @@ import path from 'path'
 import EventManager, { RegisteredCoreEvent, RegisteredCustomEvent } from '../../managers/EventManager.js'
 import Logger from '../../Logger.js';
 import { Client } from 'discord.js';
+import CoreLoader from './CoreLoader';
+import Event from 'Event.js';
+import CoreEvent from '../types/CoreEvent.js';
 
 const folders = ['src/events','events'];
 const IGNORED_EVENTS = ['raw','debug']
+
+interface EventBit {
+    name: string
+    event: Event | CoreEvent
+    isCore: boolean
+}
 
 export default class {
     #manager: EventManager;
@@ -26,51 +35,36 @@ export default class {
         //Catch all events, pass to EventManager
         patchEmitter(client, this.#manager)
     }
-    async loadEvents() {
-        const promises: Promise<RegisteredCoreEvent | RegisteredCustomEvent>[] = [];
-        for(let i = 0; i < folders.length; i++) {
-            const isCoreEvent = i == 0;
-            const folder = folders[i];
-            const filepath = path.join(this.#client.ROOT_DIR,folder);
-            await fs.readdir(filepath)
-            .then(files => {
-                files.forEach(file => {
-                    if(file.split(".").slice(-1)[0] !== "js") return; //has to be .js file *cough* folder that doesnt exist *cough*
-                    const eventName = file.split(".");
-                    eventName.pop();
-                    try {
-                        //TODO: refactor to just have this.#manager.register((Core)Event, name);
-                        //Also possible reason event loader not stating numbers correctly is the import() promise
-                        import(`file://${filepath}/${file}`)
-                        .then(eventObject => {
-                            //Test for invalid. Only log if there IS content (don't error on empty files)
-                            if(!eventObject || !eventObject.default) {
-                                if(eventObject.default && typeof eventObject.default !== 'function') {
-                                    const prefix = isCoreEvent ? '' : 'Custom '
-                                    this.#logger.warn(`${prefix}Event ${file} is not setup correctly!`);
-                                }
-                                return;
-                            }
-
-                            promises.push(this.#manager.registerEvent(eventName[0], isCoreEvent))
-                        })
-                        //delete require.cache[require.resolve(`${filepath}/${file}`)];
-                    }catch(err) {
-                        this.#logger.error(`Event ${file} had an error:\n`, err);
-                    }
-                });
-            }).catch(err => {
+    async load() {
+        const promises: Promise<EventBit>[] = [];
+        for(const folder of folders) {
+            const isCore = folder.startsWith("src")
+            let filepath = path.join(this.#client.ROOT_DIR, folder);
+            try {
+                const files = await fs.readdir(filepath, { withFileTypes: true })
+                for(const dirent of files) {
+                    promises.push(loadEvent(filepath, dirent.name, isCore));
+                }
+            }catch(err) {
                 if(err.code === "ENOENT") {
                     this.#logger.warn(`'${folder}' directory does not exist.`)
-                }else{
-                    this.#logger.error(`Loading${folder} failed:\n`, err);
+                }else {
+                    this.#logger.error(`Loading ${folder} failed:\n`, err);
                 }
-            })
+            }
         }
-        Promise.all(promises)
-        .then(() => {
+        try {
+            let eventBits = await Promise.all(promises)
+            eventBits = eventBits.filter(bit => bit)
+            await Promise.all(eventBits.map(async(eventBit) => {
+                await this.#manager.register(eventBit.event, eventBit.name, eventBit.isCore)
+            }))
             this.#logger.success(`Loaded ${this.#manager.coreLoaded} core events, ${this.#manager.customLoaded} custom events`)
-        })
+            return;
+        }catch(err) {
+            //TODO: change logic?
+            this.#logger.severe('A failure occurred while loading events.\n', err)
+        }
     }
 }
 
@@ -86,4 +80,19 @@ function patchEmitter(emitter: any, manager: EventManager) {
 		oldEmit.apply(emitter, arguments);
     }
     return emitter;
+}
+
+async function loadEvent(rootPath: string, filename: string, isCore: boolean): Promise<EventBit> {
+    if(filename.split(".").slice(-1)[0] !== "js") return null; 
+    if(filename.startsWith("_")) return null;
+    const eventName = filename.split(".");
+    eventName.pop();
+
+    const event = await import(`file://${path.resolve(rootPath, filename)}`);
+    if(!event.default) return null;
+    return {
+        name: eventName[0],
+        event,
+        isCore,
+    }
 }

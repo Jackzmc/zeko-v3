@@ -132,6 +132,37 @@ export default class EventManager {
         })
     }
 
+    async register(eventClass: any, name: string, isCore: boolean = false) : Promise<RegisteredCoreEvent | RegisteredCustomEvent>{
+        if(!eventClass.default || typeof eventClass.default !== "function") {
+            throw new Error('Invalid moduleClass: must be a class.')
+        }
+        if(isCore) {
+            const event: CoreEvent = new eventClass.default(this.#client, new Logger(`event/${name}`))
+            const registeredName = name.toLowerCase().replace('.js', '')
+            const registeredEvent: RegisteredCoreEvent = {
+                event,
+                config: {
+                    core: isCore,
+                    name: registeredName
+                }
+            }
+            this.#events.core.set(registeredName, registeredEvent);
+            return registeredEvent;
+        }else{
+            const event: Event = new eventClass.default(this.#client, new Logger(`event/${name}`))
+            const registeredName = name.toLowerCase().replace('.js', '')
+            const registeredEvent: RegisteredCustomEvent = {
+                event,
+                config: {
+                    core: isCore,
+                    name: registeredName
+                }
+            }
+            this.#events.custom.set(registeredName, registeredEvent);
+            return registeredEvent;
+        }
+    }
+
 
     /**
      * Attempt to fetch a core event by name

@@ -113,6 +113,43 @@ export default class CommandManager {
         })
     }
 
+    async register(commandClass: any, filename: string, group: string = "default", isCore: boolean): Promise<RegisteredCommand> {
+        if(!commandClass.default || typeof commandClass.default !== "function") {
+            throw new Error('Invalid moduleClass: must be a class.')
+        }else if(commandClass.default !instanceof Command) {
+            throw new Error('commandClass must contain a default Command class.')
+        }
+        const command: Command = new commandClass.default(this.#client, new Logger(`cmd/${filename}`))
+        const help = command.help();
+        const config = command.config ? command.config() : {}
+
+        const cmdName = (Array.isArray(help.name) ? help.name.shift() : help.name).toLowerCase()
+        if(!cmdName) throw new Error('Name field is empty or is an empty array.')
+
+        delete command.help;
+        delete command.config;
+
+        const registeredCommand: RegisteredCommand = {
+            help,
+            group,
+            isCore,
+            config,
+            command,
+            name: cmdName
+        }
+        this.#commands.set(cmdName.toLowerCase(), registeredCommand);
+        if(Array.isArray(help.name) && help.name.length > 0) {
+            help.name.forEach(alias => {
+                this.#aliases.set(alias.toLowerCase(), cmdName.toLowerCase())
+            })
+        }
+        //Add to list of groups.
+        if(group !== "default" && !this.#groups.includes(group)) {
+            this.#groups.push(group)
+        }
+        return registeredCommand;
+    }
+
     /**
      * Get a command by the name
      *

@@ -109,6 +109,8 @@ export default class ModuleManager {
         return new Promise(async(resolve, reject) => {
             if(!moduleClass.default || typeof moduleClass.default !== "function") {
                 return reject(new Error('Invalid moduleClass: must be a class.'))
+            }else if(moduleClass.default !instanceof Module) {
+                throw new Error('moduleClass must contain a default Module class.')
             }
             const module: Module = new moduleClass.default(this.#client, new Logger(`mod/${name}`))
 
