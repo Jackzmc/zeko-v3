@@ -16,7 +16,7 @@ export default class extends Command {
 	help() {
         return {
             name: ['ping'],
-            description: 'Show bot latency',
+            description: "Show the bot's ping to discord.",
             usage: 'ping',
             flags: {}
         }

@@ -1,4 +1,4 @@
-import Command, { FlagList } from "../types/Command.js";
+import Command, { FlagList, CommandConfigOptions, CommandHelpOptions } from "../types/Command.js";
 import { Message, Client } from 'discord.js';
 import CommandManager , { RegisteredCommand } from '../managers/CommandManager.js';
 import Logger from "../Logger.js";
@@ -43,13 +43,14 @@ export default class extends Command {
         }
     }
 
-    config() {
+    config(): CommandConfigOptions {
         return {
-            usageIfNotSet: false
+            usageIfNotSet: false,
+            guildOnly: false
         }
     }
 
-    help() {
+    help(): CommandHelpOptions {
         return {
             name: ['help'],
             description: 'Get help with the bot and it\'s commands. Leave blank for a list of commands.',
