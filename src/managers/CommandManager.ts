@@ -108,9 +108,15 @@ export default class CommandManager {
     }
 
 
-    unregister(command: string): boolean {
-        const cmd = command.replace(/.js$/, '');
-        return this.#commands.delete(cmd);
+    async unregister(command: string): Promise<boolean> {
+        const query = command.replace(/.js$/, '');
+        const cmd = this.#commands.get(query);
+        if(cmd) {
+            await cmd.command.exit(true);
+            return this.#commands.delete(query);
+        }else{
+            return false;
+        }
     }
 
 

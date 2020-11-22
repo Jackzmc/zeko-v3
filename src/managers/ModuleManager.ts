@@ -148,8 +148,19 @@ export default class ModuleManager {
      * @returns {boolean} If a module was deleted successfully
      * @memberof ModuleManager
      */
-    unregister(query: string): boolean {
-        return this.#modules.core.delete(query.toLowerCase()) || this.#modules.custom.delete(query.toLowerCase());
+    async unregister(query: string): Promise<boolean> {
+        query = query.replace(/.js$/, '');
+        const coreMod = this.#modules.core.get(query);
+        const customMod = this.#modules.custom.get(query);
+        if(coreMod) {
+            await coreMod.module.exit(true)
+            return this.#modules.core.delete(query);
+        }else if(customMod) {
+            await customMod.module.exit(true)
+            return this.#modules.custom.delete(query);
+        }else{
+            return null;
+        }
     }
 
 

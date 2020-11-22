@@ -204,9 +204,19 @@ export default class EventManager {
      * @returns {boolean} If event was removed
      * @memberof EventManager
      */
-    unregister(query: string): boolean {
-        const event = query.replace(/.js$/, '');
-        return this.#events.core.delete(event) || this.#events.custom.delete(event);
+    async unregister(query: string): Promise<boolean> {
+        query = query.replace(/.js$/, '');
+        const core = this.#events.core.get(query);
+        const custom = this.#events.custom.get(query);
+        if(core) {
+            await core.event.exit(true)
+            return this.#events.core.delete(query);
+        }else if(custom) {
+            await custom.event.exit(true)
+            return this.#events.custom.delete(query);
+        }else{
+            return null;
+        }
     }
 
     /**
