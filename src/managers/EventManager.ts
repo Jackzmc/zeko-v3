@@ -184,6 +184,31 @@ export default class EventManager {
         return this.#events.custom.get(query.toLowerCase())
     }
 
+
+    /**
+     * Attempt to fetch a core event, if does not exist, then custom event
+     *
+     * @param {string} query Name of the event
+     * @returns {(RegisteredCoreEvent | RegisteredCustomEvent)}
+     * @memberof EventManager
+     */
+    get(query: string): RegisteredCoreEvent | RegisteredCustomEvent {
+        return this.#events.core.get(query.toLowerCase()) || this.#events.custom.get(query.toLowerCase());
+    }
+
+
+    /**
+     * Remove an event from manager, events will not be passed to it. Removes from core, if does not exist, then custom
+     *
+     * @param {string} query The event name
+     * @returns {boolean} If event was removed
+     * @memberof EventManager
+     */
+    unregister(query: string): boolean {
+        const event = query.replace(/.js$/, '');
+        return this.#events.core.delete(event) || this.#events.custom.delete(event);
+    }
+
     /**
      * Get the total number of core events loaded
      *

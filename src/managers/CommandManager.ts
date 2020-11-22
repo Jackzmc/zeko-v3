@@ -109,7 +109,8 @@ export default class CommandManager {
 
 
     unregister(command: string): boolean {
-        return this.#commands.delete(command);
+        const cmd = command.replace(/.js$/, '');
+        return this.#commands.delete(cmd);
     }
 
     /**

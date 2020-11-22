@@ -18,7 +18,8 @@ let instance: any;
 
 export interface RegisteredModule {
     group?: string
-    module: Module
+    module: Module,
+    isCore: boolean
 }
 
 
@@ -83,7 +84,8 @@ export default class ModuleManager {
 
             const registeredModule = {
                 group,
-                module
+                module,
+                isCore
             }
 
             const type = isCore ? 'core' : 'custom'
@@ -121,6 +123,33 @@ export default class ModuleManager {
             return registered ? registered.module : null;
         }
         return this.#modules.core.get(query.toLowerCase());
+    }
+
+
+    /**
+     * Retrieve either core or custom module, in order.
+     *
+     * @param {string} query The name of the module
+     * @param {boolean} [moduleOnly=false] Should only the module class be returned
+     * @returns {(RegisteredModule | Module)}
+     * @memberof ModuleManager
+     */
+    get(query: string, moduleOnly: boolean = false): RegisteredModule | Module {
+        const module = this.#modules.core.get(query.toLowerCase()) || this.#modules.custom.get(query.toLowerCase());
+        if(!module) return null;
+        return moduleOnly ? module.module : module;
+    }
+
+
+    /**
+     * Remove a module from manager. Will try core, if does not exist, then custom.
+     *
+     * @param {string} query Module to remove
+     * @returns {boolean} If a module was deleted successfully
+     * @memberof ModuleManager
+     */
+    unregister(query: string): boolean {
+        return this.#modules.core.delete(query.toLowerCase()) || this.#modules.custom.delete(query.toLowerCase());
     }
 
 
