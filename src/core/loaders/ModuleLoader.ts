@@ -60,7 +60,7 @@ export default class {
                     //delete event from map, load it, initalize it, and then add it back if successful
                     const result: ModuleBit = await loadModule(folder, file, module.group, module.isCore)
                     if(!result) return this.#logger.debug('bit was null')
-                    ModuleManager.getInstance().unregister(filename);
+                    await ModuleManager.getInstance().unregister(filename);
                     await ModuleManager.getInstance().register(result.module, result.name, result.group, result.isCore);
                     this.#logger.info(`Watcher: Reloaded module '${filename}' successfully`)
                 }catch(err) {

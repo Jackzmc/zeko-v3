@@ -57,7 +57,7 @@ export default class{
                     //delete command from map, load it, initalize it, and then add it back if successful
                     const result: CommandBit = await loadCommand(folder, file, command.group, command.isCore)
                     if(!result) return this.#logger.debug('bit was null')
-                    CommandManager.getInstance().unregister(filename);
+                    await CommandManager.getInstance().unregister(filename);
                     await CommandManager.getInstance().register(result.command, result.name, result.group, result.isCore);
                     this.#logger.info(`Watcher: Reloaded command '${filename}' successfully`)
                 }catch(err) {

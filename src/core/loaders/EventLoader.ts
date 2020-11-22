@@ -60,7 +60,7 @@ export default class {
                     //delete event from map, load it, initalize it, and then add it back if successful
                     const result: EventBit = await loadEvent(folder, file, event.config.core)
                     if(!result) return this.#logger.debug('bit was null')
-                    EventManager.getInstance().unregister(filename);
+                    await EventManager.getInstance().unregister(filename);
                     await EventManager.getInstance().register(result.event, result.name, result.isCore);
                     this.#logger.info(`Watcher: Reloaded event '${filename}' successfully`)
                 }catch(err) {
