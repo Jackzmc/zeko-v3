@@ -2,6 +2,7 @@
 @module core:loaders/ModuleLoader
 @description Loads all module files
 */
+import Chokidar from 'chokidar'
 import { Client} from "discord.js"
 import { promises as fs } from 'fs';
 import path from 'path'
@@ -9,6 +10,7 @@ import path from 'path'
 import ModuleManager from '../../managers/ModuleManager.js'
 import Logger from "../../Logger.js";
 import Module, { ModuleConfig } from '../../types/Module.js';
+import { RegisteredModule } from '../../managers/ModuleManager';
 
 const folders = ['src/modules','modules'];
 
@@ -31,6 +33,41 @@ export default class {
 
         this.#manager = new ModuleManager(client);
         client.managers.ModuleManager = this.#manager;
+        if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
+            this.setupWatcher()
+        }
+    }
+    setupWatcher() {
+        const distFolders = folders.map(v => path.join('dist',v))
+        Chokidar.watch(distFolders, {
+            ignored: /(^|[\/\\])\../,
+            ignoreInitial: true,
+            persistent: true
+        })
+        .on('add', filepath => this.#logger.debug('Event was added:', filepath))
+        .on('change', (filepath) => {
+            const file = filepath.replace(/^.*[\\\/]/, '')
+            if(file.split(".").slice(-1)[0] !== "js") return;
+            if(file.startsWith("_")) return;
+            const filename = file.split(".").slice(0,-1).join(".")
+
+            const module = ModuleManager.getInstance().get(filename, false) as RegisteredModule;
+            if(!module) return this.#logger.debug(`Module ${filename} not registered. ignoring.`)
+            const folder = path.parse(filepath).dir;
+
+            setTimeout(async() => {
+                try {
+                    //delete event from map, load it, initalize it, and then add it back if successful
+                    const result: ModuleBit = await loadModule(folder, file, module.group, module.isCore)
+                    if(!result) return this.#logger.debug('bit was null')
+                    ModuleManager.getInstance().unregister(filename);
+                    await ModuleManager.getInstance().register(result.module, result.name, result.group, result.isCore);
+                    this.#logger.info(`Watcher: Reloaded module '${filename}' successfully`)
+                }catch(err) {
+                    this.#logger.error(`Watcher: '${filename}' Failed Reload: ${process.env.PRODUCTION?err.message:err.stack}`)
+                }
+            },500)
+        })
     }
     async load(): Promise<void> {
         const promises: Promise<ModuleBit>[] = [];

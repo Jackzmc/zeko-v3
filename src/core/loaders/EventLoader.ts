@@ -2,13 +2,13 @@
 @module core:loaders/EventLoader
 @description Loads all event files
 */
+import Chokidar from 'chokidar'
 import { promises as fs } from 'fs';
 import path from 'path'
 
 import EventManager, { RegisteredCoreEvent, RegisteredCustomEvent } from '../../managers/EventManager.js'
 import Logger from '../../Logger.js';
 import { Client } from 'discord.js';
-import CoreLoader from './CoreLoader';
 import Event from 'Event.js';
 import CoreEvent from '../types/CoreEvent.js';
 
@@ -30,10 +30,44 @@ export default class {
         client.managers.EventManager = this.#manager;
         this.#logger = log;
         this.#client = client;
-        //this.setupWatcher()
 
         //Catch all events, pass to EventManager
         patchEmitter(client, this.#manager)
+        if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
+            this.setupWatcher()
+        }
+    }
+    setupWatcher() {
+        const distFolders = folders.map(v => path.join('dist',v))
+        Chokidar.watch(distFolders, {
+            ignored: /(^|[\/\\])\../,
+            ignoreInitial: true,
+            persistent: true
+        })
+        .on('add', filepath => this.#logger.debug('Event was added:', filepath))
+        .on('change', (filepath) => {
+            const file = filepath.replace(/^.*[\\\/]/, '')
+            if(file.split(".").slice(-1)[0] !== "js") return;
+            if(file.startsWith("_")) return;
+            const filename = file.split(".").slice(0,-1).join(".")
+
+            const event = EventManager.getInstance().get(filename);
+            if(!event) return this.#logger.debug(`Event ${filename} not registered. ignoring.`)
+            const folder = path.parse(filepath).dir;
+
+            setTimeout(async() => {
+                try {
+                    //delete event from map, load it, initalize it, and then add it back if successful
+                    const result: EventBit = await loadEvent(folder, file, event.config.core)
+                    if(!result) return this.#logger.debug('bit was null')
+                    EventManager.getInstance().unregister(filename);
+                    await EventManager.getInstance().register(result.event, result.name, result.isCore);
+                    this.#logger.info(`Watcher: Reloaded event '${filename}' successfully`)
+                }catch(err) {
+                    this.#logger.error(`Watcher: '${filename}' Failed Reload: ${process.env.PRODUCTION?err.message:err.stack}`)
+                }
+            },500)
+        })
     }
     async load() {
         const promises: Promise<EventBit>[] = [];

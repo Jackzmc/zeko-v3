@@ -25,19 +25,18 @@ export default class{
     #logger: Logger;
     #manager: CommandManager
     constructor(client: Client, logger: Logger) {
-        if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
-            //this.setupWatcher();
-        }
         this.#client = client;
         this.#logger = logger;
         this.#manager = new CommandManager(client)
         client.managers.CommandManager = this.#manager;
-
-        this.setupWatcher()
+        if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
+            this.setupWatcher()
+        }
     }
     
     setupWatcher() {
-        Chokidar.watch(folders, {
+        const distFolders = folders.map(v => path.join('dist',v))
+        Chokidar.watch(distFolders, {
             ignored: /(^|[\/\\])\../,
             ignoreInitial: true,
             persistent: true
@@ -48,19 +47,21 @@ export default class{
             if(file.split(".").slice(-1)[0] !== "js") return;
             if(file.startsWith("_")) return;
             const filename = file.split(".").slice(0,-1).join(".")
-            this.#logger.debug(`change detected | ${filename} | ${filepath}`)
+
+            const command = CommandManager.getInstance().getCommand(filename);
+            if(!command) return this.#logger.debug(`command ${filename} not registered. ignoring.`)
+            const folder = path.parse(filepath).dir;
 
             setTimeout(async() => {
                 try {
                     //delete command from map, load it, initalize it, and then add it back if successful
-                    const result = await CommandManager.getInstance().reload(file)
-                    if(result) {
-                        this.#logger.info(`Watcher: Reloaded command ${filename} successfully`)
-                    }else{
-                        this.#logger.debug(`Command ${file} was not reloaded: 404`)
-                    }
+                    const result: CommandBit = await loadCommand(folder, file, command.group, command.isCore)
+                    if(!result) return this.#logger.debug('bit was null')
+                    CommandManager.getInstance().unregister(filename);
+                    await CommandManager.getInstance().register(result.command, result.name, result.group, result.isCore);
+                    this.#logger.info(`Watcher: Reloaded command '${filename}' successfully`)
                 }catch(err) {
-                    this.#logger.error(`Watcher: ${filename} Failed Reload: ${process.env.PRODUCTION?err.message:err.stack}`)
+                    this.#logger.error(`Watcher: '${filename}' Failed Reload: ${process.env.PRODUCTION?err.message:err.stack}`)
                 }
             },500)
         })
@@ -112,8 +113,7 @@ export default class{
 async function loadCommand(rootPath: string, filename: string, group?: string, isCore: boolean = false): Promise<CommandBit> {
     if(filename.split(".").slice(-1)[0] !== "js") return null;
     if(filename.startsWith("_")) return null;
-
-    const command = await import(`file://${path.resolve(rootPath, filename)}`);
+    const command = await import(`file://${path.resolve(rootPath, filename)}?d=${Date.now()}`);
     if(!command.default) return null;
     return {
         name: filename,
