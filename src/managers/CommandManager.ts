@@ -113,6 +113,27 @@ export default class CommandManager {
         return this.#commands.delete(cmd);
     }
 
+    
+    reload(commandName: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            const registeredCommand = this.#commands.get(commandName);
+            if(registeredCommand) {
+                this.unregister(commandName)
+                this.registerCommand(commandName, registeredCommand.isCore, registeredCommand.group)
+                .then(() => resolve(true))
+                .catch((err: Error) => reject(err))
+            }else{
+                resolve(false);
+            }
+        })
+        
+    }
+
+
+    unregister(command: string): boolean {
+        return this.#commands.delete(command);
+    }
+
     /**
      * Get a command by the name
      *
