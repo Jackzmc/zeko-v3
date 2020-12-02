@@ -195,7 +195,7 @@ export default class CommandManager {
     exit(waitable: boolean): Promise<void[]>  {
         const promises = [];
         this.#commands.forEach(command => {
-            if(command.command.exit) {
+            if(command.command.exit && typeof command.command.exit === "function") {
                 if(waitable) {
                     promises.push(Promise.resolve(command.command.exit(waitable)))
                 }else{
