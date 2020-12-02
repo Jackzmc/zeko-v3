@@ -13,7 +13,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default class DataManager {
-    r: unknown;
+    r: any;
     #logger: Logger;
     /**
      *  Creates a new rethinkdb instance, with table selected
