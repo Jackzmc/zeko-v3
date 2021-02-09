@@ -4,8 +4,6 @@ import Functions from './src/core/Functions.js'
 import CoreLoader from './src/core/loaders/CoreLoader.js'
 
 const intents = new Discord.Intents(Discord.Intents.NON_PRIVILEGED);
-intents.remove("GUILD_PRESENCES", "GUILD_MEMBERS")
-
 const envs = EnvLoader()
 intents.add(envs.privilegedIntents as Discord.BitFieldResolvable<Discord.IntentsString>)
 
