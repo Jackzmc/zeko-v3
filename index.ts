@@ -8,9 +8,6 @@ const envs = EnvLoader()
 intents.add(envs.privilegedIntents as Discord.BitFieldResolvable<Discord.IntentsString>)
 
 const client: Discord.Client = new Discord.Client({
-    messageCacheMaxSize: 500,
-    messageCacheLifetime: 120,
-    messageSweepInterval: 60,
     ws: {intents}
 });
 
@@ -23,3 +20,8 @@ process.on('error',(err: Error) => {
 	console.error(`[ERROR] Ran into critical error: \n${err.message}`);
 	process.exit(1)
 })
+process.on('unhandledRejection', (err:Error) => {
+    console.error(`[ERROR] Uncaught Promise Exception \n${err.message}`);
+	process.exit(2)
+});
+  
