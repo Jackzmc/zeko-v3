@@ -12,4 +12,5 @@ export default function(client: Client) {
     client.ROOT_DIR = path.resolve(__dirname,"../../"); 
     client.managers = {}
     client.utils = Utils(client);
+    client.evns = {}
 }
