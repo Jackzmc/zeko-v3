@@ -103,11 +103,9 @@ dist
 # TernJS port file
 .tern-port
 
-commands/
-events/
-modules/
 .vscode
 
 !src/**
 
 data
+docs
