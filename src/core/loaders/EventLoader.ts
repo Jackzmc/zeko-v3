@@ -81,7 +81,7 @@ export default class {
                 }
             }catch(err) {
                 if(err.code === "ENOENT") {
-                    this.#logger.warn(`'${folder}' directory does not exist.`)
+                    //this.#logger.warn(`'${folder}' directory does not exist.`)
                 }else {
                     this.#logger.error(`Loading ${folder} failed:\n`, err);
                 }
