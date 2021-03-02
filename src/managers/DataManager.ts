@@ -3,7 +3,7 @@
  @module DataManager
  @description WIP
 */
-import r from '../core/Database.js'
+import Database from '../core/Database.js'
 import Logger from '../Logger.js'
 
 import path from 'path'
@@ -21,9 +21,9 @@ export default class DataManager {
      * @returns {RethinkDBInstance}
      */
     constructor(table: string = 'data') {
-        r.tableCreate(table)
-        this.r = r;
-        const tableInstance = r.table(table)
+        Database().tableCreate(table)
+        this.r = Database();
+        const tableInstance = Database().table(table)
 
         fs.mkdir(DataManager.getDataDirectory(), () => {})
 
@@ -32,7 +32,7 @@ export default class DataManager {
     }
 
     get instance(): any {
-        return r;
+        return Database();
     }
 
     /**

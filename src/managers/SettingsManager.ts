@@ -4,7 +4,7 @@
  @description An interface to change/view settings
 */
 import Logger from '../Logger.js'
-import r from '../core/Database.js'
+import Database from '../core/Database.js'
 import { Client, Snowflake } from 'discord.js';
 
 export default class {
@@ -45,7 +45,7 @@ export class SettingsCategory {
      */
     constructor(category: string) {
         this.module = category;
-        this.db = r.db('zeko').table('settings');
+        this.db = Database().db('zeko').table('settings');
     }
 
     /**

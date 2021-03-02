@@ -9,19 +9,25 @@ import Logger from '../Logger.js';
 
 const HOST = process.env.RETHINKDB_HOST||'127.0.0.1'
 const PORT = parseInt(process.env.RETHINKDB_PORT)||28015;
-const DB = process.env.RETHINKDB_DB;
+const DB = process.env.RETHINKDB_DB || "zeko";
 
-const r = rethinkdb({
-    host: HOST,
-    port: PORT,
-    db: DB,
-    silent: true
-})
+let _db;
 
-r.tableCreate('settings').run().catch(() => {})
-r.tableCreate('data').run().catch(() => {})
+export default function() {
+    if(_db) return _db;
+    const r = rethinkdb({
+        host: HOST,
+        port: PORT,
+        db: DB,
+        silent: true
+    })
 
-const logger = new Logger("Database");
-logger.info(`Connecting to rethinkdb on ${HOST}:${PORT} for database ${DB}`)
+    r.tableCreate('settings').run().catch(() => {})
+    r.tableCreate('data').run().catch(() => {})
 
-export default r;
+    const logger = new Logger("Database");
+    logger.info(`Connecting to rethinkdb on ${HOST}:${PORT} for database ${DB}`)
+
+    _db = r
+    return r;
+}

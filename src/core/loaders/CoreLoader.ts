@@ -32,7 +32,8 @@ export default class CoreLoader {
                 .catch(err => {
                     logger.severe('Failed to load modules', err)
                 })
-            client.managers.SettingsManager = new SettingsManager(client);
+            if(!process.env.ZEKO_DISABLE_SETTINGS)
+                client.managers.SettingsManager = new SettingsManager(client);
             client.login(process.env.DISCORD_BOT_TOKEN)
             process.on('exit',    () => this.gracefulShutdown(false))
             process.on('SIGTERM', () => this.gracefulShutdown(true))
