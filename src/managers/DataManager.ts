@@ -3,7 +3,7 @@
  @module DataManager
  @description WIP
 */
-import Database from '../core/Database.js'
+import r from '../core/Database.js'
 import Logger from '../Logger.js'
 
 import path from 'path'
@@ -15,24 +15,27 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default class DataManager {
     r: any;
     #logger: Logger;
+    #table: string
     /**
      *  Creates a new rethinkdb instance, with table selected
      * @param {!string} table Name of the table to fetch
      * @returns {RethinkDBInstance}
      */
     constructor(table: string = 'data') {
-        Database().tableCreate(table)
-        this.r = Database();
-        const tableInstance = Database().table(table)
-
+        this.#table = table;
+        this.r = r();
+        this.r.tableCreate(table)
         fs.mkdir(DataManager.getDataDirectory(), () => {})
 
         this.#logger = new Logger(`DataManager/${table}`)
-        return tableInstance;
     }
 
     get instance(): any {
-        return Database();
+        return this.r.table(this.#table)
+    }
+
+    get poolCount() {
+        return this.r.getPoolMaster().getLength()
     }
 
     /**
@@ -43,6 +46,7 @@ export default class DataManager {
     getInternalRethink(): any {
         return this.r;
     }
+
 
     /**
      * Gets the root data directory or a subdirectory

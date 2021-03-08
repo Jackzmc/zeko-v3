@@ -32,7 +32,6 @@ export default class extends Command {
                 msg.author.send({embed:{
                     title:`${group_name} Commands`,
                     description: cmds.map((cmd: RegisteredCommand) => {
-                        this.logger.debug
                         const desc = cmd.help.description.replace(/\*\*/g,'\\**')
                         return `**${cmd.name}** - ${desc}`
                     }).join("\n")

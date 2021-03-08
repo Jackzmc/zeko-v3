@@ -9,25 +9,34 @@ import Logger from '../Logger.js';
 
 const HOST = process.env.RETHINKDB_HOST||'127.0.0.1'
 const PORT = parseInt(process.env.RETHINKDB_PORT)||28015;
-const DB = process.env.RETHINKDB_DB || "zeko";
+const DB = process.env.RETHINKDB_DB;
 
-let _db;
+const logger = new Logger("Database");
 
-export default function() {
-    if(_db) return _db;
-    const r = rethinkdb({
-        host: HOST,
-        port: PORT,
-        db: DB,
-        silent: true
-    })
+const r = rethinkdb({
+    host: HOST,
+    port: PORT,
+    db: DB,
+    silent: true
+})
 
-    r.tableCreate('settings').run().catch(() => {})
-    r.tableCreate('data').run().catch(() => {})
+let isFirstLoaded = false
 
-    const logger = new Logger("Database");
-    logger.info(`Connecting to rethinkdb on ${HOST}:${PORT} for database ${DB}`)
+r.getPoolMaster().on('healthy', (healthy: boolean) => {
+    if(healthy) {
+        if(!isFirstLoaded) {
+            logger.success(`Connected to rethinkdb database ${DB} for ${HOST}:${PORT}`)
+            isFirstLoaded = true;
+        }else{
+            logger.info('Pool state is now healthy.')
+        }
+    }else{
+        logger.warn('Pool state has changed to unhealthy')
+    }
+});
 
-    _db = r
-    return r;
-}
+r.tableCreate('settings').run().catch(() => {})
+r.tableCreate('data').run().catch(() => {})
+
+
+export default r;
