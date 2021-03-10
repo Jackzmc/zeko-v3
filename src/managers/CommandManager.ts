@@ -6,6 +6,7 @@ import path from 'path'
 import Logger from '../Logger.js'
 import { Client, Collection } from 'discord.js';
 import Command, { CommandConfigOptions, CommandHelpOptions } from '../types/Command.js';
+import Manager from './Manager.js';
 
 let instance;
 //TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that
@@ -30,7 +31,7 @@ export interface RegisteredCommand {
     command: Command
 }
 
-export default class CommandManager {
+export default class CommandManager extends Manager {
     /**
      * Create a new CommandManager
      *
@@ -42,12 +43,11 @@ export default class CommandManager {
     #client: Client
     #logger: Logger
     constructor(client: Client) {
+        super(client, 'CommandManager')
         this.#commands = new Collection();
         this.#aliases = new Collection();
         this.#groups = [];
         
-        this.#client = client;
-        this.#logger = new Logger('CommandManager');
         instance = this;
     }
 

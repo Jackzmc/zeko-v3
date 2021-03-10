@@ -7,6 +7,7 @@ import { Client } from 'discord.js';
 import path from 'path'
 import Logger from '../Logger.js'
 import Module from '../types/Module.js';
+import Manager, { Registered } from './Manager.js';
 
 let instance: any;
  
@@ -16,16 +17,12 @@ let instance: any;
  * @property {types/Module} module - The actual module class
  */
 
-export interface RegisteredModule {
-    group?: string
+export interface RegisteredModule extends Registered {
     module: Module,
-    isCore: boolean
 }
 
 
-export default class ModuleManager {
-    #client: Client;
-    #logger: Logger
+export default class ModuleManager extends Manager {
     #modules: {
         core: Map<string, RegisteredModule>
         custom: Map<string, RegisteredModule>
@@ -36,13 +33,12 @@ export default class ModuleManager {
      * @param {Client} client The current discord.js client
      */
     constructor(client: Client) {
+        super(client, "ModuleManager")
         //Prevents custom overriding core modules
         this.#modules = {
             core: new Map(),
             custom: new Map()
         }
-        this.#client = client;
-        this.#logger = new Logger("ModuleManager")
         instance = this
     }
 
@@ -54,6 +50,13 @@ export default class ModuleManager {
      */
     static getInstance(): ModuleManager {
         return instance;
+    }
+
+    //Called internally by src/events/ready on once(), and is then sent to all modules
+    ready() {
+        for(const {module} of this.#modules.core.values()) {
+            if(module.ready) module.ready()
+        }
     }
 
     /**
@@ -80,7 +83,7 @@ export default class ModuleManager {
             }else if(moduleClass.default !instanceof Module) {
                 throw new Error('moduleClass must contain a default Module class.')
             }
-            const module: Module = new moduleClass.default(this.#client, new Logger(`mod/${name}`))
+            const module: Module = new moduleClass.default(this.client, new Logger(`mod/${name}`))
 
             const registeredModule = {
                 group,

@@ -28,7 +28,7 @@ export default class{
         this.#client = client;
         this.#logger = logger;
         this.#manager = new CommandManager(client)
-        client.managers.CommandManager = this.#manager;
+        client.managers.commandManager = this.#manager;
         if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
             this.setupWatcher()
         }

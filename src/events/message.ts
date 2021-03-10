@@ -12,7 +12,7 @@ export default class extends CoreEvent {
     #generateHelpCommand: Function
     constructor(client: Client, logger: Logger) {
         super(client, logger);
-        this.#cmdManager = client.managers.CommandManager;
+        this.#cmdManager = client.managers.commandManager;
         const helpModule = ModuleManager.getInstance().getCoreModule("help", true) as HelpModule
         if(helpModule) {
             this.#generateHelpCommand = helpModule.generateHelpCommand

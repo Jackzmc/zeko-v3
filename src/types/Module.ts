@@ -34,6 +34,16 @@ export default class Module {
 
     static config: ModuleConfig = {}
 
+
+    /**
+     * Called when the discord.js ready event is called for the first time
+     *
+     * @memberof Module
+     */
+    ready?(): void {
+
+    }
+
     /**
      * Fired on bot exit or module reload
      *

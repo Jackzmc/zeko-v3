@@ -1,3 +1,5 @@
+import { Managers } from "./core/Functions.js";
+
 declare module "discord.js" {
     interface EnvVariable {
         [envKey: string]: any
@@ -5,7 +7,7 @@ declare module "discord.js" {
     export interface Client {
         PREFIX: string
         ROOT_DIR: string
-        managers: any
+        managers: Managers
         utils: any,
         evns: EnvVariable
     }

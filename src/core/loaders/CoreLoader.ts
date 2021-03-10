@@ -33,7 +33,7 @@ export default class CoreLoader {
                     logger.severe('Failed to load modules', err)
                 })
             if(!process.env.ZEKO_DISABLE_SETTINGS)
-                client.managers.SettingsManager = new SettingsManager(client);
+                client.managers.settingsManager = new SettingsManager(client);
             client.login(process.env.DISCORD_BOT_TOKEN)
             process.on('exit',    () => this.gracefulShutdown(false))
             process.on('SIGTERM', () => this.gracefulShutdown(true))
@@ -48,9 +48,9 @@ export default class CoreLoader {
             this.#shuttingDown = true;
             this.#logger.info(`Detected shutdown signal (exit=${exit}). Shutting down managers...`)
             Promise.all([
-                this.#client.managers.ModuleManager.exit(exit),
-                this.#client.managers.CommandManager.exit(exit),
-                this.#client.managers.EventManager.exit(exit)
+                this.#client.managers.moduleManager.exit(exit),
+                this.#client.managers.commandManager.exit(exit),
+                this.#client.managers.eventManager.exit(exit)
             ]).then(() => {
                 if(exit) process.exit(0)
             })

@@ -32,7 +32,7 @@ export default class {
         this.#logger = logger;
 
         this.#manager = new ModuleManager(client);
-        client.managers.ModuleManager = this.#manager;
+        client.managers.moduleManager = this.#manager;
         if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
             this.setupWatcher()
         }

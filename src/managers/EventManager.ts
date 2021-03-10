@@ -9,6 +9,7 @@ import path from 'path'
 import Logger from '../Logger.js'
 import Event from '../types/Event.js';
 import CoreEvent from '../core/types/CoreEvent.js'
+import Manager from './Manager';
 let instance;
 
 export interface RegisteredCoreEvent {
@@ -25,9 +26,7 @@ export interface RegisteredEventConfig {
 }
 
 
-export default class EventManager {
-    #client: Client
-    #logger: Logger
+export default class EventManager extends Manager {
     #events: {
         core: Map<string, RegisteredCoreEvent>,
         custom: Map<string, RegisteredCustomEvent>
@@ -38,12 +37,11 @@ export default class EventManager {
      * @param {Client} client The current discord.js client
      */
     constructor(client: Client) {
+        super(client, 'EventManager')
         this.#events = {
             core: new Map<string, RegisteredCoreEvent>(),
             custom: new Map<string, RegisteredCustomEvent>()
         }
-        this.#client = client;
-        this.#logger = new Logger('EventManager');
         instance = this;
     }
 
@@ -76,7 +74,7 @@ export default class EventManager {
                         .then(coreResponse => {
                             if(coreResponse !== true) custom.event.after(...args);
                         }).catch(err => {
-                            this.#logger.error(`Core Event ${name} errored: ${process.env.PRODUCTION?err.message:err.stack}`)
+                            this.logger.error(`Core Event ${name} errored: ${process.env.PRODUCTION?err.message:err.stack}`)
                         })
                     }else{
                         custom.event.after(...args)
@@ -86,7 +84,7 @@ export default class EventManager {
         }else if(core) {
             Promise.resolve(core.event.every(...args) as unknown)
             .catch(err => {
-                this.#logger.error(`Core Event '${name}' errored:\n`, err)
+                this.logger.error(`Core Event '${name}' errored:\n`, err)
             })
         }
     }
@@ -101,12 +99,12 @@ export default class EventManager {
      */
     registerEvent(name: string, isCore: boolean = false) : Promise<RegisteredCoreEvent | RegisteredCustomEvent> {
         return new Promise((resolve,reject) => {
-            const filepath = path.join(this.#client.ROOT_DIR, isCore?"src/events":"events",`${name}.js`)
+            const filepath = path.join(this.client.ROOT_DIR, isCore?"src/events":"events",`${name}.js`)
             //delete require.cache[require.resolve(_path)];
             import(`file://${filepath}`)
             .then(event_src => {
                 if(isCore) {
-                    const event: CoreEvent = new event_src.default(this.#client, new Logger(`event/${name}`))
+                    const event: CoreEvent = new event_src.default(this.client, new Logger(`event/${name}`))
                     const registeredEvent = {
                         event, 
                         config: {
@@ -117,7 +115,7 @@ export default class EventManager {
                     this.#events.core.set(name, registeredEvent);
                     resolve(registeredEvent)
                 }else{
-                    const event: Event = new event_src.default(this.#client, new Logger(`event/${name}`))
+                    const event: Event = new event_src.default(this.client, new Logger(`event/${name}`))
                     const registeredEvent = {
                         event, 
                         config: {
@@ -137,7 +135,7 @@ export default class EventManager {
             throw new Error('Invalid moduleClass: must be a class.')
         }
         if(isCore) {
-            const event: CoreEvent = new eventClass.default(this.#client, new Logger(`event/${name}`))
+            const event: CoreEvent = new eventClass.default(this.client, new Logger(`event/${name}`))
             const registeredName = name.toLowerCase().replace('.js', '')
             const registeredEvent: RegisteredCoreEvent = {
                 event,
@@ -149,7 +147,7 @@ export default class EventManager {
             this.#events.core.set(registeredName, registeredEvent);
             return registeredEvent;
         }else{
-            const event: Event = new eventClass.default(this.#client, new Logger(`event/${name}`))
+            const event: Event = new eventClass.default(this.client, new Logger(`event/${name}`))
             const registeredName = name.toLowerCase().replace('.js', '')
             const registeredEvent: RegisteredCustomEvent = {
                 event,
