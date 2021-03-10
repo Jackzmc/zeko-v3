@@ -27,7 +27,7 @@ export default class {
     #client: Client
     constructor(client: Client, log: Logger) {
         this.#manager = new EventManager(client);
-        client.managers.EventManager = this.#manager;
+        client.managers.eventManager = this.#manager;
         this.#logger = log;
         this.#client = client;
 

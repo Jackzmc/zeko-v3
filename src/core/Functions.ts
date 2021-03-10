@@ -15,7 +15,6 @@ export interface Managers {
     commandManager: CommandManager,
     moduleManager: ModuleManager,
     eventManager: EventManager,
-    [key: string]: Manager | null
 }
 
 export default function(client: Client) {
