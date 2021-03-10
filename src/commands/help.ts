@@ -21,7 +21,7 @@ export default class extends Command {
             if(!cmd) return msg.channel.send("Couldn't find that command");
             return msg.channel.send(this.#generateHelpCommand(cmd))
         }else{
-            const grouped = this.client.managers.commandManager.getCommands(true, false, false)
+            const grouped = this.client.managers.commandManager.getCommands(true)
             //loop the sorted commands
             for(const key in grouped) {
                 //make the name pretty, and filter non-hidden groups
