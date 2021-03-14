@@ -7,7 +7,7 @@ import Logger from '../Logger.js'
 import Database from '../core/Database.js'
 import { Client, Snowflake } from 'discord.js';
 
-export default class {
+export default class SettingsManager {
     #client: Client;
     #logger: Logger
     /**

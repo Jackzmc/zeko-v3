@@ -9,7 +9,7 @@ import path from 'path'
 import Logger from '../Logger.js'
 import Event from '../types/Event.js';
 import CoreEvent from '../core/types/CoreEvent.js'
-import Manager from './Manager';
+import Manager from './Manager.js';
 let instance;
 
 export interface RegisteredCoreEvent {
