@@ -57,6 +57,9 @@ export default class ModuleManager extends Manager {
         for(const {module} of this.#modules.core.values()) {
             if(module.ready) module.ready()
         }
+        for(const {module} of this.#modules.custom.values()) {
+            if(module.ready) module.ready()
+        }
     }
 
     /**
