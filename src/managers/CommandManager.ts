@@ -79,7 +79,7 @@ export default class CommandManager extends Manager {
             const help = command.help();
             const config = command.config ? command.config() : {}
 
-            const cmdName = (Array.isArray(help.name) ? help.name.shift() : help.name).toLowerCase()
+            const cmdName = (Array.isArray(help.name) && help.name.length > 0 ? help.name.shift() : help.name as string).toLowerCase()
             if(!cmdName) throw new Error('Name field is empty or is an empty array.')
 
             delete command.help;
