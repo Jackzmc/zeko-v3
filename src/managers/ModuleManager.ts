@@ -91,7 +91,8 @@ export default class ModuleManager extends Manager {
             const registeredModule = {
                 group,
                 module,
-                isCore
+                isCore,
+                name
             }
 
             const type = isCore ? 'core' : 'custom'

@@ -27,7 +27,7 @@ export default class CoreLoader {
     }
     async _load(customIntents: Intents) {
         try {
-            const ROOT_DIR = resolve(__dirname,"../../")
+            const ROOT_DIR = resolve(__dirname,"../../../")
             const moduleLoader = new ModuleLoader(ROOT_DIR, new Logger("ModuleLoader"));
             const commandLoader = new CommandLoader(ROOT_DIR, new Logger("CommandLoader"));
             const eventLoader = new EventLoader(ROOT_DIR, new Logger("EventLoader"));
