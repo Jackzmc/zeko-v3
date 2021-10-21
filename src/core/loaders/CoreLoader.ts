@@ -20,6 +20,7 @@ export default class CoreLoader {
     #logger: Logger;
     #client: Client;
     #shuttingDown: boolean = false
+
     constructor(customIntents: Intents) {
         const logger = new Logger( 'CoreLoader' );
         this.#logger = logger;
@@ -38,6 +39,7 @@ export default class CoreLoader {
             const client: Client = new Client({
                 intents: customIntents
             });
+            this.#client = client
             Functions(client)
 
             try {

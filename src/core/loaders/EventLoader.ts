@@ -96,8 +96,8 @@ export default class {
         }
     }
     async load(client: Client, eventBits: EventBit[]) {
-
         this.#manager = new EventManager(client);
+        client.managers.eventManager = this.#manager
         patchEmitter(client, this.#manager)
         if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
             this.setupWatcher()
