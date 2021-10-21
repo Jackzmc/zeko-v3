@@ -18,24 +18,18 @@ const IGNORED_EVENTS = ['raw','debug']
 interface EventBit {
     name: string
     event: Event | CoreEvent
-    isCore: boolean
+    isCore: boolean,
+    intents?: number
 }
 
 export default class {
     #manager: EventManager;
     #logger: Logger
     #client: Client
-    constructor(client: Client, log: Logger) {
-        this.#manager = new EventManager(client);
-        client.managers.eventManager = this.#manager;
+    #rootDir: string
+    constructor(rootDir: string, log: Logger) {
+        this.#rootDir = rootDir
         this.#logger = log;
-        this.#client = client;
-
-        //Catch all events, pass to EventManager
-        patchEmitter(client, this.#manager)
-        if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
-            this.setupWatcher()
-        }
     }
     setupWatcher() {
         const distFolders = folders.map(v => path.join('dist',v))
@@ -69,11 +63,11 @@ export default class {
             },500)
         })
     }
-    async load() {
+    async preload() {
         const promises: Promise<EventBit>[] = [];
         for(const folder of folders) {
             const isCore = folder.startsWith("src")
-            let filepath = path.join(this.#client.ROOT_DIR, folder);
+            let filepath = path.join(this.#rootDir, folder);
             try {
                 const files = await fs.readdir(filepath, { withFileTypes: true })
                 for(const dirent of files) {
@@ -87,9 +81,29 @@ export default class {
                 }
             }
         }
+        let intents = 0;
         try {
             let eventBits = await Promise.all(promises)
             eventBits = eventBits.filter(bit => bit)
+            eventBits.forEach(bit => {
+                if(bit.intents) {
+                    intents |= bit.intents
+                }
+            })
+            return { intents, events: eventBits }
+        } catch(err) {
+            this.#logger.severe('A failure occurred while pre-loading events.\n', err)
+        }
+    }
+    async load(client: Client, eventBits: EventBit[]) {
+
+        this.#manager = new EventManager(client);
+        patchEmitter(client, this.#manager)
+        if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
+            this.setupWatcher()
+        }
+
+        try {
             await Promise.all(eventBits.map(async(eventBit) => {
                 await this.#manager.register(eventBit.event, eventBit.name, eventBit.isCore)
             }))
@@ -128,5 +142,6 @@ async function loadEvent(rootPath: string, filename: string, isCore: boolean): P
         name: eventName[0],
         event,
         isCore,
+        intents: event.INTENTS
     }
 }

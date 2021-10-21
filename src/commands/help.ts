@@ -29,13 +29,15 @@ export default class extends Command {
                 const cmds = grouped[key]
                 if(cmds.length === 0) continue;
                 //send embed of commands, only if well there is commands
-                msg.author.send({embed:{
-                    title:`${group_name} Commands`,
-                    description: cmds.map((cmd: RegisteredCommand) => {
-                        const desc = cmd.help.description.replace(/\*\*/g,'\\**')
-                        return `**${cmd.name}** - ${desc}`
-                    }).join("\n")
-                }})
+                msg.author.send({ 
+                    embeds: [{
+                        title:`${group_name} Commands`,
+                        description: cmds.map((cmd: RegisteredCommand) => {
+                            const desc = cmd.help.description.replace(/\*\*/g,'\\**')
+                            return `**${cmd.name}** - ${desc}`
+                        }).join("\n")
+                    }]
+                })
             }
             //clarify (for other users and the author) thats in the dm
             msg.channel.send("** 📬 Help has been sent to your DM**")

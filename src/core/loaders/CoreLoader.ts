@@ -7,40 +7,55 @@ import EventLoader from './EventLoader.js'
 import CommandLoader from './CommandLoader.js'
 import ModuleLoader from './ModuleLoader.js'
 import SettingsManager from '../../managers/SettingsManager.js';
-
+import Functions from '../Functions.js'
 import Logger from '../../Logger.js'
 import { promises as fs } from 'fs';
-import { Client } from 'discord.js';
+import { Client, Intents } from 'discord.js';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default class CoreLoader {
     #logger: Logger;
     #client: Client;
     #shuttingDown: boolean = false
-    constructor(client: Client ) {
+    constructor(customIntents: Intents) {
         const logger = new Logger( 'CoreLoader' );
         this.#logger = logger;
-        this.#client = client;
+        this._load(customIntents)
+    }
+    async _load(customIntents: Intents) {
         try {
-            const moduleLoader = new ModuleLoader(client, new Logger("ModuleLoader"));
-            const commandLoader = new CommandLoader(client, new Logger("CommandLoader"));
-            const eventLoader = new EventLoader(client, new Logger("EventLoader"));
-            //TODO: Wait for moduleloader to finish, load cmd/event, finally send token
+            const ROOT_DIR = resolve(__dirname,"../../")
+            const moduleLoader = new ModuleLoader(ROOT_DIR, new Logger("ModuleLoader"));
+            const commandLoader = new CommandLoader(ROOT_DIR, new Logger("CommandLoader"));
+            const eventLoader = new EventLoader(ROOT_DIR, new Logger("EventLoader"));
             internalCustomCheck()
-            moduleLoader.load()
-                .then(() => commandLoader.load())
-                .then(() => eventLoader.load())
-                .catch(err => {
-                    logger.severe('Failed to load modules', err)
-                })
+
+            const { intents, events } = await eventLoader.preload()
+            customIntents.add(intents)
+            const client: Client = new Client({
+                intents: customIntents
+            });
+            Functions(client)
+
+            try {
+                await moduleLoader.load(client)
+                await commandLoader.load(client)
+                await eventLoader.load(client, events)
+            } catch(err) {
+                this.#logger.severe('Failed to load modules', err)
+            }
             if(!process.env.ZEKO_DISABLE_SETTINGS)
-                client.managers.settingsManager = new SettingsManager(client);
-            client.login(process.env.DISCORD_BOT_TOKEN)
+                // client.managers.settingsManager = new SettingsManager(client);
+            
             process.on('exit',    () => this.gracefulShutdown(false))
             process.on('SIGTERM', () => this.gracefulShutdown(true))
             process.on('SIGINT',  () => this.gracefulShutdown(true))
             process.on('SIGUSR2', () => this.gracefulShutdown(true))
         } catch (err) {
-            logger.severe('Manager loading failure:\n', err)
+            this.#logger.severe('Manager loading failure:\n', err)
         }
     }
     gracefulShutdown(exit: boolean) {
@@ -57,7 +72,7 @@ export default class CoreLoader {
         }
     }
 }
-async function internalCustomCheck() {
+async function internalCustomCheck(): Promise<void> {
     return new Promise((resolve, reject) => {
         const folders = ["commands", "events", "modules"]
         folders.forEach(v => {

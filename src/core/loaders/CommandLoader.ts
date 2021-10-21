@@ -24,14 +24,10 @@ export default class{
     #client: Client;
     #logger: Logger;
     #manager: CommandManager
-    constructor(client: Client, logger: Logger) {
-        this.#client = client;
+    #rootDir: string
+    constructor(rootDir: string, logger: Logger) {
+        this.#rootDir = rootDir
         this.#logger = logger;
-        this.#manager = new CommandManager(client)
-        client.managers.commandManager = this.#manager;
-        if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
-            this.setupWatcher()
-        }
     }
     
     setupWatcher() {
@@ -66,17 +62,25 @@ export default class{
             },500)
         })
     }
-    async load() {
+    async load(client: Client) {
+        this.#client = client;
+        this.#manager = new CommandManager(client)
+        client.managers.commandManager = this.#manager;
+        if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
+            this.setupWatcher()
+        }
+
         const promises: Promise<CommandBit>[] = [];
         for(const folder of folders) {
             const isCore = folder.startsWith("src/");
-            let filepath = path.join(this.#client.ROOT_DIR, folder);
+            let filepath = path.join(this.#rootDir, folder);
             try {
                 const files = await fs.readdir(filepath, { withFileTypes: true})
                 for(const dirent of files) {
                     //If it is a directory, it will be a group
                     let group = null;
                     if(dirent.isDirectory()) {
+                        if(dirent.name.toLowerCase() === "disabled") return
                         group = dirent.name;
                         const _filepath = path.join(filepath, group);
                         const folderFiles = await fs.readdir(_filepath);

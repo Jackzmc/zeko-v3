@@ -6,6 +6,10 @@
 import { Client } from "discord.js";
 import Logger from '../Logger'
 
+export interface EventConfig {
+    intents: number
+}
+
 /**
  * @property {Client} client Discord.js client
  * @property {Logger} logger Logger for class
@@ -24,6 +28,8 @@ export default class {
         this.client = client;
         this.logger = logger;
     }
+
+    config?(): Promise<Partial<EventConfig>> | Partial<EventConfig> | null;
 
     /**
      * Fires before the core event (if exists & this is custom event) is fired. Must return a promise.

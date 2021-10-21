@@ -6,6 +6,9 @@ import Logger from '../Logger.js'
 import { RegisteredCommand } from '../managers/CommandManager.js';
 import ModuleManager from '../managers/ModuleManager.js';
 import HelpModule from '../modules/help.js';
+import { Intents } from 'discord.js'
+
+export const INTENTS = Intents.FLAGS.GUILD_MESSAGES | Intents.FLAGS.DIRECT_MESSAGES
 
 export default class extends CoreEvent {
     #cmdManager: any;
@@ -20,6 +23,10 @@ export default class extends CoreEvent {
             logger.warn('Could not find help module, help method disabled.');
         }
     }
+    config() {
+        return {
+        }
+    }
     every(msg: Message): Promise<boolean> {
         return new Promise((resolve) => {
             if(msg.author.bot) return resolve(true); //Ignore bots.
@@ -31,7 +38,7 @@ export default class extends CoreEvent {
                 const command_name: string = /\s/.test(this.client.PREFIX) ? args.shift().toLowerCase() : args.shift().slice(this.client.PREFIX.length).toLowerCase();
                 const cmd: RegisteredCommand = this.#cmdManager.getCommand(command_name, true)
                 if(cmd) {
-                    if(cmd.config.guildOnly && msg.channel.type === "dm") {
+                    if(cmd.config.guildOnly && msg.channel.type === "DM") {
                         return msg.channel.send('This commanad only works in guilds.')
                     }
                     try {

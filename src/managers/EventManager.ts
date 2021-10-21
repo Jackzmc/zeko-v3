@@ -31,6 +31,7 @@ export default class EventManager extends Manager {
         core: Map<string, RegisteredCoreEvent>,
         custom: Map<string, RegisteredCustomEvent>
     }
+    #intents: number = 0
     /**
      * Create a new EventManager
      *
@@ -97,46 +98,14 @@ export default class EventManager extends Manager {
      * @param {boolean} [isCore=false] Is the event a core event? (Internal use only)
      * @returns {Promise<RegisteredCoreEvent | RegisteredCustomEvent}
      */
-    registerEvent(name: string, isCore: boolean = false) : Promise<RegisteredCoreEvent | RegisteredCustomEvent> {
-        return new Promise((resolve,reject) => {
-            const filepath = path.join(this.client.ROOT_DIR, isCore?"src/events":"events",`${name}.js`)
-            //delete require.cache[require.resolve(_path)];
-            import(`file://${filepath}`)
-            .then(event_src => {
-                if(isCore) {
-                    const event: CoreEvent = new event_src.default(this.client, new Logger(`event/${name}`))
-                    const registeredEvent = {
-                        event, 
-                        config: {
-                            core: isCore,
-                            name
-                        }
-                    }
-                    this.#events.core.set(name, registeredEvent);
-                    resolve(registeredEvent)
-                }else{
-                    const event: Event = new event_src.default(this.client, new Logger(`event/${name}`))
-                    const registeredEvent = {
-                        event, 
-                        config: {
-                            core: isCore,
-                            name
-                        }
-                    }
-                    this.#events.custom.set(name, registeredEvent);
-                    resolve(registeredEvent)
-                }
-            })
-        })
-    }
 
     async register(eventClass: any, name: string, isCore: boolean = false) : Promise<RegisteredCoreEvent | RegisteredCustomEvent>{
         if(!eventClass.default || typeof eventClass.default !== "function") {
             throw new Error('Invalid moduleClass: must be a class.')
         }
+        const registeredName = name.toLowerCase().replace('.js', '')
         if(isCore) {
             const event: CoreEvent = new eventClass.default(this.client, new Logger(`event/${name}`))
-            const registeredName = name.toLowerCase().replace('.js', '')
             const registeredEvent: RegisteredCoreEvent = {
                 event,
                 config: {
@@ -145,10 +114,12 @@ export default class EventManager extends Manager {
                 }
             }
             this.#events.core.set(registeredName, registeredEvent);
+            if(event.config) {
+                const config = await event.config()
+            }
             return registeredEvent;
         }else{
             const event: Event = new eventClass.default(this.client, new Logger(`event/${name}`))
-            const registeredName = name.toLowerCase().replace('.js', '')
             const registeredEvent: RegisteredCustomEvent = {
                 event,
                 config: {
@@ -157,6 +128,9 @@ export default class EventManager extends Manager {
                 }
             }
             this.#events.custom.set(registeredName, registeredEvent);
+            if(event.config) {
+                const config = await event.config()
+            }
             return registeredEvent;
         }
     }
@@ -222,7 +196,7 @@ export default class EventManager extends Manager {
      *
      * @readonly
      */
-    get coreLoaded() : number {
+    get coreLoaded(): number {
         return this.#events.core.size;
     }
     
@@ -231,10 +205,9 @@ export default class EventManager extends Manager {
      *
      * @readonly
      */
-    get customLoaded() :number {
+    get customLoaded(): number {
         return this.#events.custom.size;
     }
-
     
     /**
      * Returns all event objects

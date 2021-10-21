@@ -26,16 +26,10 @@ export default class {
     #client: Client
     #logger: Logger
     #manager: ModuleManager
-    constructor(client: Client, logger: Logger) {
-        //this.setupWatcher()
-        this.#client = client;
+    #rootDir: string
+    constructor(rootDir: string, logger: Logger) {
+        this.#rootDir = rootDir;
         this.#logger = logger;
-
-        this.#manager = new ModuleManager(client);
-        client.managers.moduleManager = this.#manager;
-        if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
-            this.setupWatcher()
-        }
     }
     setupWatcher() {
         const distFolders = folders.map(v => path.join('dist',v))
@@ -69,11 +63,16 @@ export default class {
             },500)
         })
     }
-    async load(): Promise<void> {
+    async load(client: Client): Promise<void> {
+        this.#manager = new ModuleManager(client);
+        client.managers.moduleManager = this.#manager;
+        if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
+            this.setupWatcher()
+        }
         const promises: Promise<ModuleBit>[] = [];
         for(const folder of folders) {
             const isCore = folder.startsWith("src/")
-            let filepath = path.join(this.#client.ROOT_DIR, folder);
+            let filepath = path.join(this.#rootDir, folder);
             try {
                 const files = await fs.readdir(filepath, { withFileTypes: true})
                 for(const dirent of files) {
