@@ -52,6 +52,7 @@ export default class CoreLoader {
             if(!process.env.ZEKO_DISABLE_SETTINGS)
                 // client.managers.settingsManager = new SettingsManager(client);
             
+            client.login(process.env.DISCORD_BOT_TOKEN)
             process.on('exit',    () => this.gracefulShutdown(false))
             process.on('SIGTERM', () => this.gracefulShutdown(true))
             process.on('SIGINT',  () => this.gracefulShutdown(true))
