@@ -9,8 +9,10 @@ export default class OptionResult {
     #results: SlashCommandOptionList
     constructor(results: CommandInteractionOptionResolver, options: SlashCommandSubOption[]) {
         this.#results = {}
-        for(const option of options) {
-            this.#results[option.name] = results.get(option.name, option.required)
+        if(options) {
+            for(const option of options) {
+                this.#results[option.name] = results.get(option.name, option.required)
+            }
         }
     }
 
