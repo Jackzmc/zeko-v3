@@ -2,7 +2,7 @@
  @module types/Command
  @description The Commands class
 */
-import Discord from 'discord.js';
+import Discord, { CommandInteraction } from 'discord.js';
 import Logger from '../Logger'
 import OptionResult from '../types/OptionResult.js';
 
@@ -22,7 +22,7 @@ export interface SlashCommandSubOption {
     choices?: Record<string, string>
 }
 
-export { OptionResult }
+export { OptionResult, CommandInteraction }
 
 export default abstract class SlashCommand {
     protected client: Discord.Client;
