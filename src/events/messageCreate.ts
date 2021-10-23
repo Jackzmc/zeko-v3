@@ -17,14 +17,15 @@ export default class extends CoreEvent {
     constructor(client: Client, logger: Logger) {
         super(client, logger);
         this.#cmdManager = client.managers.commandManager;
-        this.#generateHelpCommand = (CommandManager.getInstance().getSlashCommand('help', true).command as HelpCommand).generateHelpCommand
+        const helpCmd = CommandManager.getInstance().getSlashCommand('help', true).command as HelpCommand
+        if(helpCmd) this.#generateHelpCommand = helpCmd.generateHelpCommand
+        else logger.warn(`Could not find internal help command, legacy command usage help will not run properly`)
     }
     config() {
         return {
         }
     }
     every(msg: Message): Promise<boolean> {
-        this.logger.debug('msg')
         return new Promise((resolve) => {
             if(msg.author.bot) return resolve(true); //Ignore bots.
             if(msg.content.startsWith(this.client.PREFIX)) {
