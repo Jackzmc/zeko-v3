@@ -25,6 +25,11 @@ export interface RegisteredEventConfig {
     name: string
 }
 
+// Will automatically add intents if any event from list registered
+const eventRequiredIntents = {
+    "messageCreate": []
+}
+
 
 export default class EventManager extends Manager {
     #events: {

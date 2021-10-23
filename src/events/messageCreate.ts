@@ -17,8 +17,8 @@ export default class extends CoreEvent {
     constructor(client: Client, logger: Logger) {
         super(client, logger);
         this.#cmdManager = client.managers.commandManager;
-        const helpCmd = CommandManager.getInstance().getSlashCommand('help', true).command as HelpCommand
-        if(helpCmd) this.#generateHelpCommand = helpCmd.generateHelpCommand
+        const helpCmd = CommandManager.getInstance().getSlashCommand('help', true)
+        if(helpCmd) this.#generateHelpCommand = (helpCmd.command as HelpCommand).generateHelpCommand
         else logger.warn(`Could not find internal help command, legacy command usage help will not run properly`)
     }
     config() {
