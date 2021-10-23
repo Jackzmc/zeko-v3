@@ -339,6 +339,7 @@ export default class CommandManager extends Manager {
     async registerPending() {
         await this.client.application.commands.set([])
         for(const slash of this.#pendingSlash) {
+            this.logger.debug(`Registering slash command \"${slash.data.name}\" with ${slash.data.options?.length} options`)
             const cmd = await this.client.application.commands.create(slash.builder.toJSON(), slash.guild)
             const registeredCommand: RegisteredSlashCommand = {
                 ...slash,
