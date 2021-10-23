@@ -69,7 +69,6 @@ export default class{
         if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
             this.setupWatcher()
         }
-
         const promises: Promise<CommandBit>[] = [];
         for(const folder of folders) {
             const isCore = folder.startsWith("src/");
@@ -80,7 +79,7 @@ export default class{
                     //If it is a directory, it will be a group
                     let group = null;
                     if(dirent.isDirectory()) {
-                        if(dirent.name.toLowerCase() === "disabled") return
+                        if(dirent.name.toLowerCase() === "disabled") continue
                         group = dirent.name;
                         const _filepath = path.join(filepath, group);
                         const folderFiles = await fs.readdir(_filepath);
