@@ -10,7 +10,7 @@ export interface SlashCommandOption {
     name: string,
     description?: string,
     guild?: Discord.Snowflake
-    options?: SlashCommandSubOption[]
+    options?: SlashCommandSubOption[],
 }
 
 export interface SlashCommandSubOption {
@@ -18,7 +18,8 @@ export interface SlashCommandSubOption {
     type: Discord.ApplicationCommandOptionType,
     required: boolean
     description?: string,
-    options?: SlashCommandOption[]
+    options?: SlashCommandOption[],
+    choices?: Record<string, string>
 }
 
 export { OptionResult }

@@ -293,7 +293,13 @@ export default class CommandManager extends Manager {
 
     private addSlashOption(builder: SlashCommandBuilder, data: SlashCommandSubOption) {
         function setData(option) {
-            return option.setName(data.name).setDescription(data.description)
+            option = option.setName(data.name).setDescription(data.description)
+            if(data.choices) {
+                for(const name in data.choices) {
+                   option.addChoice(name, data.choices[name])
+                }
+            }
+            return option
         }
         switch(data.type) {
             case "BOOLEAN":
