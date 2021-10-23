@@ -101,7 +101,6 @@ export default class{
             let bits = await Promise.all(promises);
             bits = bits.filter(bit => bit)
             await Promise.all(bits.map(async(bit) => {
-                this.#logger.debug(`loading ${bit.name} of group ${bit.group}`)
                 await this.#manager.register(bit.command, bit.name, bit.group, bit.isCore)
             }))
             this.#logger.success(`Loaded ${this.#manager.commandsCount} commands, ${this.#manager.aliasesCount} aliases`)
