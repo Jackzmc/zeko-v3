@@ -4,9 +4,14 @@
 */
 import path from 'path'
 import Logger from '../Logger.js'
-import { Client, Collection } from 'discord.js';
-import Command, { CommandConfigOptions, CommandHelpOptions } from '../types/Command.js';
+import { Client, Collection, ApplicationCommand, Snowflake, ApplicationCommandOption } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/Command.js';
+import SlashCommand, { SlashCommandOption, SlashCommandSubOption } from '../types/SlashCommand.js'
 import Manager from './Manager.js';
+import { mkdir, readFile, writeFile } from 'fs/promises'
+import DataManager from './DataManager.js';
+import deepEqual from 'deep-equal'
 
 let instance;
 //TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that
@@ -22,7 +27,24 @@ let instance;
  * @property {types/Command} command - The actual command class
  */
  
-export interface RegisteredCommand {
+export interface RegisteredSlashCommand {
+    group?: string
+    isCore: boolean
+    command: SlashCommand,
+    data: SlashCommandOption,
+    slashCommand: ApplicationCommand
+}
+
+export interface PendingSlashCommand {
+    group?: string
+    isCore: boolean
+    command: SlashCommand,
+    data: SlashCommandOption,
+    builder: SlashCommandBuilder,
+    guild: Snowflake
+}
+
+export interface RegisteredLegacyCommand {
     config: CommandConfigOptions
     help: CommandHelpOptions
     group?: string
@@ -31,18 +53,26 @@ export interface RegisteredCommand {
     command: Command
 }
 
+
+export type RegisteredCommand = RegisteredSlashCommand | RegisteredLegacyCommand
+
+
 export default class CommandManager extends Manager {
     /**
      * Create a new CommandManager
      *
      * @param {Client} client The current discord.js client
      */
-    #commands: Collection<string, RegisteredCommand>
+    #commands: Collection<string, RegisteredLegacyCommand>
     #aliases: Collection<string, string>
+    #slashCommands:  Collection<string, RegisteredSlashCommand>
+    #pendingSlash: PendingSlashCommand[]
     #groups: string[]
     constructor(client: Client) {
         super(client, 'CommandManager')
         this.#commands = new Collection();
+        this.#slashCommands = new Collection()
+        this.#pendingSlash = []
         this.#aliases = new Collection();
         this.#groups = [];
         
@@ -59,6 +89,20 @@ export default class CommandManager extends Manager {
         return instance;
     }
 
+    async register(commandClass: any, filename: string, group: string = "default", isCore: boolean): Promise<RegisteredLegacyCommand | PendingSlashCommand> {
+        if(!commandClass.default || typeof commandClass.default !== "function") {
+            throw new Error('Invalid commandClass: must be a class.')
+        }else if(commandClass.default !instanceof Command) {
+            throw new Error('commandClass must contain a default Command class.')
+        }
+        const command: (Command|SlashCommand) = new commandClass.default(this.client, new Logger(`cmd/${filename}`))
+        if('slashConfig' in command) {
+            return this.registerSlashCommand(command, isCore, group)
+        } else {
+            return this.registerLegacy(commandClass, filename, group, isCore)
+        }
+    }
+
     /**
      * Registers a command with the CommandManager
      *
@@ -68,9 +112,9 @@ export default class CommandManager extends Manager {
      * @param {boolean} isCore Is the plugin a core plugin? 
      * @returns {Promise<RegisteredCommand}
      */
-    async register(commandClass: any, filename: string, group: string = "default", isCore: boolean): Promise<RegisteredCommand> {
+    async registerLegacy(commandClass: any, filename: string, group: string = "default", isCore: boolean): Promise<RegisteredLegacyCommand> {
         if(!commandClass.default || typeof commandClass.default !== "function") {
-            throw new Error('Invalid moduleClass: must be a class.')
+            throw new Error('Invalid commandClass: must be a class.')
         }else if(commandClass.default !instanceof Command) {
             throw new Error('commandClass must contain a default Command class.')
         }
@@ -85,7 +129,7 @@ export default class CommandManager extends Manager {
             delete command.help;
             delete command.config;
 
-            const registeredCommand: RegisteredCommand = {
+            const registeredCommand: RegisteredLegacyCommand = {
                 help,
                 group,
                 isCore,
@@ -104,6 +148,45 @@ export default class CommandManager extends Manager {
                 this.#groups.push(group)
             }
             return registeredCommand;
+        } catch(err) {
+            throw err
+        }
+    }
+
+        /**
+     * Registers a command with the CommandManager
+     *
+     * @param {any} commandClass The display name of the command. Also used as ID
+     * @param {string} filename
+     * @param {string} [group="default"] The command's group or null/default for misc
+     * @param {boolean} isCore Is the plugin a core plugin? 
+     * @returns {Promise<RegisteredCommand}
+     */
+    async registerSlashCommand(command: SlashCommand, isCore: boolean, group: string = "default"): Promise<PendingSlashCommand> {
+        try {
+            const data = command.slashConfig()
+
+            let builder = new SlashCommandBuilder()
+                .setName(data.name)
+                .setDescription(data.description)
+            for(const option of data.options) {
+                builder = this.addSlashOption(builder, option)
+            }
+            const pendingCommand: PendingSlashCommand = {
+                group,
+                isCore,
+                command,
+                data,
+                builder,
+                guild: data.guild
+            }
+
+            this.#pendingSlash.push(pendingCommand)
+            //Add to list of groups.
+            if(group !== "default" && !this.#groups.includes(group)) {
+                this.#groups.push(group)
+            }
+            return pendingCommand;
         } catch(err) {
             throw err
         }
@@ -130,7 +213,7 @@ export default class CommandManager extends Manager {
      * @param {boolean} [includeHidden=false] Should hidden commands (cmd.config.hidden) be provided?
      * @returns {?RegisteredCommand}
      */
-    getCommand(name: string, includeHidden:boolean = false) : RegisteredCommand {
+    getCommand(name: string, includeHidden:boolean = false) : RegisteredLegacyCommand {
         const command = this.#commands.get(name);
         if(!command) {
             const alias = this.#aliases.get(name);
@@ -155,17 +238,17 @@ export default class CommandManager extends Manager {
      * @param {boolean} includeHidden Should hidden commands be provided?
      * @returns {RegisteredCommand} 
      */
-    getCommandsGrouped(includeHidden?: boolean, onlyKeys?: boolean): { [group: string]: RegisteredCommand[] | string[] } {
+    getCommandsGrouped(includeHidden?: boolean, onlyKeys?: boolean): { [group: string]: RegisteredLegacyCommand[] | string[] } {
         let object = {}
         this.#commands.forEach((cmd,key) => {
             const group = cmd.isCore ? 'core' : ((cmd.group === "default") ? 'misc' : cmd.group);
 
             if(!object[group]) object[group] = []
-            if(includeHidden || !cmd.config.hidden) object[group].push(onlyKeys ? key : cmd);
+            if(includeHidden || (cmd.config && !cmd.config.hidden)) object[group].push(onlyKeys ? key : cmd);
         })
         return object;
     }
-    getCommands(includeHidden?: boolean) : Collection<string, RegisteredCommand> {
+    getCommands(includeHidden?: boolean) : Collection<string, RegisteredLegacyCommand> {
         return includeHidden ? this.#commands.filter(v => !v.config.hidden) : this.#commands
     }
 
@@ -207,4 +290,119 @@ export default class CommandManager extends Manager {
         })
         return Promise.all(promises)
     }
+
+    private addSlashOption(builder: SlashCommandBuilder, data: SlashCommandSubOption) {
+        function setData(option) {
+            return option.setName(data.name).setDescription(data.description)
+        }
+        switch(data.type) {
+            case "BOOLEAN":
+                builder.addBooleanOption(setData)
+                break
+            case "STRING":
+                builder.addStringOption(setData)
+                break
+            case "INTEGER":
+                builder.addIntegerOption(setData)
+                break
+            case "USER":
+                builder.addUserOption(setData)
+                break
+            case "CHANNEL":
+                builder.addChannelOption(setData)
+                break
+            case "NUMBER":
+                builder.addNumberOption(setData)
+                break
+            case "NUMBER":
+                builder.addNumberOption(setData)
+                break
+            case "ROLE":
+                builder.addRoleOption(setData)
+                break
+            case "MENTIONABLE":
+                builder.addMentionableOption(setData)
+                break    
+            case "SUB_COMMAND":
+                builder.addSubcommand(setData)
+                break    
+        }
+        return builder
+    }
+
+    async registerPending() {
+        const slashReg = path.join(DataManager.getDataDirectory(), `slash-commands.json`)
+        let data: Record<string, SavedSlashCommandData> = {};
+        let newData: Record<string, SavedSlashCommandData> = {}
+        // Grab slash commands 
+        try {
+            const raw = await readFile(slashReg, "utf8") //For some dumb reason, readFile from promises still error'd?
+            data = JSON.parse(raw)
+        } catch(err) { }
+
+        for(const slash of this.#pendingSlash) {
+            let cmd: ApplicationCommand;
+            if(data[slash.data.name]) {
+                const json = slash.builder.toJSON()
+                if(deepEqual(json, data[slash.data.name].data)) {
+                    cmd = await this.client.application.commands.fetch(data[slash.data.name].id, {
+                        guildId: slash.guild
+                    })
+                    if(cmd) {
+                        try {
+                            // @ts-ignore
+                            cmd = await cmd.edit(json)
+                        } catch(err) {
+                            this.logger.warn(`Could not update \"${slash.data.name}\": ${err.message}`)
+                        }
+                        newData[slash.data.name] = { 
+                            id: cmd.id,
+                            data: json
+                        }
+                    } else {
+                        this.logger.warn(`Not registering command \"${slash.data.name}\", pre-existing command no longer exists.`)
+                        continue
+                    }
+                }
+                delete data[slash.data.name]
+            } else {
+                const json = slash.builder.toJSON()
+                cmd = await this.client.application.commands.create(json, slash.guild)
+                newData[slash.data.name] = { 
+                    id: cmd.id,
+                    data: json
+                }
+                this.logger.debug(`registered new command \"${slash.data.name}\"`)
+            }
+
+            const registeredCommand: RegisteredSlashCommand = {
+                ...slash,
+                slashCommand: cmd
+            }
+            this.#slashCommands.set(slash.data.name.toLowerCase(), registeredCommand)
+        }
+
+        for(const name in data) {
+            await this.client.application.commands.delete(data[name].id)
+            this.logger.debug(`Deleting slash command \"${name}\" (not defined)`)
+        }
+        // Save slash commands to edit them:
+        try {
+            await mkdir(DataManager.getDataDirectory()).catch(() => {})
+            await writeFile(slashReg, JSON.stringify(newData))
+        } catch(err) { 
+            this.logger.warn(`Failed to write slash command id registry file (data/slash-commands.json): ${err}`)
+        }
+    }
+
+    getSlashCommand(name: string, fetchPending: boolean = false): RegisteredSlashCommand | PendingSlashCommand | null {
+        const cmd = this.#slashCommands.get(name.toLowerCase())
+        if(!cmd && fetchPending) return this.#pendingSlash.find(v => v.data.name.toLowerCase() === name.toLowerCase())
+        return cmd
+    }
+}
+
+interface SavedSlashCommandData {
+    id: Snowflake,
+    data: any
 }
