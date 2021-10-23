@@ -19,6 +19,10 @@ export default class {
         this.#mod = name
     }
 
+    setPrefix(prefix: string) {
+        this.#mod = prefix
+    }
+
     /**
      * Normal log
      *

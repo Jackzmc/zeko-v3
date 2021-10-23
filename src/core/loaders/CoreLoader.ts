@@ -22,7 +22,7 @@ export default class CoreLoader {
     #shuttingDown: boolean = false
 
     constructor() {
-        const logger = new Logger( 'CoreLoader' );
+        const logger = new Logger( 'Core' );
         this.#logger = logger;
     }
     async load(customIntents: Intents) {
