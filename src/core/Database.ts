@@ -2,7 +2,7 @@
  @module core:Database
  @description Only used for core atm. Exposes rethinkdb instance.
 */
-import 'dotenv/config.js'
+import 'dotenv/config'
 import rethinkdb from 'rethinkdbdash'
 import Logger from '../Logger.js';
 

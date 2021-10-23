@@ -63,6 +63,7 @@ export default class EventManager extends Manager {
      * @param {string} name The name of event
      * @param {...*} args Any discord.js event arguments
      */
+    //Optimize, to use list of hooks per discord event? 
     event(name: string, args: any[]) {
         const core: RegisteredCoreEvent = this.getCoreEvent(name);
         const custom: RegisteredCustomEvent = this.getCustomEvent(name);

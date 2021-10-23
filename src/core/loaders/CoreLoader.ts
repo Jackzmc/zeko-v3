@@ -21,38 +21,45 @@ export default class CoreLoader {
     #client: Client;
     #shuttingDown: boolean = false
 
-    constructor(customIntents: Intents) {
+    constructor() {
         const logger = new Logger( 'CoreLoader' );
         this.#logger = logger;
-        this._load(customIntents)
     }
-    async _load(customIntents: Intents) {
+    async load(customIntents: Intents) {
         try {
+            // Initialize all loaders
             const ROOT_DIR = resolve(__dirname,"../../../")
             const moduleLoader = new ModuleLoader(ROOT_DIR, new Logger("ModuleLoader"));
             const commandLoader = new CommandLoader(ROOT_DIR, new Logger("CommandLoader"));
             const eventLoader = new EventLoader(ROOT_DIR, new Logger("EventLoader"));
             internalCustomCheck()
 
+            // Event loader must be preloaded to grab any intents any event may need
             const { intents, events } = await eventLoader.preload()
             customIntents.add(intents)
+            this.#logger.info(`Registered intents: ${customIntents.toArray()}`)
+
+            // Create client with intents
             const client: Client = new Client({
                 intents: customIntents
             });
             this.#client = client
             Functions(client)
 
+            // Everything's ready, load the loaders
             try {
                 await moduleLoader.load(client)
                 await commandLoader.load(client)
                 await eventLoader.load(client, events)
             } catch(err) {
-                this.#logger.severe('Failed to load modules', err)
+                this.#logger.severe('Failed to load modules', err.stack)
+                process.exit(3)
             }
             if(!process.env.ZEKO_DISABLE_SETTINGS)
                 // client.managers.settingsManager = new SettingsManager(client);
             
             client.login(process.env.DISCORD_BOT_TOKEN)
+
             process.on('exit',    () => this.gracefulShutdown(false))
             process.on('SIGTERM', () => this.gracefulShutdown(true))
             process.on('SIGINT',  () => this.gracefulShutdown(true))
