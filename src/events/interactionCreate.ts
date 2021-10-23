@@ -21,14 +21,20 @@ export default class extends CoreEvent {
             try {
                 await slash.command.run(interaction, options)
             } catch(err) {
-                if(!interaction.replied)
-                    interaction.reply('**Command Error**\n`' + err.message + "`")
+                if(interaction.replied)
+                    await interaction.editReply('**Command Error**\n`' + err.message + "`")
+                    .catch(err => this.logger.warn("Failed to send command error message",err.message))
+                else
+                    await interaction.reply('**Command Error**\n`' + err.message + "`")
                     .catch(err => this.logger.warn("Failed to send command error message",err.message))
                 this.logger.warn(`Command ${slash.data.name} had an error:\n    `, err.stack)
                 return false
             }
         } catch(err) {
-            await interaction.reply(err.message)
+            if(interaction.replied)
+                await interaction.editReply(err.message)
+            else
+                await interaction.reply(err.message)
         }
         return true
     }
