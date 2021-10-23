@@ -19,6 +19,7 @@ let instance: any;
 
 export interface RegisteredModule extends Registered {
     module: Module,
+    name: string
 }
 
 
@@ -54,11 +55,18 @@ export default class ModuleManager extends Manager {
 
     //Called internally by src/events/ready on once(), and is then sent to all modules
     ready() {
-        for(const {module} of this.#modules.core.values()) {
-            if(module.ready) module.ready()
-        }
-        for(const {module} of this.#modules.custom.values()) {
-            if(module.ready) module.ready()
+        const modules = [
+            ...this.#modules.core.values(),
+            ...this.#modules.custom.values()
+        ]
+        for(const { module, name } of modules) {
+            if(module.ready) {
+                try {
+                    module.ready()
+                }catch(err) {
+                    this.logger.error(`Module ${name}.ready() returned error: `, err)
+                }
+            }
         }
     }
 
