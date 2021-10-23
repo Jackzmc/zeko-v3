@@ -5,7 +5,8 @@ import CoreLoader from './src/core/loaders/CoreLoader.js'
 // Fetch envs and any intents from env variable
 const envs = EnvLoader()
 const customIntents = new Discord.Intents();
-customIntents.add(envs.privilegedIntents as Discord.BitFieldResolvable<Discord.IntentsString,number>[])
+if(envs.privilegedIntents)
+	customIntents.add(envs.privilegedIntents as Discord.BitFieldResolvable<Discord.IntentsString,number>[])
 
 // All core logic moved into loader:
 new CoreLoader().load(customIntents);
