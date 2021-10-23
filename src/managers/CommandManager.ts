@@ -170,8 +170,10 @@ export default class CommandManager extends Manager {
             let builder = new SlashCommandBuilder()
                 .setName(data.name)
                 .setDescription(data.description)
-            for(const option of data.options) {
-                builder = this.addSlashOption(builder, option)
+            if(data.options) {
+                for(const option of data.options) {
+                    builder = this.addSlashOption(builder, option)
+                }
             }
             const pendingCommand: PendingSlashCommand = {
                 group,
@@ -341,7 +343,6 @@ export default class CommandManager extends Manager {
         await this.client.application.commands.set([])
         for(const slash of this.#pendingSlash) {
             const guild = process.env.DISCORD_FORCE_SLASH_GUILD || slash.guild
-            this.logger.debug(`Registering slash command \"${slash.data.name}\" with ${slash.data.options?.length} options guild=${guild||'none'}`)
             const cmd = await this.client.application.commands.create(slash.builder.toJSON(), guild)
             const registeredCommand: RegisteredSlashCommand = {
                 ...slash,
