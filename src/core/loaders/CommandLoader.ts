@@ -70,31 +70,30 @@ export default class{
             this.setupWatcher()
         }
         const promises: Promise<CommandBit>[] = [];
-        for(const folder of folders) {
-            const isCore = folder.startsWith("src/");
-            let filepath = path.join(this.#rootDir, folder);
+        for(const cmdFolder of folders) {
+            const isCore = cmdFolder.startsWith("src/");
+            let filepath = path.join(this.#rootDir, cmdFolder);
             try {
                 const files = await fs.readdir(filepath, { withFileTypes: true})
-                for(const dirent of files) {
+                for(const parent of files) {
                     //If it is a directory, it will be a group
-                    let group = null;
-                    if(dirent.isDirectory()) {
-                        if(dirent.name.toLowerCase() === "disabled") continue
-                        group = dirent.name;
-                        const _filepath = path.join(filepath, group);
-                        const folderFiles = await fs.readdir(_filepath);
-                        for(const filename of folderFiles) {
-                            promises.push(loadCommand(_filepath, filename, group, isCore))
+                    if(parent.isDirectory()) {
+                        if(parent.name.toLowerCase() === "disabled") continue
+                        // parent is a folder, mark it as group and get its children:
+                        const group = parent.name;
+                        const cmdRoot = path.join(filepath, group)
+                        const files = await fs.readdir(cmdRoot);
+                        for(const filename of files) {
+                            promises.push(loadCommand(cmdRoot, filename, group, isCore))
                         }
                     }else{
-                        promises.push(loadCommand(filepath, dirent.name, group, isCore));
+                        // parent is directly in commands/, no group
+                        promises.push(loadCommand(filepath, parent.name, null, isCore));
                     }
                 }
             }catch(err) {
-                if(err.code === "ENOENT") {
-                    //this.#logger.warn(`'${folder}' directory does not exist.`)
-                }else {
-                    this.#logger.error(`Loading ${folder} failed:\n`, err);
+                if(err.code !== "ENOENT") {
+                    this.#logger.error(`Loading ${parent.name} failed:\n`, err);
                 }
             }
         }
@@ -102,6 +101,7 @@ export default class{
             let bits = await Promise.all(promises);
             bits = bits.filter(bit => bit)
             await Promise.all(bits.map(async(bit) => {
+                this.#logger.debug(`loading ${bit.name} of group ${bit.group}`)
                 await this.#manager.register(bit.command, bit.name, bit.group, bit.isCore)
             }))
             this.#logger.success(`Loaded ${this.#manager.commandsCount} commands, ${this.#manager.aliasesCount} aliases`)
