@@ -1,4 +1,4 @@
-import SlashCommand, { SlashCommandOption, OptionResult } from '../types/Slashcommand.js'
+import SlashCommand, { SlashCommandOption, OptionResult } from '../types/SlashCommand.js'
 import { CommandInteraction, Client } from 'discord.js';
 import CommandManager , { RegisteredCommand, RegisteredLegacyCommand } from '../managers/CommandManager.js';
 import Logger from "../Logger.js";

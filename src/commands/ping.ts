@@ -1,4 +1,4 @@
-import SlashCommand, { SlashCommandOption, OptionResult } from '../types/Slashcommand.js'
+import SlashCommand, { SlashCommandOption, OptionResult } from '../types/SlashCommand.js'
 import { CommandInteraction} from 'discord.js';
 
 export default class extends SlashCommand {
