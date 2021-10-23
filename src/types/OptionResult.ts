@@ -1,18 +1,17 @@
-import { CommandInteractionOption, User, GuildMember, GuildChannel, ThreadChannel, CommandInteractionOptionResolver } from 'discord.js'
+import { CommandInteractionOption, User, GuildMember, GuildChannel, ThreadChannel, CommandInteractionOptionResolver, Role } from 'discord.js'
 import { SlashCommandSubOption } from '../types/SlashCommand.js'
 
 export interface SlashCommandOptionList {
-    [key: string]: string | number | boolean | User | GuildMember | GuildChannel | ThreadChannel | CommandInteractionOption[]
+    [key: string]: CommandInteractionOption
 }
 
 export default class OptionResult {
-    #results: SlashCommandOptionList[]
+    #results: SlashCommandOptionList
     constructor(results: CommandInteractionOptionResolver, options: SlashCommandSubOption[]) {
-        console.log(options)
+        this.#results = {}
         for(const option of options) {
             this.#results[option.name] = results.get(option.name, option.required)
         }
-        console.log('done')
     }
 
     get size() {
@@ -20,43 +19,43 @@ export default class OptionResult {
     }
 
     has(name: string) {
-        return this.#results[name] !== undefined;
+        return this.#results[name] !== undefined && this.#results[name] !== null;
     }
 
-    getString(name: string) {
-        return this.#results[name].option.value;
+    getString(name: string): string {
+        return this.has(name) ? this.#results[name].value as string : null
     }
 
-    getBoolean(name: string) {
-        return this.#results[name].option.value;
+    getBoolean(name: string): boolean {
+        return this.has(name) ? this.#results[name].value as boolean : null
     }
 
     getInteger(name: string) {
-        return this.#results[name].option.value;
+        return this.has(name) ? this.#results[name].value as number : null
     }
 
     getUser(name: string): User {
-        return this.#results[name].option.user;
+        return this.has(name) ? this.#results[name].user : null
     }
 
     getMember(name: string): GuildMember {
-        return this.#results[name].option.member;
+        return this.has(name) ? this.#results[name].member as GuildMember : null
     }
 
     getChannel(name: string): GuildChannel | ThreadChannel {
-        return this.#results[name].option.channel;
+        return this.has(name) ? this.#results[name].channel as (GuildChannel | ThreadChannel) : null
     }
 
     getMentionable(name: string) {
-        return this.#results[name].option.member || this.#results[name].option.user || this.#results[name].option.role;
+        return this.has(name) ? this.#results[name].member || this.#results[name].user|| this.#results[name].role : null
     }
 
-    getRole(name: string) {
-        return this.#results[name].option.role;
+    getRole(name: string): Role {
+        return this.has(name) ? this.#results[name].role as Role : null
     }
 
     getOptions(name: string): CommandInteractionOption[] {
-        return this.#results[name].option.options;
+        return this.has(name) ? this.#results[name].options : null
     }
 
 } 

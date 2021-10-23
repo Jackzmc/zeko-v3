@@ -17,16 +17,6 @@ export default class extends CoreEvent {
         const slash = this.#cmdManager.getSlashCommand(interaction.commandName)
         if(!slash) return;
         let options: OptionResult = new OptionResult(interaction.options, slash.data.options)
-        for(const option of slash.data.options) {
-            const data = interaction.options.get(option.name, option.required)
-            if(data.value) {
-                if(option.type === "STRING") options[option.name] = data.value.toString()
-                else if(option.type === "BOOLEAN") options[option.name] = data.value.toString() === "true"
-                else if(option.type === "NUMBER") options[option.name] = Number(data.value)
-            } else {
-                options[option.name] = data.user || data.member || data.channel || data.role || data.options
-            }
-        }
         try {
             await slash.command.run(interaction, options)
         } catch(err) {

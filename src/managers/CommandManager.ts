@@ -331,6 +331,18 @@ export default class CommandManager extends Manager {
     }
 
     async registerPending() {
+        await this.client.application.commands.set([])
+        for(const slash of this.#pendingSlash) {
+            const cmd = await this.client.application.commands.create(slash.builder.toJSON(), slash.guild)
+            const registeredCommand: RegisteredSlashCommand = {
+                ...slash,
+                slashCommand: cmd
+            }
+            this.#slashCommands.set(slash.data.name.toLowerCase(), registeredCommand)
+        }
+    }
+
+    async registerPendingOld() {
         const slashReg = path.join(DataManager.getDataDirectory(), `slash-commands.json`)
         let data: Record<string, SavedSlashCommandData> = {};
         let newData: Record<string, SavedSlashCommandData> = {}
