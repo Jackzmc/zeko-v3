@@ -16,15 +16,19 @@ export default class extends CoreEvent {
 
         const slash = this.#cmdManager.getSlashCommand(interaction.commandName)
         if(!slash) return;
-        let options: OptionResult = new OptionResult(interaction.options, slash.data.options)
         try {
-            await slash.command.run(interaction, options)
+            let options: OptionResult = new OptionResult(interaction.options, slash.data.options)
+            try {
+                await slash.command.run(interaction, options)
+            } catch(err) {
+                if(!interaction.replied)
+                    interaction.reply('**Command Error**\n`' + err.message + "`")
+                    .catch(err => this.logger.warn("Failed to send command error message",err.message))
+                this.logger.warn(`Command ${slash.data.name} had an error:\n    `, err.stack)
+                return false
+            }
         } catch(err) {
-            if(!interaction.replied)
-                interaction.reply('**Command Error**\n`' + err.message + "`")
-                .catch(err => this.logger.warn("Failed to send command error message",err.message))
-            this.logger.warn(`Command ${slash.data.name} had an error:\n    `, err.stack)
-            return false
+            await interaction.reply(err.message)
         }
         return true
     }
