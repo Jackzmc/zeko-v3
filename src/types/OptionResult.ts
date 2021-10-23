@@ -12,6 +12,7 @@ export default class OptionResult {
         if(options) {
             for(const option of options) {
                 this.#results[option.name] = results.get(option.name, option.required)
+                if(option.default !== undefined && !this.#results[option.name]) this.#results[option.name] = option.default
             }
         }
     }
