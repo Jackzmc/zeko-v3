@@ -96,10 +96,11 @@ export default class CommandManager extends Manager {
             throw new Error('commandClass must contain a default Command class.')
         }
         const command: (Command|SlashCommand) = new commandClass.default(this.client, new Logger(`cmd/${filename}`))
-        if('slashConfig' in command) {
-            return this.registerSlashCommand(command, isCore, group)
+        // No clue why the other way around doesn't work (SlashCommand vs. Command)
+        if(command instanceof Command) {
+            return this.registerLegacyCommand(commandClass, filename, group, isCore)
         } else {
-            return this.registerLegacy(commandClass, filename, group, isCore)
+            return this.registerSlashCommand(command, isCore, group)
         }
     }
 
@@ -112,7 +113,7 @@ export default class CommandManager extends Manager {
      * @param {boolean} isCore Is the plugin a core plugin? 
      * @returns {Promise<RegisteredCommand}
      */
-    async registerLegacy(commandClass: any, filename: string, group: string = "default", isCore: boolean): Promise<RegisteredLegacyCommand> {
+    async registerLegacyCommand(commandClass: any, filename: string, group: string = "default", isCore: boolean): Promise<RegisteredLegacyCommand> {
         if(!commandClass.default || typeof commandClass.default !== "function") {
             throw new Error('Invalid commandClass: must be a class.')
         }else if(commandClass.default !instanceof Command) {
