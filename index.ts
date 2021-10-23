@@ -18,7 +18,7 @@ process.on('error',(err: Error) => {
 	process.exit(1)
 })
 process.on('unhandledRejection', (err:Error) => {
-    console.error(`[ERROR] Uncaught Promise Exception \n${err.stack}`);
+    console.error(`[ERROR] Uncaught Promise Exception \n`, err);
 	process.exit(2)
 });
   
