@@ -2,18 +2,13 @@ import * as Discord from 'discord.js';
 import EnvLoader from './src/core/EnvLoader.js'
 import CoreLoader from './src/core/loaders/CoreLoader.js'
 
-const intents = [
-	Discord.Intents.FLAGS.GUILDS | 
-	Discord.Intents.FLAGS.GUILD_MEMBERS | 
-	Discord.Intents.FLAGS.GUILD_PRESENCES | 
-	Discord.Intents.FLAGS.GUILD_MESSAGES | 
-	Discord.Intents.FLAGS.DIRECT_MESSAGES 
-]
+// Fetch envs and any intents from env variable
 const envs = EnvLoader()
 const customIntents = new Discord.Intents();
 customIntents.add(envs.privilegedIntents as Discord.BitFieldResolvable<Discord.IntentsString,number>[])
 
-new CoreLoader(customIntents);
+// All core logic moved into loader:
+new CoreLoader().load(customIntents);
 
 
 //final error catch area
