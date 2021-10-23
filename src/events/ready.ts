@@ -6,6 +6,7 @@ export default class extends CoreEvent {
         if(!this.#fired) {
             this.#fired = true;
             this.client.managers.moduleManager.ready();
+            this.client.managers.commandManager.registerPending()
         }
         //Fires every time.
         this.logger.info(`Bot now ready`);
