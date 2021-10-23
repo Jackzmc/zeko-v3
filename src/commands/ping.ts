@@ -1,24 +1,18 @@
-import Command, {FlagList} from '../types/Command.js'
-import { Message } from 'discord.js';
-export default class extends Command {
-	run(msg: Message, args: string[], flags: FlagList) {
-		msg.channel.send("Ping?")
-		.then((m: Message) => {
-			m.edit(`Pong! Roundtrip: \`\`${(msg.createdTimestamp - m.createdTimestamp) * -1}ms\`\` Heartbeat: \`\`${Math.round(this.client.ws.ping)}ms\`\``)
-		});
-	}
-	config() {
-		return {
-			usageIfNotSet: false
-		}
-	}
+import SlashCommand, { SlashCommandOption, OptionResult } from '../types/Slashcommand.js'
+import { CommandInteraction} from 'discord.js';
 
-	help() {
+export default class extends SlashCommand {
+	async run(interact: CommandInteraction, options: OptionResult) {
+		await interact.deferReply({ ephemeral: true, fetchReply: true })
+		interact.followUp(`Pong! Heartbeat: \`\`${Math.round(this.client.ws.ping)}ms\`\``)
+	}
+	
+	slashConfig(): SlashCommandOption {
         return {
-            name: ['ping'],
-            description: "Show the bot's ping to discord.",
-            usage: 'ping',
-            flags: {}
+            name: 'ping',
+            description: "Ping pong",
+            guild: "137389758228725761",
+            options: []
         }
     }
 }
