@@ -27,12 +27,12 @@ export type Integer = number
 
 export interface SlashSubCommandOption extends SlashOptionBase {
     type: "SUB_COMMAND",
-    options: SlashSubOption[]
+    options?: SlashSubOption[]
 }
 
 export interface SlashSubCommandGroupOption extends SlashOptionBase {
     type: "SUB_COMMAND_GROUP",
-    options: SlashSubOption[]
+    options?: SlashSubOption[]
 }
 
 export interface SlashStringOption extends SlashDefaultOption<string> {
