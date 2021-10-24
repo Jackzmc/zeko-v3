@@ -11,7 +11,6 @@ export default class extends SlashCommand {
         return {
             name: 'ping',
             description: "Ping pong",
-            guild: "137389758228725761",
             options: []
         }
     }

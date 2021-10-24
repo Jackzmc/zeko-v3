@@ -6,26 +6,7 @@ import Discord, { CommandInteraction } from 'discord.js';
 import Logger from '../Logger.js'
 import OptionResult from '../types/OptionResult.js';
 
-export interface SlashCommandConfig {
-    name: string,
-    description: string,
-    guild?: Discord.Snowflake
-    options?: SlashCommandOption[],
-}
-
-export type ChannelType = "GUILD_TEXT" | "DM" | "GUILD_VOICE" | "GROUP_DM" | "GUILD_CATEGORY" | "GUILD_NEWS" | "GUILD_STORE" | "GUILD_NEWS_THREAD" | "GUILD_NEWS_THREAD" | "GUILD_PUBLIC_THREAD" |"GUILD_PRIVATE_THREAD" | "GUILD_STAGE_VOICE"
-
-export interface SlashCommandOption {
-    name: string,
-    type: Discord.ApplicationCommandOptionType,
-    required?: boolean
-    description: string,
-    options?: SlashCommandOption[],
-    choices?: Record<string, string> | string[],
-    default?: any
-    channelTypes?: ChannelType[]
-}
-
+import { SlashCommandConfig, SlashOption } from './SlashOptions.js' 
 
 import { Client } from 'discord.js'
 
@@ -33,7 +14,9 @@ export {
     OptionResult, 
     CommandInteraction, 
     Logger,
-    Client
+    Client,
+    SlashCommandConfig,
+    SlashOption
 }
 
 export default abstract class SlashCommand {

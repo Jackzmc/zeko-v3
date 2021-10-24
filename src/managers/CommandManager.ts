@@ -7,7 +7,8 @@ import Logger from '../Logger.js'
 import { Client, Collection, ApplicationCommand, Snowflake } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/Command.js';
-import SlashCommand, { SlashCommandConfig, SlashCommandOption } from '../types/SlashCommand.js'
+import SlashCommand from '../types/SlashCommand.js'
+import { SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
 import Manager from './Manager.js';
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import DataManager from './DataManager.js';
@@ -298,10 +299,10 @@ export default class CommandManager extends Manager {
         return Promise.all(promises)
     }
 
-    private addSlashOption(builder: SlashCommandBuilder, data: SlashCommandOption) {
+    private addSlashOption(builder: SlashCommandBuilder, data: SlashOption) {
         function setData(option) {
             option = option.setName(data.name).setDescription(data.description)
-            if(data.choices) {
+            if('choices' in data) {
                 if(Array.isArray(data.choices)) {
                     for(const name of data.choices) {
                         option.addChoice(name, name)
