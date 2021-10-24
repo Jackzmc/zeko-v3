@@ -12,10 +12,14 @@ export interface SlashCommandOptionList {
 export default class OptionResult {
     #results: SlashCommandOptionList
     #count: number
+    #subcmd: string
+    #subcmdGroup: string
     constructor(results: CommandInteractionOptionResolver, options: SlashOption[]) {
         this.#results = {}
         this.#count = 0
         if(options) {
+            this.#subcmd = results.getSubcommand()
+            this.#subcmdGroup = results.getSubcommandGroup()
             for(const option of options) {
                 const value = results.get(option.name, ('required' in option) ? option.required : null)
                 if(value) {
@@ -34,6 +38,14 @@ export default class OptionResult {
 
     get optionCount() {
         return Object.keys(this.#results).length
+    }
+
+    get subcommand() {
+        return this.#subcmd
+    }
+
+    get subcommandGroup() {
+        return this.#subcmdGroup
     }
 
     has(name: string) {
