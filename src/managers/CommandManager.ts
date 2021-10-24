@@ -298,8 +298,14 @@ export default class CommandManager extends Manager {
         function setData(option) {
             option = option.setName(data.name).setDescription(data.description)
             if(data.choices) {
-                for(const name in data.choices) {
-                   option.addChoice(name, data.choices[name])
+                if(Array.isArray(data.choices)) {
+                    for(const name of data.choices) {
+                        option.addChoice(name, name)
+                    }
+                } else {
+                    for(const name in data.choices) {
+                        option.addChoice(name, data.choices[name])
+                    }
                 }
             }
             return option

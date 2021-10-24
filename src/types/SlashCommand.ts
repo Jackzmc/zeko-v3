@@ -19,7 +19,7 @@ export interface SlashCommandSubOption {
     required: boolean
     description?: string,
     options?: SlashCommandOption[],
-    choices?: Record<string, string>,
+    choices?: Record<string, string> | string[],
     default?: any
 }
 import { Client } from 'discord.js'
