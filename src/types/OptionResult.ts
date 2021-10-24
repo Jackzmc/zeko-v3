@@ -18,8 +18,8 @@ export default class OptionResult {
         this.#results = {}
         this.#count = 0
         if(options) {
-            this.#subcmd = results.getSubcommand()
-            this.#subcmdGroup = results.getSubcommandGroup()
+            this.#subcmd = results.getSubcommand(false)
+            this.#subcmdGroup = results.getSubcommandGroup(false)
             for(const option of options) {
                 const value = results.get(option.name, ('required' in option) ? option.required : null)
                 if(value) {
