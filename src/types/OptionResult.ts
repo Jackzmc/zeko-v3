@@ -41,7 +41,7 @@ export default class OptionResult {
     }
 
     getString(name: string, defaultValue?: string): string {
-        return this.#results[name].value as string || defaultValue
+        return this.#results[name]?.value as string || defaultValue
     
     }
 
@@ -54,15 +54,15 @@ export default class OptionResult {
     }
 
     getBoolean(name: string, defaultValue?: boolean): boolean {
-        return this.#results[name].value === "true" || defaultValue
+        return this.#results[name]?.value === "true" || defaultValue
     }
 
     getInteger(name: string, defaultValue?: Integer): Integer {
-        return (this.#results[name].value) ? Math.round(Number(this.#results[name].value)) : defaultValue
+        return (this.#results[name]?.value) ? Math.round(Number(this.#results[name].value)) : defaultValue
     }
 
     getNumber(name: string, defaultValue?: number) {
-        return (this.#results[name].value) ?  Number(this.#results[name].value) : defaultValue
+        return (this.#results[name]?.value) ?  Number(this.#results[name].value) : defaultValue
     }
 
     getUser(name: string): User {

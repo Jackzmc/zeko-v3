@@ -42,7 +42,7 @@ export default abstract class SlashCommand {
     /**
      * Sets the setup information for the slash command
      *
-     * @returns {SlashCommandOption} Slash command registeration data
+     * @returns {SlashCommandConfig} Slash command registeration data
      */
     abstract slashConfig(): SlashCommandConfig;
 
