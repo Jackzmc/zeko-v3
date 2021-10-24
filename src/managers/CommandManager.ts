@@ -352,7 +352,10 @@ export default class CommandManager extends Manager {
     async registerPending() {
         if(process.env.DISCORD_FORCE_SLASH_GUILD) {
             this.logger.debug(`DISCORD_FORCE_SLASH_GUILD was set, using forced-guild ID ${process.env.DISCORD_FORCE_SLASH_GUILD}`)
+            if(process.env.DISCORD_CLEAR_SLASH_GLOBAL)
+                await this.client.application.commands.set([])
         }
+        
         await this.client.application.commands.set([], process.env.DISCORD_FORCE_SLASH_GUILD)
         for(const slash of this.#pendingSlash) {
             const guild = process.env.DISCORD_FORCE_SLASH_GUILD || slash.guild
