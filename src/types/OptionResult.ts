@@ -17,7 +17,7 @@ export default class OptionResult {
         this.#count = 0
         if(options) {
             for(const option of options) {
-                const value = results.get(option.name, option.required)
+                const value = results.get(option.name, ('required' in option) ? option.required : null)
                 if(value) {
                     this.#count++
                     this.#results[option.name] = value

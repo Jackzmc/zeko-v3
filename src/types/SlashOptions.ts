@@ -12,10 +12,13 @@ export interface SlashOptionBase {
     name: string,
     type: ApplicationCommandOptionType,
     description: string,
+}
+
+export interface SlashOptionValue extends SlashOptionBase {
     required?: boolean
 }
 
-export interface SlashDefaultOption<T> extends SlashOptionBase {
+export interface SlashDefaultOption<T> extends SlashOptionValue {
     choices?: Record<string, T> | T[],
     default?: T
 }
@@ -24,12 +27,12 @@ export type Integer = number
 
 export interface SlashSubCommandOption extends SlashOptionBase {
     type: "SUB_COMMAND",
-    options: SlashOption[]
+    options: SlashSubOption[]
 }
 
 export interface SlashSubCommandGroupOption extends SlashOptionBase {
     type: "SUB_COMMAND_GROUP",
-    options: SlashOption[]
+    options: SlashSubOption[]
 }
 
 export interface SlashStringOption extends SlashDefaultOption<string> {
@@ -44,20 +47,20 @@ export interface SlashBooleanOption extends SlashDefaultOption<boolean> {
     type: "BOOLEAN",
 }
 
-export interface SlashUserOption extends SlashOptionBase {
+export interface SlashUserOption extends SlashOptionValue {
     type: "USER",
 }
 
-export interface SlashChannelOption extends SlashOptionBase {
+export interface SlashChannelOption extends SlashOptionValue {
     type: "CHANNEL",
     channelTypes?: ChannelType[] 
 }
 
-export interface SlashRoleOption extends SlashOptionBase {
+export interface SlashRoleOption extends SlashOptionValue {
     type: "ROLE",
 }
 
-export interface SlashMentionableOption extends SlashOptionBase {
+export interface SlashMentionableOption extends SlashOptionValue {
     type: "MENTIONABLE",
 }
 
@@ -66,6 +69,8 @@ export interface SlashNumberOption extends SlashDefaultOption<number> {
 }
 
 export type SlashOption = SlashSubCommandOption | SlashSubCommandGroupOption | SlashStringOption | SlashIntegerOption | SlashBooleanOption | SlashUserOption | SlashChannelOption | SlashRoleOption | SlashMentionableOption | SlashNumberOption
+// Subcommands do not support nesting:
+export type SlashSubOption = SlashStringOption | SlashIntegerOption | SlashBooleanOption | SlashUserOption | SlashChannelOption | SlashRoleOption | SlashMentionableOption | SlashNumberOption
 
 export type SlashHasDefault = SlashStringOption | SlashIntegerOption | SlashBooleanOption | SlashNumberOption
 export type SlashHasChoices = SlashStringOption | SlashIntegerOption | SlashBooleanOption | SlashNumberOption
