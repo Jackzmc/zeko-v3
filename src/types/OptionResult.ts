@@ -7,17 +7,28 @@ export interface SlashCommandOptionList {
 
 export default class OptionResult {
     #results: SlashCommandOptionList
+    #count: number
     constructor(results: CommandInteractionOptionResolver, options: SlashCommandSubOption[]) {
         this.#results = {}
+        this.#count = 0
         if(options) {
             for(const option of options) {
-                this.#results[option.name] = results.get(option.name, option.required)
-                if(option.default !== undefined && !this.#results[option.name]) this.#results[option.name] = option.default
+                const value = results.get(option.name, option.required)
+                if(value) {
+                    this.#count++
+                    this.#results[option.name] = value
+                } else if(option.default !== undefined) {
+                    this.#results[option.name] = option.default
+                }
             }
         }
     }
 
-    get size() {
+    get valueCount() {
+        return this.#count
+    }
+
+    get optionCount() {
         return Object.keys(this.#results).length
     }
 
