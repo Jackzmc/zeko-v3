@@ -40,29 +40,29 @@ export default class OptionResult {
         return this.#results[name] !== undefined && this.#results[name] !== null;
     }
 
-    getString(name: string): string {
-        return this.#results[name].value as string 
+    getString(name: string, defaultValue?: string): string {
+        return this.#results[name].value as string || defaultValue
     
     }
 
-    getStringLower(name: string): string {
-        return this.getString(name)?.toLowerCase()
+    getStringLower(name: string, defaultValue?: string): string {
+        return this.getString(name)?.toLowerCase() || defaultValue
     }
 
-    getStringUpper(name: string): string {
-        return this.getString(name)?.toUpperCase()
+    getStringUpper(name: string, defaultValue?: string): string {
+        return this.getString(name)?.toUpperCase() || defaultValue
     }
 
-    getBoolean(name: string): boolean {
-        return this.#results[name].value === "true"
+    getBoolean(name: string, defaultValue?: boolean): boolean {
+        return this.#results[name].value === "true" || defaultValue
     }
 
-    getInteger(name: string): Integer {
-        return Math.round(Number(this.#results[name].value))
+    getInteger(name: string, defaultValue?: Integer): Integer {
+        return (this.#results[name].value) ? Math.round(Number(this.#results[name].value)) : defaultValue
     }
 
-    getNumber(name: string) {
-        return Number(this.#results[name].value)
+    getNumber(name: string, defaultValue?: number) {
+        return (this.#results[name].value) ?  Number(this.#results[name].value) : defaultValue
     }
 
     getUser(name: string): User {
