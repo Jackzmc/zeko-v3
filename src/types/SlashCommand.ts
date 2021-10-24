@@ -18,7 +18,7 @@ export interface SlashCommandSubOption {
     type: Discord.ApplicationCommandOptionType,
     required: boolean
     description?: string,
-    options?: SlashCommandOption[],
+    options?: SlashCommandSubOption[],
     choices?: Record<string, string> | string[],
     default?: any
 }
