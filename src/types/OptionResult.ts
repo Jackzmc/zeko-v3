@@ -40,6 +40,14 @@ export default class OptionResult {
         return this.has(name) ? this.#results[name].value as string : null
     }
 
+    getStringLower(name: string): string {
+        return this.getString(name)?.toLowerCase()
+    }
+
+    getStringUpper(name: string): string {
+        return this.getString(name)?.toUpperCase()
+    }
+
     getBoolean(name: string): boolean {
         return this.has(name) ? this.#results[name].value as boolean : null
     }
