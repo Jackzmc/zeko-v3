@@ -1,4 +1,4 @@
-import SlashCommand, { SlashCommandOption, OptionResult } from '../types/SlashCommand.js'
+import SlashCommand, { SlashCommandConfig, OptionResult } from '../types/SlashCommand.js'
 import { CommandInteraction} from 'discord.js';
 
 export default class extends SlashCommand {
@@ -7,7 +7,7 @@ export default class extends SlashCommand {
 		interact.followUp(`Pong! Heartbeat: \`\`${Math.round(this.client.ws.ping)}ms\`\``)
 	}
 	
-	slashConfig(): SlashCommandOption {
+	slashConfig(): SlashCommandConfig {
         return {
             name: 'ping',
             description: "Ping pong",

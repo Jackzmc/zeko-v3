@@ -1,5 +1,5 @@
 import { CommandInteractionOption, User, GuildMember, GuildChannel, ThreadChannel, CommandInteractionOptionResolver, Role } from 'discord.js'
-import { SlashCommandSubOption } from '../types/SlashCommand.js'
+import { SlashCommandOption } from '../types/SlashCommand.js'
 
 export interface SlashCommandOptionList {
     [key: string]: CommandInteractionOption
@@ -8,7 +8,7 @@ export interface SlashCommandOptionList {
 export default class OptionResult {
     #results: SlashCommandOptionList
     #count: number
-    constructor(results: CommandInteractionOptionResolver, options: SlashCommandSubOption[]) {
+    constructor(results: CommandInteractionOptionResolver, options: SlashCommandOption[]) {
         this.#results = {}
         this.#count = 0
         if(options) {

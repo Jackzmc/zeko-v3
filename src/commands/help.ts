@@ -1,4 +1,4 @@
-import SlashCommand, { SlashCommandOption, OptionResult } from '../types/SlashCommand.js'
+import SlashCommand, { SlashCommandConfig, OptionResult } from '../types/SlashCommand.js'
 import { CommandInteraction, Client } from 'discord.js';
 import CommandManager , { RegisteredCommand, RegisteredLegacyCommand } from '../managers/CommandManager.js';
 import Logger from "../Logger.js";
@@ -41,7 +41,7 @@ export default class HelpCommand extends SlashCommand {
         }
     }
 
-    slashConfig(): SlashCommandOption {
+    slashConfig(): SlashCommandConfig {
         return {
             name: 'help',
             description: "Get help with the bot and it's commands. Leave blank for a list of commands.",

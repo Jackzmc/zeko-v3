@@ -4,10 +4,10 @@
 */
 import path from 'path'
 import Logger from '../Logger.js'
-import { Client, Collection, ApplicationCommand, Snowflake, ApplicationCommandOption } from 'discord.js';
+import { Client, Collection, ApplicationCommand, Snowflake } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/Command.js';
-import SlashCommand, { SlashCommandOption, SlashCommandSubOption } from '../types/SlashCommand.js'
+import SlashCommand, { SlashCommandConfig, SlashCommandOption } from '../types/SlashCommand.js'
 import Manager from './Manager.js';
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import DataManager from './DataManager.js';
@@ -26,22 +26,21 @@ let instance;
  * @property {string} name - The registered name of the command
  * @property {types/Command} command - The actual command class
  */
- 
-export interface RegisteredSlashCommand {
+
+interface SlashCommandRegistry {
     group?: string
     isCore: boolean
     command: SlashCommand,
-    data: SlashCommandOption,
+    data: SlashCommandConfig,
+    guild: Snowflake
+}
+ 
+export interface RegisteredSlashCommand extends SlashCommandRegistry {
     slashCommand: ApplicationCommand
 }
 
-export interface PendingSlashCommand {
-    group?: string
-    isCore: boolean
-    command: SlashCommand,
-    data: SlashCommandOption,
+export interface PendingSlashCommand extends SlashCommandRegistry {
     builder: SlashCommandBuilder,
-    guild: Snowflake
 }
 
 export interface RegisteredLegacyCommand {
@@ -299,7 +298,7 @@ export default class CommandManager extends Manager {
         return Promise.all(promises)
     }
 
-    private addSlashOption(builder: SlashCommandBuilder, data: SlashCommandSubOption) {
+    private addSlashOption(builder: SlashCommandBuilder, data: SlashCommandOption) {
         function setData(option) {
             option = option.setName(data.name).setDescription(data.description)
             if(data.choices) {
