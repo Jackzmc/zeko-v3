@@ -166,14 +166,19 @@ export default class CommandManager extends Manager {
     async registerSlashCommand(command: SlashCommand, isCore: boolean, group: string = "default"): Promise<PendingSlashCommand> {
         try {
             const data = command.slashConfig()
-
-            let builder = new SlashCommandBuilder()
-                .setName(data.name)
-                .setDescription(data.description)
-            if(data.options) {
-                for(const option of data.options) {
-                    builder = this.addSlashOption(builder, option)
+            let builder: SlashCommandBuilder
+            try {
+                builder = new SlashCommandBuilder()
+                    .setName(data.name)
+                    .setDescription(data.description)
+                if(data.options) {
+                    for(const option of data.options) {
+                        builder = this.addSlashOption(builder, option)
+                    }
                 }
+            } catch(err) {
+                this.logger.error(`Registering slash command "${data.name}" failed during meta processing: `, err)
+                return null
             }
             const pendingCommand: PendingSlashCommand = {
                 group,
