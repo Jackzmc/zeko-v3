@@ -10,7 +10,7 @@ import { SlashCommandConfig, SlashOption } from './SlashOptions.js'
 import SlashCommand, {} from './SlashCommand.js'
 
 import { Client, Snowflake } from 'discord.js'
-import { FlagList, CommandFlagOptions, FlagType, CommandFlag } from 'Command';
+import { FlagList, CommandFlagOptions, FlagType, CommandFlag } from './Command.js';
 import { SlashStringOption, SlashBooleanOption, SlashNumberOption } from 'SlashOptions';
 
 export { 
