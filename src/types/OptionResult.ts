@@ -48,6 +48,20 @@ export default class OptionResult {
         return this.#subcmdGroup
     }
 
+    get keys() {
+        return Object.keys(this.#results)
+    }
+
+    get values() {
+        return Object.values(this.#results)
+    }
+
+    *[Symbol.iterator]() {
+        for(const key in this.#results) {
+            yield [ key, this.#results[key] ]
+        }
+    }
+
     has(name: string) {
         return this.#results[name] !== undefined && this.#results[name] !== null;
     }
