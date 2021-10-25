@@ -98,7 +98,9 @@ export default abstract class SlashTraditionalCommand extends SlashCommand {
     /**
      * Add any flags to be added
      */
-    abstract flags?(): CommandFlagOptions;
+    flags(): CommandFlagOptions {
+        return {}
+    }
 
     /**
      * Sets the information for the command
@@ -107,7 +109,7 @@ export default abstract class SlashTraditionalCommand extends SlashCommand {
 
     slashConfig(): SlashCommandConfig {
         this.sConfig = this.config()
-        const flagKV = this.flags()
+        const flagKV = this.flags ? this.flags() : {}
         const flags: (SlashStringOption | SlashBooleanOption | SlashNumberOption)[] = []
         for(const key in flagKV) {
             flags.push(this.convertFlagToOption(key, flagKV[key]))
