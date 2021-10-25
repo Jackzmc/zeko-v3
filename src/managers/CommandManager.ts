@@ -365,6 +365,9 @@ export default class CommandManager extends Manager {
                 ...slash,
                 slashCommand: cmd
             }
+            if(process.env.DEBUG_SLASH_REGISTER) {
+                this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options. guild=${slash.guild}`)
+            }
             this.#slashCommands.set(slash.data.name.toLowerCase(), registeredCommand)
         }
     }
