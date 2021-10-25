@@ -356,8 +356,8 @@ export default class CommandManager extends Manager {
             if(process.env.DISCORD_CLEAR_SLASH_GLOBAL)
                 await this.client.application.commands.set([])
         }
-        
-        await this.client.application.commands.set([], process.env.DISCORD_FORCE_SLASH_GUILD)
+        if(process.env.DISCORD_CLEAR_SLASH)
+            await this.client.application.commands.set([], process.env.DISCORD_FORCE_SLASH_GUILD)
         for(const slash of this.#pendingSlash) {
             const guild = process.env.DISCORD_FORCE_SLASH_GUILD || slash.guild
             const cmd = await this.client.application.commands.create(slash.builder.toJSON(), guild)
