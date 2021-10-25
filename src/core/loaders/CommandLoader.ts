@@ -93,21 +93,25 @@ export default class{
                 }
             }catch(err) {
                 if(err.code !== "ENOENT") {
-                    this.#logger.error(`Loading ${parent.name} failed:\n`, err);
+                    this.#logger.error(`Error reading directory \"${cmdFolder}\":\n`, err);
                 }
             }
         }
         try {
             let bits = await Promise.all(promises);
             bits = bits.filter(bit => bit)
-            await Promise.all(bits.map(async(bit) => {
-                await this.#manager.register(bit.command, bit.name, bit.group, bit.isCore)
+            const results = await Promise.allSettled(bits.map(bit => {
+                return this.#manager.register(bit.command, bit.name, bit.group, bit.isCore)
             }))
+            const failed = results.filter(res => res.status === "rejected") as PromiseRejectedResult[]
+            for(const failedCommand of failed) {
+                this.#logger.error(`Command failed to load: ${failedCommand.reason}`)
+            }
             this.#logger.success(`Loaded ${this.#manager.commandsCount} commands, ${this.#manager.aliasesCount} aliases`)
             return;
         }catch(err) {
             //TODO: change logic?
-            this.#logger.severe('A failure occurred while loading commands.\n', err)
+            this.#logger.severe('A failure occurred while registering commands.\n', err)
         }
     }
 }
