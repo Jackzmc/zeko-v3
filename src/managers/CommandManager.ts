@@ -9,6 +9,7 @@ import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/Com
 import SlashCommand from '../types/SlashCommand.js'
 import { SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
 import Manager from './Manager.js';
+import Core from 'src/core/Core.js';
 
 //TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that
 
@@ -356,12 +357,15 @@ export default class CommandManager extends Manager {
 
     public async ready() {
         await this.registerPending()
+        const core = Core.getInstance()
+        const promises = []
         for(const registered of this.#slashCommands.values()) {
-            registered.command.onReady()
+            promises.push(registered.command.onReady(core))
         }
         for(const registered of this.#commands.values()) {
-            registered.command.onReady()
+            promises.push(registered.command.onReady(core))
         }
+        return Promise.allSettled(promises)
     }
 
     private async registerPending() {

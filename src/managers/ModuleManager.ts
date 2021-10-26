@@ -5,6 +5,7 @@
 */
 import { Client } from 'discord.js';
 import path from 'path'
+import Core from 'src/core/Core.js';
 import Logger from '../Logger.js'
 import Module from '../types/Module.js';
 import Manager, { Registered } from './Manager.js';
@@ -54,20 +55,17 @@ export default class ModuleManager extends Manager {
     }
 
     //Called internally by src/events/ready on once(), and is then sent to all modules
-    ready() {
+    async ready() {
         const modules = [
             ...this.#modules.core.values(),
             ...this.#modules.custom.values()
         ]
+        const core = Core.getInstance()
+        const promises = []
         for(const { module, name } of modules) {
-            if(module.ready) {
-                try {
-                    module.onReady()
-                }catch(err) {
-                    this.logger.error(`Module ${name}.ready() returned error: `, err)
-                }
-            }
+            promises.push(module.onReady(core))
         }
+        return await Promise.allSettled(promises)
     }
 
     /**

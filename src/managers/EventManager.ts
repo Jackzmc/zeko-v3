@@ -10,6 +10,7 @@ import Logger from '../Logger.js'
 import Event from '../types/Event.js';
 import CoreEvent from '../core/types/CoreEvent.js'
 import Manager from './Manager.js';
+import Core from 'src/core/Core.js';
 
 export interface RegisteredCoreEvent {
     config: RegisteredEventConfig,
@@ -142,12 +143,15 @@ export default class EventManager extends Manager {
     }
 
     async ready() {
+        const core = Core.getInstance()
+        const promises = []
         for(const registered of this.#events.core.values()) {
-            await registered.event.onReady()
+            promises.push(registered.event.onReady(core))
         }
         for(const registered of this.#events.custom.values()) {
-            await registered.event.onReady()
+            promises.push(registered.event.onReady(core))
         }
+        return await Promise.allSettled(promises)
     }
 
 
