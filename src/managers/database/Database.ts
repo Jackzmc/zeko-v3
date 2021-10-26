@@ -1,5 +1,5 @@
 import Keyv from 'keyv'
-import Logger from '../Logger.js'
+import Logger from '../../Logger.js'
 
 import path from 'path'
 import fs from 'fs'
@@ -7,26 +7,23 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default class SqliteDataManager implements Keyv {
-    private logger: Logger
-    keyv: Keyv
-    private _filepath: String
-    constructor(namespace: string, sqlitePath?: string) {
-        this.logger = new Logger(`DataManager/${namespace}`)
-        if(sqlitePath && !fs.existsSync(sqlitePath)) {
-            throw new Error(`Provided path \"${sqlitePath}\" does not exist`)
-        }
-        else if(!sqlitePath) sqlitePath = path.join(SqliteDataManager.getDataDirectory(), `data.db`)
-        this._filepath = sqlitePath
-        const keyv = new Keyv(`sqlite://${sqlitePath}`, { namespace });
-        keyv.on('error', (err: Error) => {
-            this.logger.severe(`KeyV connection error: `, err)
-        });
-        this.keyv = keyv
-    }
+export interface ConnectionDetails {
+    user?: string
+    password?: string
+    hostname: string
+    port?: number
+}
 
-    get filepath() {
-        return this._filepath
+export interface ConnectionSQLDetails extends ConnectionDetails {
+    database: string
+}
+
+
+export default abstract class Database implements Keyv {
+    protected logger: Logger
+    protected keyv: Keyv
+    constructor(namespace: string) {
+        this.logger = new Logger(`DataManager/${namespace}`)
     }
 
     get<T>(key: string, defaultValue?: T): T {
@@ -39,6 +36,14 @@ export default class SqliteDataManager implements Keyv {
 
     setWithTTL(key: string, value: any, ttlMS: number): Promise<boolean> {
         return this.keyv.set(key, value, ttlMS)
+    }
+
+    delete(key: string): Promise<boolean> {
+        return this.keyv.delete(key)
+    }
+
+    clear(): Promise<boolean> {
+        return this.keyv.clear()
     }
 
      /**

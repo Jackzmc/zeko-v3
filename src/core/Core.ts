@@ -16,7 +16,15 @@ import { fileURLToPath } from 'url';
 import ModuleManager from '../managers/ModuleManager.js';
 import CommandManager from '../managers/CommandManager.js';
 import EventManager from '../managers/EventManager.js';
-import DataManager from '../managers/DataManager2.js';
+
+import SqliteDatabase from '../managers/database/SqliteDatabase.js';
+import Database from '../managers/database/Database.js'
+import MySQLDatabase from '../managers/database/MySQLDatabase.js'
+
+export enum DatabaseType {
+    SQLITE,
+    MYSQL
+}
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -31,7 +39,8 @@ export default class Core {
     private commandManager: CommandManager;
     private moduleManager: ModuleManager;
     private eventManager: EventManager;
-    private dataManager: DataManager;
+    private dataManager: Database;
+    private dataProvider: DatabaseType
 
     constructor() {
         this.logger = new Logger( 'Core' );
@@ -58,6 +67,7 @@ export default class Core {
             const moduleLoader = new ModuleLoader(ROOT_DIR, new Logger("ModuleLoader"));
             const commandLoader = new CommandLoader(ROOT_DIR, new Logger("CommandLoader"));
             const eventLoader = new EventLoader(ROOT_DIR, new Logger("EventLoader"));
+            this.dataManager = this.getDatabase('core')
             internalCustomCheck()
 
 
@@ -65,7 +75,7 @@ export default class Core {
             const { intents, events } = await eventLoader.preload()
             customIntents.add(intents)
             const intentsArray = customIntents.toArray()
-            this.logger.info(`Registered ${intentsArray.length} intents, ${intentsArray}`)
+            this.logger.info(`Registered ${intentsArray.length} intents ${intentsArray}`)
 
             // Create client with intents
             this.client = new Client({
@@ -87,7 +97,6 @@ export default class Core {
             this.moduleManager = moduleLoader.manager
             this.commandManager = commandLoader.manager
             this.eventManager = eventLoader.manager
-            this.dataManager = new DataManager('core')
 
 
             if(!process.env.ZEKO_DISABLE_SETTINGS)
@@ -104,7 +113,9 @@ export default class Core {
         } catch (err) {
             this.logger.severe('Manager loading failure:\n', err)
         }
+
     }
+
     gracefulShutdown(exit: boolean) {
         if(!this.shuttingDown) {
             this.shuttingDown = true;
@@ -119,6 +130,25 @@ export default class Core {
         }
     }
 
+    private getDatabase(namespace: string): Database {
+        if(process.env.MYSQL_HOST) {
+            const settings = {
+                hostname: process.env.MYSQL_HOST,
+                port: parseInt(process.env.MYSQL_PORT),
+                user: process.env.MYSQL_USER,
+                password: process.env.MYSQL_PASSWORD,
+                database: process.env.MYSQL_DATABASE,
+            }
+            this.logger.info(`Using database provider: MySQLDatabase`)
+            this.dataProvider = DatabaseType.MYSQL
+            return new MySQLDatabase(namespace, settings)
+        } else {
+            this.logger.info(`Using database provider: SqliteDatabase`)
+            this.dataProvider = DatabaseType.SQLITE
+            return new SqliteDatabase(namespace)
+        }
+    }
+
     get commands() { 
         return this.commandManager 
     }
@@ -130,6 +160,9 @@ export default class Core {
     }
     get db() {
         return this.dataManager
+    }
+    get dbProvider() {
+        return this.dataProvider
     }
 }
 async function internalCustomCheck(): Promise<void> {
