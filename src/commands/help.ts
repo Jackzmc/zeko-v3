@@ -1,6 +1,6 @@
 import SlashCommand, { SlashCommandConfig, OptionResult } from '../types/SlashCommand.js'
 import { CommandInteraction, Client } from 'discord.js';
-import CommandManager , { RegisteredCommand, RegisteredLegacyCommand } from '../managers/CommandManager.js';
+import { RegisteredCommand, RegisteredLegacyCommand } from '../managers/CommandManager.js';
 import Logger from "../Logger.js";
 
 const PREFIX_REGEX = new RegExp(/%(prefix|p)%/,"g")
@@ -13,13 +13,13 @@ export default class HelpCommand extends SlashCommand {
     run(inter: CommandInteraction, options: OptionResult) {
         if(options.has("command")) {
             // TODO: Support non-legacy
-            const cmd: RegisteredLegacyCommand = CommandManager.getInstance().getLegacyCommand(options.getString("command"), false);
+            const cmd: RegisteredLegacyCommand = this.core.commands.getLegacyCommand(options.getString("command"), false);
             if(!cmd) return inter.reply("Couldn't find that command");
             return inter.reply({
-                embeds: [this.generateHelpCommand(cmd)]
+                embeds: [this.generateLegacyHelpCommand(cmd)]
             })
         }else{
-            const grouped = this.client.managers.commandManager.getCommands(true)
+            const grouped = this.core.commands.getCommands(true)
             //loop the sorted commands
             for(const key in grouped) {
                 //make the name pretty, and filter non-hidden groups
@@ -46,7 +46,6 @@ export default class HelpCommand extends SlashCommand {
         return {
             name: 'help',
             description: "Get help with the bot and it's commands. Leave blank for a list of commands.",
-            guild: "137389758228725761",
             options: [
                 {
                     type: "STRING",
@@ -58,7 +57,7 @@ export default class HelpCommand extends SlashCommand {
         }
     }
 
-    generateHelpCommand(cmd: RegisteredLegacyCommand) {
+    generateLegacyHelpCommand(cmd: RegisteredLegacyCommand) {
         let fields = [];
         //print information about flags if not hidden
         if(cmd.help.flags && !cmd.config.hideFlags) {
