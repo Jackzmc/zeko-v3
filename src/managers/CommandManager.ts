@@ -10,7 +10,6 @@ import SlashCommand from '../types/SlashCommand.js'
 import { SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
 import Manager from './Manager.js';
 
-let instance;
 //TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that
 
 /**
@@ -59,6 +58,7 @@ export default class CommandManager extends Manager {
      *
      * @param {Client} client The current discord.js client
      */
+    private static instance: CommandManager
     #commands: Collection<string, RegisteredLegacyCommand>
     #aliases: Collection<string, string>
     #slashCommands:  Collection<string, RegisteredSlashCommand>
@@ -72,7 +72,7 @@ export default class CommandManager extends Manager {
         this.#aliases = new Collection();
         this.#groups = [];
         
-        instance = this;
+        CommandManager.instance = this;
     }
 
     /**
@@ -82,7 +82,7 @@ export default class CommandManager extends Manager {
      * @returns {CommandManager} The current instance
      */
      static getInstance() : CommandManager {
-        return instance;
+        return this.instance;
     }
 
     async register(commandClass: any, filename: string, group: string = "default", isCore: boolean): Promise<RegisteredLegacyCommand | PendingSlashCommand> {

@@ -10,7 +10,6 @@ import Logger from '../Logger.js'
 import Event from '../types/Event.js';
 import CoreEvent from '../core/types/CoreEvent.js'
 import Manager from './Manager.js';
-let instance;
 
 export interface RegisteredCoreEvent {
     config: RegisteredEventConfig,
@@ -32,6 +31,7 @@ const eventRequiredIntents = {
 
 
 export default class EventManager extends Manager {
+    private static instance: EventManager
     #events: {
         core: Map<string, RegisteredCoreEvent>,
         custom: Map<string, RegisteredCustomEvent>
@@ -48,7 +48,7 @@ export default class EventManager extends Manager {
             core: new Map<string, RegisteredCoreEvent>(),
             custom: new Map<string, RegisteredCustomEvent>()
         }
-        instance = this;
+        EventManager.instance = this;
     }
 
     /**
@@ -58,7 +58,7 @@ export default class EventManager extends Manager {
      * @returns {EventManager} The current instance
      */
      static getInstance(): EventManager {
-        return instance;
+        return this.instance;
     }
 
     
