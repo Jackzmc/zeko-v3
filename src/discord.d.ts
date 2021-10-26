@@ -1,4 +1,5 @@
 import { Managers } from "./core/Functions.js";
+import Core from './core/Core.js';
 
 declare module "discord.js" {
     interface EnvVariable {
@@ -10,5 +11,6 @@ declare module "discord.js" {
         managers: Managers
         utils: any,
         evns: EnvVariable
+        core: Core
     }
 }

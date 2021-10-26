@@ -58,6 +58,7 @@ export default class Core {
             const client: Client = new Client({
                 intents: customIntents
             });
+            client.core = this
             this.client = client;
             Functions(client)
 
