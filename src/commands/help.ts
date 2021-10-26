@@ -12,7 +12,8 @@ export default class HelpCommand extends SlashCommand {
 
     run(inter: CommandInteraction, options: OptionResult) {
         if(options.has("command")) {
-            const cmd: RegisteredLegacyCommand = CommandManager.getInstance().getCommand(options.getString("command"), false);
+            // TODO: Support non-legacy
+            const cmd: RegisteredLegacyCommand = CommandManager.getInstance().getLegacyCommand(options.getString("command"), false);
             if(!cmd) return inter.reply("Couldn't find that command");
             return inter.reply({
                 embeds: [this.generateHelpCommand(cmd)]
