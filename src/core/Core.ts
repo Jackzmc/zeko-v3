@@ -33,6 +33,7 @@ export default class Core {
 
     constructor() {
         this.logger = new Logger( 'Core' );
+        this.logger.info(`Start of logging ${new Date().toLocaleDateString()}`)
         Core.instance = this
     }
 
@@ -52,7 +53,8 @@ export default class Core {
             // Event loader must be preloaded to grab any intents any event may need
             const { intents, events } = await eventLoader.preload()
             customIntents.add(intents)
-            this.logger.info(`Registered intents: ${customIntents.toArray()}`)
+            const intentsArray = customIntents.toArray()
+            this.logger.info(`Registered ${intentsArray.length} intents, ${intentsArray}`)
 
             // Create client with intents
             const client: Client = new Client({
