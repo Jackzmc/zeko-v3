@@ -25,7 +25,7 @@ interface ModuleBit {
 export default class {
     #client: Client
     #logger: Logger
-    #manager: ModuleManager
+    manager: ModuleManager
     #rootDir: string
     constructor(rootDir: string, logger: Logger) {
         this.#rootDir = rootDir;
@@ -64,8 +64,8 @@ export default class {
         })
     }
     async load(client: Client): Promise<void> {
-        this.#manager = new ModuleManager(client);
-        client.managers.moduleManager = this.#manager;
+        this.manager = new ModuleManager(client);
+        client.managers.moduleManager = this.manager;
         if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
             this.setupWatcher()
         }
@@ -107,9 +107,9 @@ export default class {
                 return 0;
             })
             await Promise.all(moduleBits.map(async(moduleBit) => {
-                await this.#manager.register(moduleBit.module, moduleBit.name, moduleBit.group, moduleBit.isCore)
+                await this.manager.register(moduleBit.module, moduleBit.name, moduleBit.group, moduleBit.isCore)
             }))
-            this.#logger.success(`Loaded ${this.#manager.coreLoaded} core modules, ${this.#manager.customLoaded} custom modules`)
+            this.#logger.success(`Loaded ${this.manager.coreLoaded} core modules, ${this.manager.customLoaded} custom modules`)
             return;
         }catch(err) {
             //TODO: change logic?

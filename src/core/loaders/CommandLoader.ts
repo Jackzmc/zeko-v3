@@ -23,7 +23,7 @@ interface CommandBit {
 export default class{ 
     #client: Client;
     #logger: Logger;
-    #manager: CommandManager
+    manager: CommandManager
     #rootDir: string
     constructor(rootDir: string, logger: Logger) {
         this.#rootDir = rootDir
@@ -64,8 +64,8 @@ export default class{
     }
     async load(client: Client) {
         this.#client = client;
-        this.#manager = new CommandManager(client)
-        client.managers.commandManager = this.#manager;
+        this.manager = new CommandManager(client)
+        client.managers.commandManager = this.manager;
         if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
             this.setupWatcher()
         }
@@ -101,13 +101,13 @@ export default class{
             let bits = await Promise.all(promises);
             bits = bits.filter(bit => bit)
             const results = await Promise.allSettled(bits.map(bit => {
-                return this.#manager.register(bit.command, bit.name, bit.group, bit.isCore)
+                return this.manager.register(bit.command, bit.name, bit.group, bit.isCore)
             }))
             const failed = results.filter(res => res.status === "rejected") as PromiseRejectedResult[]
             for(const failedCommand of failed) {
                 this.#logger.error(`Command failed to load: ${failedCommand.reason}`)
             }
-            this.#logger.success(`Loaded ${this.#manager.commandsCount} commands, ${this.#manager.aliasesCount} aliases`)
+            this.#logger.success(`Loaded ${this.manager.commandsCount} commands, ${this.manager.aliasesCount} aliases`)
             return;
         }catch(err) {
             //TODO: change logic?

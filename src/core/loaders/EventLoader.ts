@@ -23,7 +23,7 @@ interface EventBit {
 }
 
 export default class {
-    #manager: EventManager;
+    manager: EventManager;
     #logger: Logger
     #client: Client
     #rootDir: string
@@ -96,18 +96,18 @@ export default class {
         }
     }
     async load(client: Client, eventBits: EventBit[]) {
-        this.#manager = new EventManager(client);
-        client.managers.eventManager = this.#manager
-        patchEmitter(client, this.#manager)
+        this.manager = new EventManager(client);
+        client.managers.eventManager = this.manager
+        patchEmitter(client, this.manager)
         if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
             this.setupWatcher()
         }
 
         try {
             await Promise.all(eventBits.map(async(eventBit) => {
-                await this.#manager.register(eventBit.event, eventBit.name, eventBit.isCore)
+                await this.manager.register(eventBit.event, eventBit.name, eventBit.isCore)
             }))
-            this.#logger.success(`Loaded ${this.#manager.coreLoaded} core events, ${this.#manager.customLoaded} custom events`)
+            this.#logger.success(`Loaded ${this.manager.coreLoaded} core events, ${this.manager.customLoaded} custom events`)
             return;
         }catch(err) {
             //TODO: change logic?
