@@ -60,13 +60,13 @@ export default abstract class Command {
     }
 
     // Called when everything is ready (discord.js ready and zeko core is ready)
-    ready(): Promise<any> | any {
+    ready(core?: Core): Promise<any> | any {
 
     }
 
-    onReady() {
+    onReady(core: Core) {
         this.core = Core.getInstance()
-        return this.ready()
+        return this.ready(core)
     }
 
     /**
