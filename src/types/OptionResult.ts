@@ -58,12 +58,28 @@ export default class OptionResult {
 
     *[Symbol.iterator]() {
         for(const key in this.#results) {
-            yield [ key, this.#results[key] ]
+            yield [ key, this.get(key) ]
         }
     }
 
     has(name: string) {
         return this.#results[name] !== undefined && this.#results[name] !== null;
+    }
+
+    get(name: string) {
+        const result = this.#results[name]
+        if(!result) return null
+        switch(result.type) {
+            case 'STRING': return this.getString(name)
+            case 'BOOLEAN': return this.getBoolean(name)
+            case 'INTEGER': return this.getInteger(name)
+            case 'NUMBER': return this.getNumber(name)
+            case 'USER': return this.getMember(name)
+            case 'CHANNEL': return this.getChannel(name)
+            case 'ROLE': return this.getRole(name)
+            case 'MENTIONABLE': return this.getMentionable(name)
+        }
+        return null
     }
 
     getString(name: string, defaultValue?: string): string {

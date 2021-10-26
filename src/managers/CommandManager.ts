@@ -2,7 +2,6 @@
  @namespace Managers
  @module CommandManager
 */
-import path from 'path'
 import Logger from '../Logger.js'
 import { Client, Collection, ApplicationCommand, Snowflake } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
@@ -10,9 +9,6 @@ import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/Com
 import SlashCommand from '../types/SlashCommand.js'
 import { SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
 import Manager from './Manager.js';
-import { mkdir, readFile, writeFile } from 'fs/promises'
-import DataManager from './DataManager.js';
-import deepEqual from 'deep-equal'
 
 let instance;
 //TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that
@@ -166,6 +162,13 @@ export default class CommandManager extends Manager {
     async registerSlashCommand(command: SlashCommand, isCore: boolean, group: string = "default"): Promise<PendingSlashCommand> {
         try {
             const data = command.slashConfig()
+            // Overwrite any previousc ommands, such that a custom can overwrite a core command
+            for(let i = 0; i < this.#pendingSlash.length; i++) {
+                if(this.#pendingSlash[i].data.name === data.name && this.#pendingSlash[i].guild === data.guild) {
+                    this.#pendingSlash.splice(i, 1)
+                    return this.#pendingSlash[i]
+                }
+            }
             let builder: SlashCommandBuilder
             try {
                 builder = new SlashCommandBuilder()
@@ -186,7 +189,7 @@ export default class CommandManager extends Manager {
                 command,
                 data,
                 builder,
-                guild: data.guild
+                guild: process.env.DISCORD_FORCE_SLASH_GUILD || data.guild
             }
 
             this.#pendingSlash.push(pendingCommand)
@@ -221,7 +224,7 @@ export default class CommandManager extends Manager {
      * @param {boolean} [includeHidden=false] Should hidden commands (cmd.config.hidden) be provided?
      * @returns {?RegisteredCommand}
      */
-    getCommand(name: string, includeHidden:boolean = false) : RegisteredLegacyCommand {
+    getLegacyCommand(name: string, includeHidden:boolean = false) : RegisteredLegacyCommand {
         const command = this.#commands.get(name);
         if(!command) {
             const alias = this.#aliases.get(name);
@@ -238,6 +241,10 @@ export default class CommandManager extends Manager {
         }else{
             return (!includeHidden && command.config.hidden) ? null : command;
         }
+    }
+
+    getCommand(name: string) : RegisteredLegacyCommand | RegisteredSlashCommand | PendingSlashCommand {
+        return this.getCommand(name) || this.getSlashCommand(name, true)
     }
 
     /**
@@ -351,16 +358,19 @@ export default class CommandManager extends Manager {
     }
 
     async registerPending() {
-        if(process.env.DISCORD_FORCE_SLASH_GUILD) {
-            this.logger.debug(`DISCORD_FORCE_SLASH_GUILD was set, using forced-guild ID ${process.env.DISCORD_FORCE_SLASH_GUILD}`)
-            if(process.env.DISCORD_CLEAR_SLASH_GLOBAL)
-                await this.client.application.commands.set([])
+        if(process.env.DISCORD_CLEAR_SLASH_GLOBAL) {
+            this.logger.debug(`DISCORD_CLEAR_SLASH_GLOBAL: Clearing all global commands`)
+            await this.client.application.commands.set([])
         }
-        if(process.env.DISCORD_CLEAR_SLASH)
+        if(process.env.DISCORD_CLEAR_SLASH_GUILD) {
+            this.logger.debug(`DISCORD_CLEAR_SLASH_GUILD: Clearing commands for ${process.env.DISCORD_CLEAR_SLASH_GUILD}`)
             await this.client.application.commands.set([], process.env.DISCORD_FORCE_SLASH_GUILD)
+        }
+        if(process.env.DISCORD_FORCE_SLASH_GUILD)
+            this.logger.debug(`DISCORD_FORCE_SLASH_GUILD was set, using forced-guild ID ${process.env.DISCORD_FORCE_SLASH_GUILD}`)
+
         for(const slash of this.#pendingSlash) {
-            const guild = process.env.DISCORD_FORCE_SLASH_GUILD || slash.guild
-            const cmd = await this.client.application.commands.create(slash.builder.toJSON(), guild)
+            const cmd = await this.client.application.commands.create(slash.builder.toJSON(), slash.guild)
             const registeredCommand: RegisteredSlashCommand = {
                 ...slash,
                 slashCommand: cmd
@@ -369,71 +379,6 @@ export default class CommandManager extends Manager {
                 this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options. guild=${slash.guild}`)
             }
             this.#slashCommands.set(slash.data.name.toLowerCase(), registeredCommand)
-        }
-    }
-
-    async registerPendingOld() {
-        const slashReg = path.join(DataManager.getDataDirectory(), `slash-commands.json`)
-        let data: Record<string, SavedSlashCommandData> = {};
-        let newData: Record<string, SavedSlashCommandData> = {}
-        // Grab slash commands 
-        try {
-            const raw = await readFile(slashReg, "utf8") //For some dumb reason, readFile from promises still error'd?
-            data = JSON.parse(raw)
-        } catch(err) { }
-
-        for(const slash of this.#pendingSlash) {
-            let cmd: ApplicationCommand;
-            if(data[slash.data.name]) {
-                const json = slash.builder.toJSON()
-                if(deepEqual(json, data[slash.data.name].data)) {
-                    cmd = await this.client.application.commands.fetch(data[slash.data.name].id, {
-                        guildId: slash.guild
-                    })
-                    if(cmd) {
-                        try {
-                            // @ts-ignore
-                            cmd = await cmd.edit(json)
-                        } catch(err) {
-                            this.logger.warn(`Could not update \"${slash.data.name}\": ${err.message}`)
-                        }
-                        newData[slash.data.name] = { 
-                            id: cmd.id,
-                            data: json
-                        }
-                    } else {
-                        this.logger.warn(`Not registering command \"${slash.data.name}\", pre-existing command no longer exists.`)
-                        continue
-                    }
-                }
-                delete data[slash.data.name]
-            } else {
-                const json = slash.builder.toJSON()
-                cmd = await this.client.application.commands.create(json, slash.guild)
-                newData[slash.data.name] = { 
-                    id: cmd.id,
-                    data: json
-                }
-                this.logger.debug(`registered new command \"${slash.data.name}\"`)
-            }
-
-            const registeredCommand: RegisteredSlashCommand = {
-                ...slash,
-                slashCommand: cmd
-            }
-            this.#slashCommands.set(slash.data.name.toLowerCase(), registeredCommand)
-        }
-
-        for(const name in data) {
-            await this.client.application.commands.delete(data[name].id)
-            this.logger.debug(`Deleting slash command \"${name}\" (not defined)`)
-        }
-        // Save slash commands to edit them:
-        try {
-            await mkdir(DataManager.getDataDirectory()).catch(() => {})
-            await writeFile(slashReg, JSON.stringify(newData))
-        } catch(err) { 
-            this.logger.warn(`Failed to write slash command id registry file (data/slash-commands.json): ${err}`)
         }
     }
 

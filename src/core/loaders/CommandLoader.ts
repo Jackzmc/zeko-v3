@@ -9,7 +9,7 @@ import path from 'path'
 import Logger from '../../Logger.js'
 
 import CommandManager from '../../managers/CommandManager.js'
-import Command, { CommandConfigOptions, CommandHelpOptions } from 'Command';
+import Command, { CommandConfigOptions, CommandHelpOptions } from '../../types/Command.js';
 
 const folders = ['src/commands','commands'];
 
