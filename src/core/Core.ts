@@ -24,7 +24,9 @@ export default class Core {
     private static instance: Core;
     private logger: Logger;
     private client: Client;
-    #shuttingDown: boolean = false
+
+    private isLoaded: boolean = false
+    private shuttingDown: boolean = false
 
     private commandManager: CommandManager;
     private moduleManager: ModuleManager;
@@ -38,17 +40,26 @@ export default class Core {
     }
 
     static getInstance(): Core {
-        return this.instance
+        return Core.instance
+    }
+
+    get isReady() { 
+        return this.isLoaded
+    }
+
+    get isShuttingDown() {
+        return this.shuttingDown
     }
     
     async load(customIntents: Intents) {
         try {
             // Initialize all loaders
-            const ROOT_DIR = resolve(__dirname,"../../../")
+            const ROOT_DIR = resolve(__dirname,"../../")
             const moduleLoader = new ModuleLoader(ROOT_DIR, new Logger("ModuleLoader"));
             const commandLoader = new CommandLoader(ROOT_DIR, new Logger("CommandLoader"));
             const eventLoader = new EventLoader(ROOT_DIR, new Logger("EventLoader"));
             internalCustomCheck()
+
 
             // Event loader must be preloaded to grab any intents any event may need
             const { intents, events } = await eventLoader.preload()
@@ -57,18 +68,17 @@ export default class Core {
             this.logger.info(`Registered ${intentsArray.length} intents, ${intentsArray}`)
 
             // Create client with intents
-            const client: Client = new Client({
+            this.client = new Client({
                 intents: customIntents
             });
-            client.core = this
-            this.client = client;
-            Functions(client)
+            this.client.core = this
+            Functions(this.client)
 
             // Everything's ready, load the loaders
             try {
-                await moduleLoader.load(client)
-                await commandLoader.load(client)
-                await eventLoader.load(client, events)
+                await moduleLoader.load(this.client)
+                await commandLoader.load(this.client)
+                await eventLoader.load(this.client, events)
             } catch(err) {
                 this.logger.severe('Failed to load modules', err.stack)
                 process.exit(3)
@@ -79,10 +89,13 @@ export default class Core {
             this.eventManager = eventLoader.manager
             this.dataManager = new DataManager('core')
 
+
             if(!process.env.ZEKO_DISABLE_SETTINGS)
                 // client.managers.settingsManager = new SettingsManager(client);
             
-            client.login(process.env.DISCORD_BOT_TOKEN)
+            this.client.login(process.env.DISCORD_BOT_TOKEN)
+
+            this.isLoaded = true
 
             process.on('exit',    () => this.gracefulShutdown(false))
             process.on('SIGTERM', () => this.gracefulShutdown(true))
@@ -93,8 +106,8 @@ export default class Core {
         }
     }
     gracefulShutdown(exit: boolean) {
-        if(!this.#shuttingDown) {
-            this.#shuttingDown = true;
+        if(!this.shuttingDown) {
+            this.shuttingDown = true;
             this.logger.info(`Detected shutdown signal (exit=${exit}). Shutting down managers...`)
             Promise.all([
                 this.client.managers.moduleManager.exit(exit),

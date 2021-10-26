@@ -8,7 +8,7 @@ export interface Registered {
 
 export default abstract class Manager {
     /**
-     * Create a new EventManager
+     * Create a new Manager
      *
      * @param {Client} client The current discord.js client
      */

@@ -15,14 +15,15 @@ export default class extends CoreEvent {
     #generateHelpCommand: Function
     constructor(client: Client, logger: Logger) {
         super(client, logger);
+        console.log(this.core.commands)
+    }
+
+    async ready() {
         const helpCmd = this.core.commands.getSlashCommand('help', true)
         if(helpCmd) this.#generateHelpCommand = (helpCmd.command as HelpCommand).generateLegacyHelpCommand
-        else logger.warn(`Could not find internal help command, legacy command usage help will not run properly`)
+        else this.logger.warn(`Could not find internal help command, legacy command usage help will not run properly`)
     }
-    config() {
-        return {
-        }
-    }
+
     every(msg: Message): Promise<boolean> {
         return new Promise((resolve) => {
             if(msg.author.bot) return resolve(true); //Ignore bots.

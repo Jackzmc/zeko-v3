@@ -31,7 +31,16 @@ export default abstract class SlashCommand {
     constructor(client: Discord.Client, logger: Logger) {
         this.client = client;
         this.logger = logger;
-        this.core = Core.getInstance();
+    }
+
+    // Called when everything is ready (discord.js ready and zeko core is ready)
+    ready(): Promise<any> | any {
+
+    }
+
+    onReady() {
+        this.core = Core.getInstance()
+        return this.ready()
     }
 
     /**

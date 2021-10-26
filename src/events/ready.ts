@@ -4,9 +4,13 @@ export default class extends CoreEvent {
 
     every(/* args */) {
         if(!this.#fired) {
+            // TODO: Delay until this.core.isReady to prevent race-condition
             this.#fired = true;
-            this.core.modules.ready()
-            this.core.commands.registerPending()
+            Promise.all([
+                this.core.modules.ready(),
+                this.core.commands.ready(),
+                this.core.events.ready()
+            ])
         }
         //Fires every time.
         this.logger.info(`Bot now ready`);

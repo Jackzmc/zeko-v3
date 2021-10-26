@@ -141,6 +141,15 @@ export default class EventManager extends Manager {
         }
     }
 
+    async ready() {
+        for(const registered of this.#events.core.values()) {
+            await registered.event.onReady()
+        }
+        for(const registered of this.#events.custom.values()) {
+            await registered.event.onReady()
+        }
+    }
+
 
     /**
      * Attempt to fetch a core event by name

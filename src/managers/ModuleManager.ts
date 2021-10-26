@@ -62,7 +62,7 @@ export default class ModuleManager extends Manager {
         for(const { module, name } of modules) {
             if(module.ready) {
                 try {
-                    module.ready()
+                    module.onReady()
                 }catch(err) {
                     this.logger.error(`Module ${name}.ready() returned error: `, err)
                 }

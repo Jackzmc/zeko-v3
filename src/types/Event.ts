@@ -29,7 +29,16 @@ export default class {
     constructor(client: Client, logger: Logger) {
         this.client = client;
         this.logger = logger;
-        this.core = Core.getInstance();
+    }
+
+    // Called when everything is ready (discord.js ready and zeko core is ready)
+    ready(): Promise<any> | any {
+
+    }
+
+    onReady() {
+        this.core = Core.getInstance()
+        return this.ready()
     }
 
     config?(): Promise<Partial<EventConfig>> | Partial<EventConfig> | null;
