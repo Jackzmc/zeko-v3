@@ -5,16 +5,14 @@ import Logger from '../Logger.js';
 import CommandManager from '../managers/CommandManager.js'
 import OptionResult from '../types/OptionResult.js'
 export default class extends CoreEvent {
-    #cmdManager: CommandManager
     constructor(client: Client, logger: Logger) {
         super(client, logger)
-        this.#cmdManager = CommandManager.getInstance()
     }
 
     async every(interaction: Interaction) {
         if (!interaction.isCommand()) return;
 
-        const slash = this.#cmdManager.getSlashCommand(interaction.commandName)
+        const slash = this.core.commands.getSlashCommand(interaction.commandName)
         if(!slash) return;
         try {
             let options: OptionResult = new OptionResult(interaction.options, slash.data.options)

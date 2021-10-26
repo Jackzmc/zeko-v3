@@ -5,8 +5,8 @@ export default class extends CoreEvent {
     every(/* args */) {
         if(!this.#fired) {
             this.#fired = true;
-            this.client.managers.moduleManager.ready();
-            this.client.managers.commandManager.registerPending()
+            this.core.modules.ready()
+            this.core.commands.registerPending()
         }
         //Fires every time.
         this.logger.info(`Bot now ready`);

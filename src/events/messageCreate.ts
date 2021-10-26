@@ -12,13 +12,11 @@ import HelpCommand from '../commands/help.js'
 export const INTENTS = Intents.FLAGS.GUILD_MESSAGES | Intents.FLAGS.DIRECT_MESSAGES
 
 export default class extends CoreEvent {
-    #cmdManager: any;
     #generateHelpCommand: Function
     constructor(client: Client, logger: Logger) {
         super(client, logger);
-        this.#cmdManager = client.managers.commandManager;
-        const helpCmd = CommandManager.getInstance().getSlashCommand('help', true)
-        if(helpCmd) this.#generateHelpCommand = (helpCmd.command as HelpCommand).generateHelpCommand
+        const helpCmd = this.core.commands.getSlashCommand('help', true)
+        if(helpCmd) this.#generateHelpCommand = (helpCmd.command as HelpCommand).generateLegacyHelpCommand
         else logger.warn(`Could not find internal help command, legacy command usage help will not run properly`)
     }
     config() {
@@ -34,7 +32,7 @@ export default class extends CoreEvent {
                 
                 if(/\s/.test(this.client.PREFIX)) args.shift(); //shift if prefix has space
                 const command_name: string = /\s/.test(this.client.PREFIX) ? args.shift().toLowerCase() : args.shift().slice(this.client.PREFIX.length).toLowerCase();
-                const cmd: RegisteredLegacyCommand = this.#cmdManager.getCommand(command_name, true)
+                const cmd: RegisteredLegacyCommand = this.core.commands.getLegacyCommand(command_name, true)
                 if(cmd) {
                     if(cmd.config.guildOnly && msg.channel.type === "DM") {
                         return msg.reply('This commanad only works in guilds.')

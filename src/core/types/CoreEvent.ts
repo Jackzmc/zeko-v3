@@ -1,6 +1,7 @@
 import { Client } from "discord.js";
 import Logger from '../../Logger.js'
 import { EventConfig } from '../../types/Event';
+import Core from "../Core.js";
 /**
  @module core:types/CoreEvent
  @desc The CoreEvent class, core events inherit
@@ -8,9 +9,11 @@ import { EventConfig } from '../../types/Event';
 export default class {
     protected client: Client;
     protected logger: Logger;
+    protected core: Core
     constructor(client: Client, logger: Logger) {
         this.client = client;
         this.logger = logger;
+        this.core = Core.getInstance()
     }
 
     config?(): Promise<Partial<EventConfig>> | Partial<EventConfig> | null;
