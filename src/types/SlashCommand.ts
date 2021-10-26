@@ -9,6 +9,7 @@ import OptionResult from '../types/OptionResult.js';
 import { SlashCommandConfig, SlashOption } from './SlashOptions.js' 
 
 import { Client } from 'discord.js'
+import Core from '../core/Core.js';
 
 export { 
     OptionResult, 
@@ -22,6 +23,7 @@ export {
 export default abstract class SlashCommand {
     protected client: Discord.Client;
     protected logger: Logger;
+    protected core: Core;
     
     /**
      * Create a new command 
@@ -29,6 +31,7 @@ export default abstract class SlashCommand {
     constructor(client: Discord.Client, logger: Logger) {
         this.client = client;
         this.logger = logger;
+        this.core = Core.getInstance();
     }
 
     /**

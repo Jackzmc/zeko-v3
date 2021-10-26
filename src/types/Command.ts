@@ -3,7 +3,9 @@
  @description The Commands class
 */
 import { Client, Message } from 'discord.js';
+import Core from '../core/Core.js';
 import Logger from '../Logger'
+import CoreLoader from '../core/Core';
 
 export interface CommandConfigOptions {
     usageIfNotSet?: boolean,
@@ -44,6 +46,7 @@ export interface FlagList {
 export default abstract class Command {
     protected client: Client;
     protected logger: Logger;
+    protected core: Core
     
     /**
      * Create a new command 
@@ -54,6 +57,7 @@ export default abstract class Command {
     constructor(client: Client, logger: Logger) {
         this.client = client;
         this.logger = logger;
+        this.core = Core.getInstance()
     }
 
     /**

@@ -4,6 +4,7 @@
 */
 
 import { Client } from "discord.js";
+import Core from "../core/Core.js";
 import Logger from '../Logger'
 
 export interface EventConfig {
@@ -17,6 +18,7 @@ export interface EventConfig {
 export default class {
     protected client: Client;
     protected logger: Logger;
+    protected core: Core
 
     /**
      * Create a new event
@@ -27,6 +29,7 @@ export default class {
     constructor(client: Client, logger: Logger) {
         this.client = client;
         this.logger = logger;
+        this.core = Core.getInstance();
     }
 
     config?(): Promise<Partial<EventConfig>> | Partial<EventConfig> | null;

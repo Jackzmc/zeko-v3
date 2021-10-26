@@ -4,6 +4,7 @@
 */
 
 import { Client } from "discord.js";
+import Core from "../core/Core.js";
 import Logger from '../Logger.js'
 
 export interface ModuleConfig {
@@ -20,6 +21,7 @@ export interface ModuleConfig {
 export default class Module {
     protected client: Client;
     protected logger: Logger;
+    protected core: Core;
 
     /**
      * Create a new module
@@ -30,6 +32,7 @@ export default class Module {
     constructor(client: Client, logger: Logger) {
         this.client = client;
         this.logger = logger;
+        this.core = Core.getInstance()
     }
 
     static config: ModuleConfig = {}
