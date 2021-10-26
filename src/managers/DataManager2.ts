@@ -54,7 +54,9 @@ export default class SqliteDataManager implements Keyv {
             }
             return subpath;
         }else{
-            return path.resolve(__dirname, '../../../data');
+            const subpath = path.resolve(__dirname, '../../../data');
+            fs.mkdir(subpath, { recursive: true }, () => {})
+            return subpath
         }
     }
 }
