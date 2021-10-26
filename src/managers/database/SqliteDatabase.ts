@@ -1,12 +1,8 @@
 import Keyv from 'keyv'
-import Logger from '../../Logger.js'
 import Database from './Database.js'
 
 import path from 'path'
 import fs from 'fs'
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default class SqliteDatabase extends Database implements Keyv  {
     keyv: Keyv

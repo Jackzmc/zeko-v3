@@ -1,13 +1,8 @@
 import Keyv from 'keyv'
-import Logger from '../../Logger.js'
 import Database from './Database.js'
 
-import path from 'path'
-import fs from 'fs'
-import { fileURLToPath } from 'url';
 import { ConnectionSQLDetails } from './Database';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default class MySQLDatabase extends Database implements Keyv  {
     keyv: Keyv
