@@ -62,13 +62,13 @@ export default class CommandManager extends Manager {
     #commands: Collection<string, RegisteredLegacyCommand>
     #aliases: Collection<string, string>
     #slashCommands:  Collection<string, RegisteredSlashCommand>
-    #pendingSlash: PendingSlashCommand[]
+    #pendingSlash: Record<string, PendingSlashCommand>
     #groups: string[]
     constructor(client: Client) {
         super(client, 'CommandManager')
         this.#commands = new Collection();
         this.#slashCommands = new Collection()
-        this.#pendingSlash = []
+        this.#pendingSlash = {}
         this.#aliases = new Collection();
         this.#groups = [];
         
@@ -161,14 +161,11 @@ export default class CommandManager extends Manager {
      */
     async registerSlashCommand(command: SlashCommand, isCore: boolean, group: string = "default"): Promise<PendingSlashCommand> {
         try {
-            const data = command.slashConfig()
+            let data = command.slashConfig()
+            data.name = data.name.toLowerCase()
             // Overwrite any previousc ommands, such that a custom can overwrite a core command
-            for(let i = 0; i < this.#pendingSlash.length; i++) {
-                if(this.#pendingSlash[i].data.name === data.name && this.#pendingSlash[i].guild === data.guild) {
-                    this.#pendingSlash.splice(i, 1)
-                    return this.#pendingSlash[i]
-                }
-            }
+            delete this.#pendingSlash[data.name]
+
             let builder: SlashCommandBuilder
             try {
                 builder = new SlashCommandBuilder()
@@ -192,7 +189,7 @@ export default class CommandManager extends Manager {
                 guild: process.env.DISCORD_FORCE_SLASH_GUILD || data.guild
             }
 
-            this.#pendingSlash.push(pendingCommand)
+            this.#pendingSlash[data.name] = pendingCommand
             //Add to list of groups.
             if(group !== "default" && !this.#groups.includes(group)) {
                 this.#groups.push(group)
@@ -369,7 +366,7 @@ export default class CommandManager extends Manager {
         if(process.env.DISCORD_FORCE_SLASH_GUILD)
             this.logger.debug(`DISCORD_FORCE_SLASH_GUILD was set, using forced-guild ID ${process.env.DISCORD_FORCE_SLASH_GUILD}`)
 
-        for(const slash of this.#pendingSlash) {
+        for(const slash of Object.values(this.#pendingSlash)) {
             const cmd = await this.client.application.commands.create(slash.builder.toJSON(), slash.guild)
             const registeredCommand: RegisteredSlashCommand = {
                 ...slash,
@@ -384,7 +381,7 @@ export default class CommandManager extends Manager {
 
     getSlashCommand(name: string, fetchPending: boolean = false): RegisteredSlashCommand | PendingSlashCommand | null {
         const cmd = this.#slashCommands.get(name.toLowerCase())
-        if(!cmd && fetchPending) return this.#pendingSlash.find(v => v.data.name.toLowerCase() === name.toLowerCase())
+        if(!cmd && fetchPending) return this.#pendingSlash[name.toLowerCase()]
         return cmd
     }
 }
