@@ -8,20 +8,25 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default class SqliteDataManager implements Keyv {
-    logger: Logger
+    private logger: Logger
     keyv: Keyv
+    private _filepath: String
     constructor(namespace: string, sqlitePath?: string) {
         this.logger = new Logger(`DataManager/${namespace}`)
-        if(!fs.existsSync(sqlitePath)) {
+        if(sqlitePath && !fs.existsSync(sqlitePath)) {
             throw new Error(`Provided path \"${sqlitePath}\" does not exist`)
         }
         else if(!sqlitePath) sqlitePath = path.join(SqliteDataManager.getDataDirectory(), `data.db`)
-       
+        this._filepath = sqlitePath
         const keyv = new Keyv(`sqlite://${sqlitePath}`, { namespace });
         keyv.on('error', (err: Error) => {
             this.logger.severe(`KeyV connection error: `, err)
         });
         this.keyv = keyv
+    }
+
+    get filepath() {
+        return this._filepath
     }
 
     get<T>(key: string, defaultValue?: T): T {
