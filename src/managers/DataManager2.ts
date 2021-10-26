@@ -15,13 +15,25 @@ export default class SqliteDataManager implements Keyv {
         if(!fs.existsSync(sqlitePath)) {
             throw new Error(`Provided path \"${sqlitePath}\" does not exist`)
         }
-        else if(!sqlitePath) sqlitePath = path.join(SqliteDataManager.getDataDirectory(), `${namespace}.db`)
+        else if(!sqlitePath) sqlitePath = path.join(SqliteDataManager.getDataDirectory(), `data.db`)
        
-        const keyv = new Keyv();
+        const keyv = new Keyv(`sqlite://${sqlitePath}`, { namespace });
         keyv.on('error', (err: Error) => {
             this.logger.severe(`KeyV connection error: `, err)
         });
         this.keyv = keyv
+    }
+
+    get<T>(key: string, defaultValue?: T): T {
+        return this.keyv.get(key) || defaultValue
+    }
+
+    set(key: string, value: any, ttlMS?: number): Promise<boolean> {
+        return this.keyv.set(key, value, ttlMS)
+    }
+
+    setWithTTL(key: string, value: any, ttlMS: number): Promise<boolean> {
+        return this.keyv.set(key, value, ttlMS)
     }
 
      /**

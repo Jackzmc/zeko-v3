@@ -1,5 +1,4 @@
-import SlashCommand, { SlashCommandConfig, OptionResult } from '../types/SlashCommand.js'
-import { CommandInteraction} from 'discord.js';
+import SlashCommand, { SlashCommandConfig, OptionResult, CommandInteraction } from '../types/SlashCommand.js'
 
 export default class extends SlashCommand {
 	async run(interact: CommandInteraction, options: OptionResult) {
