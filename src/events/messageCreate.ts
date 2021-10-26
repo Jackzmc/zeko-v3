@@ -15,7 +15,6 @@ export default class extends CoreEvent {
     #generateHelpCommand: Function
     constructor(client: Client, logger: Logger) {
         super(client, logger);
-        console.log(this.core.commands)
     }
 
     async ready() {

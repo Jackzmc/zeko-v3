@@ -356,7 +356,12 @@ export default class CommandManager extends Manager {
 
     public async ready() {
         await this.registerPending()
-        this.passReady()
+        for(const registered of this.#slashCommands.values()) {
+            registered.command.onReady()
+        }
+        for(const registered of this.#commands.values()) {
+            registered.command.onReady()
+        }
     }
 
     private async registerPending() {
@@ -381,15 +386,6 @@ export default class CommandManager extends Manager {
                 this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options. guild=${slash.guild}`)
             }
             this.#slashCommands.set(slash.data.name.toLowerCase(), registeredCommand)
-        }
-    }
-
-    private passReady() {
-        for(const registered of this.#slashCommands.values()) {
-            registered.command.onReady()
-        }
-        for(const registered of this.#commands.values()) {
-            registered.command.onReady()
         }
     }
 
