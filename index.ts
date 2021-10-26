@@ -1,6 +1,6 @@
 import * as Discord from 'discord.js';
 import EnvLoader from './src/core/EnvLoader.js'
-import CoreLoader from './src/core/loaders/CoreLoader.js'
+import CoreLoader from './src/core/Core.js'
 
 // Fetch envs and any intents from env variable
 const envs = EnvLoader()

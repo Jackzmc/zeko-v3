@@ -3,24 +3,25 @@
  * @desc Loads all the other loaders and setups the client.
  */
 
-import EventLoader from './EventLoader.js'
-import CommandLoader from './CommandLoader.js'
-import ModuleLoader from './ModuleLoader.js'
-import Functions from '../Functions.js'
-import Logger from '../../Logger.js'
+import EventLoader from './loaders/EventLoader.js'
+import CommandLoader from './loaders/CommandLoader.js'
+import ModuleLoader from './loaders/ModuleLoader.js'
+import Functions from './Functions.js'
+import Logger from '../Logger.js'
 import { promises as fs } from 'fs';
 import { Client, Intents } from 'discord.js';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
-import ModuleManager from '../../managers/ModuleManager.js';
-import CommandManager from '../../managers/CommandManager.js';
-import EventManager from '../../managers/EventManager.js';
-import DataManager from '../../managers/DataManager2.js';
+import ModuleManager from '../managers/ModuleManager.js';
+import CommandManager from '../managers/CommandManager.js';
+import EventManager from '../managers/EventManager.js';
+import DataManager from '../managers/DataManager2.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export default class CoreLoader {
+export default class Core {
+    private static instance: Core;
     private logger: Logger;
     private client: Client;
     #shuttingDown: boolean = false
@@ -32,6 +33,11 @@ export default class CoreLoader {
 
     constructor() {
         this.logger = new Logger( 'Core' );
+        Core.instance = this
+    }
+
+    static getInstance(): Core {
+        return this.instance
     }
     
     async load(customIntents: Intents) {
@@ -80,17 +86,17 @@ export default class CoreLoader {
             process.on('SIGINT',  () => this.gracefulShutdown(true))
             process.on('SIGUSR2', () => this.gracefulShutdown(true))
         } catch (err) {
-            this.#logger.severe('Manager loading failure:\n', err)
+            this.logger.severe('Manager loading failure:\n', err)
         }
     }
     gracefulShutdown(exit: boolean) {
         if(!this.#shuttingDown) {
             this.#shuttingDown = true;
-            this.#logger.info(`Detected shutdown signal (exit=${exit}). Shutting down managers...`)
+            this.logger.info(`Detected shutdown signal (exit=${exit}). Shutting down managers...`)
             Promise.all([
-                this.#client.managers.moduleManager.exit(exit),
-                this.#client.managers.commandManager.exit(exit),
-                this.#client.managers.eventManager.exit(exit)
+                this.client.managers.moduleManager.exit(exit),
+                this.client.managers.commandManager.exit(exit),
+                this.client.managers.eventManager.exit(exit)
             ]).then(() => {
                 if(exit) process.exit(0)
             })
