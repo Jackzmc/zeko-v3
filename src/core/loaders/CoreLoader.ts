@@ -6,7 +6,6 @@
 import EventLoader from './EventLoader.js'
 import CommandLoader from './CommandLoader.js'
 import ModuleLoader from './ModuleLoader.js'
-import SettingsManager from '../../managers/SettingsManager.js';
 import Functions from '../Functions.js'
 import Logger from '../../Logger.js'
 import { promises as fs } from 'fs';
@@ -14,17 +13,27 @@ import { Client, Intents } from 'discord.js';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
+import ModuleManager from '../../managers/ModuleManager.js';
+import CommandManager from '../../managers/CommandManager.js';
+import EventManager from '../../managers/EventManager.js';
+import DataManager from '../../managers/DataManager2.js';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default class CoreLoader {
-    #logger: Logger;
-    #client: Client;
+    private logger: Logger;
+    private client: Client;
     #shuttingDown: boolean = false
 
+    private commandManager: CommandManager;
+    private moduleManager: ModuleManager;
+    private eventManager: EventManager;
+    private dataManager: DataManager;
+
     constructor() {
-        const logger = new Logger( 'Core' );
-        this.#logger = logger;
+        this.logger = new Logger( 'Core' );
     }
+    
     async load(customIntents: Intents) {
         try {
             // Initialize all loaders
@@ -37,13 +46,13 @@ export default class CoreLoader {
             // Event loader must be preloaded to grab any intents any event may need
             const { intents, events } = await eventLoader.preload()
             customIntents.add(intents)
-            this.#logger.info(`Registered intents: ${customIntents.toArray()}`)
+            this.logger.info(`Registered intents: ${customIntents.toArray()}`)
 
             // Create client with intents
             const client: Client = new Client({
                 intents: customIntents
             });
-            this.#client = client
+            this.client = client;
             Functions(client)
 
             // Everything's ready, load the loaders
@@ -52,9 +61,15 @@ export default class CoreLoader {
                 await commandLoader.load(client)
                 await eventLoader.load(client, events)
             } catch(err) {
-                this.#logger.severe('Failed to load modules', err.stack)
+                this.logger.severe('Failed to load modules', err.stack)
                 process.exit(3)
             }
+
+            this.moduleManager = moduleLoader.manager
+            this.commandManager = commandLoader.manager
+            this.eventManager = eventLoader.manager
+            this.dataManager = new DataManager('core')
+
             if(!process.env.ZEKO_DISABLE_SETTINGS)
                 // client.managers.settingsManager = new SettingsManager(client);
             
@@ -80,6 +95,19 @@ export default class CoreLoader {
                 if(exit) process.exit(0)
             })
         }
+    }
+
+    get commands() { 
+        return this.commandManager 
+    }
+    get modules() {
+        return this.moduleManager
+    }
+    get events() {
+        return this.eventManager
+    }
+    get db() {
+        return this.dataManager
     }
 }
 async function internalCustomCheck(): Promise<void> {
