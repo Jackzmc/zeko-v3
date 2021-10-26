@@ -9,7 +9,7 @@ import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/Com
 import SlashCommand from '../types/SlashCommand.js'
 import { SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
 import Manager from './Manager.js';
-import Core from 'src/core/Core.js';
+import Core from '../core/Core.js';
 
 //TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that
 

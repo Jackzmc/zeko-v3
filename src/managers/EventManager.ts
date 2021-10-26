@@ -10,7 +10,7 @@ import Logger from '../Logger.js'
 import Event from '../types/Event.js';
 import CoreEvent from '../core/types/CoreEvent.js'
 import Manager from './Manager.js';
-import Core from 'src/core/Core.js';
+import Core from '../core/Core.js';
 
 export interface RegisteredCoreEvent {
     config: RegisteredEventConfig,

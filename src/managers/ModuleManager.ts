@@ -5,7 +5,7 @@
 */
 import { Client } from 'discord.js';
 import path from 'path'
-import Core from 'src/core/Core.js';
+import Core from '../core/Core.js';
 import Logger from '../Logger.js'
 import Module from '../types/Module.js';
 import Manager, { Registered } from './Manager.js';
