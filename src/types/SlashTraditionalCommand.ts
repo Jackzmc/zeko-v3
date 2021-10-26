@@ -71,8 +71,11 @@ export default abstract class SlashTraditionalCommand extends SlashCommand {
         }
 
         // Grab all options excluding internal args
-        const flags: FlagList = {...options.keys}
-        delete flags['args']
+        let flags: FlagList = {}
+        for(const [key, value] of options) {
+            if(key === "args") continue
+            flags[key] = value
+        }
 
         try {
             Promise.resolve(this.execute(interaction, args, flags))
