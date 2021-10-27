@@ -1,5 +1,5 @@
 import { CommandInteractionOption, User, GuildMember, GuildChannel, ThreadChannel, CommandInteractionOptionResolver, Role } from 'discord.js'
-import { SlashOption, SlashHasDefault, SlashDefaultOption, Integer } from '../types/SlashOptions.js'
+import { SlashOption, SlashHasDefault, SlashDefaultOption, Integer, SlashSubCommandOption, SlashSubCommandGroupOption } from '../types/SlashOptions.js'
 
 interface StoredOptionResult extends CommandInteractionOption {
     value?: number | string | boolean | Integer
@@ -20,6 +20,13 @@ export default class OptionResult {
         if(options) {
             this.#subcmd = results.getSubcommand(false)
             this.#subcmdGroup = results.getSubcommandGroup(false)
+            if(this.#subcmd) {
+                const subcmdOption = options.find(option => option.name === this.#subcmd) as SlashSubCommandOption
+                options = subcmdOption.options || []
+            } else if(this.#subcmdGroup) {
+                const subcmdOption = options.find(option => option.name === this.#subcmdGroup) as SlashSubCommandGroupOption
+                options = subcmdOption.options || []
+            }
             for(const option of options) {
                 const value = results.get(option.name, ('required' in option) ? option.required : null)
                 if(value) {
