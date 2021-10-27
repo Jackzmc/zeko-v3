@@ -24,6 +24,9 @@ export interface SlashChoicesOption<T> extends SlashOptionValue {
 
 export type Integer = number
 export type AllowedChannelType = ChannelType.GuildText | ChannelType.GuildVoice | ChannelType.GuildCategory | ChannelType.GuildNews | ChannelType.GuildStore | ChannelType.GuildNewsThread | ChannelType.GuildPublicThread | ChannelType.GuildPrivateThread | ChannelType.GuildStageVoice
+export {
+    ChannelType
+}
 
 export interface SlashSubCommandOption extends SlashOptionBase {
     type: "SUB_COMMAND",

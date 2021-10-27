@@ -6,7 +6,7 @@ import Discord, { CommandInteraction } from 'discord.js';
 import Logger from '../Logger.js'
 import OptionResult from '../types/OptionResult.js';
 
-import { SlashCommandConfig, SlashOption } from './SlashOptions.js' 
+import { SlashCommandConfig, SlashOption, ChannelType } from './SlashOptions.js' 
 
 import { Client } from 'discord.js'
 import Core from '../core/Core.js';
@@ -17,7 +17,8 @@ export {
     Logger,
     Client,
     SlashCommandConfig,
-    SlashOption
+    SlashOption,
+    ChannelType
 }
 
 export default abstract class SlashCommand {
