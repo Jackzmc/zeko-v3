@@ -59,7 +59,7 @@ export default abstract class Database implements Keyv {
             }
             return subpath;
         }else{
-            const subpath = path.resolve(__dirname, '../../../data');
+            const subpath = path.resolve(__dirname, '../../../../data');
             fs.mkdir(subpath, { recursive: true }, () => {})
             return subpath
         }
