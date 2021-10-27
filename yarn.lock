@@ -1071,6 +1071,11 @@ jsprim@^1.2.2:
     json-schema "0.2.3"
     verror "1.10.0"
 
+jsum@^2.0.0-alpha.3:
+  version "2.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/jsum/-/jsum-2.0.0-alpha.3.tgz#8040e9b347ab2f3e5b4f8ed7e26d889b16eb16c0"
+  integrity sha512-5Lwzwd7p1rKyzXC6uG063uoSjc9nHx6Rfa3LeiRa8XTw3yB6VkxPVtmG21VsZ1qGTfuCESXBQsM0bAEh6CISdg==
+
 keyv@^4.0.3:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/keyv/-/keyv-4.0.3.tgz#4f3aa98de254803cafcd2896734108daa35e4254"

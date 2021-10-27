@@ -64,10 +64,10 @@ export default class Core {
         try {
             // Initialize all loaders
             const ROOT_DIR = resolve(__dirname,"../../")
+            this.dataManager = this.getDatabase('core')
             const moduleLoader = new ModuleLoader(ROOT_DIR, new Logger("ModuleLoader"));
             const commandLoader = new CommandLoader(ROOT_DIR, new Logger("CommandLoader"));
             const eventLoader = new EventLoader(ROOT_DIR, new Logger("EventLoader"));
-            this.dataManager = this.getDatabase('core')
             internalCustomCheck()
 
 
