@@ -185,7 +185,7 @@ export default class CommandManager extends Manager {
                     .setDescription(data.description)
                 if(data.options) {
                     for(const option of data.options) {
-                        builder = this.addSlashOption(builder, option)
+                        builder = this.addSlashOption<SlashCommandBuilder>(builder, option)
                     }
                 }
             } catch(err) {
@@ -211,6 +211,7 @@ export default class CommandManager extends Manager {
             if(group !== "default" && !this.#groups.includes(group)) {
                 this.#groups.push(group)
             }
+
             return pendingCommand;
         } catch(err) {
             throw err
@@ -334,16 +335,17 @@ export default class CommandManager extends Manager {
             if('choices' in data) {
                 if(Array.isArray(data.choices)) {
                     for(const name of data.choices) {
-                        option.addChoice(name, name)
+                        option = option.addChoice(name, name)
                     }
                 } else {
                     for(const name in data.choices) {
-                        option.addChoice(name, data.choices[name])
+                        option = option.addChoice(name, data.choices[name])
                     }
                 }
             }
             return option
         }
+
         switch(data.type) {
             case "BOOLEAN":
                 builder.addBooleanOption(setData)
@@ -458,7 +460,7 @@ export default class CommandManager extends Manager {
                             })
                             this.#slashCommands.set(name, registeredCommand)
                         } catch(err) {
-                            this.logger.error(`Registering global /${name} errored: `, err)
+                            this.logger.error(`Registering global /${name} failed:`, err)
                         }
                         resolve(true)
                     }))
@@ -484,7 +486,7 @@ export default class CommandManager extends Manager {
                                 this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options on guild ${guildID}`)
                             }
                         } catch(err) {
-                            this.logger.error(`Registering /${name} for ${guildID} errored: `, err)
+                            this.logger.error(`Registering /${name} for ${guildID} failed:`, err)
                         }
                     }
                 }
