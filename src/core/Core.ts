@@ -131,7 +131,8 @@ export default class Core {
     }
 
     private getDatabase(namespace: string): Database {
-        if(process.env.MYSQL_HOST) {
+        const provider = process.env.ZEKO_DB_PROVIDER.toLowerCase() || "sqlite"
+        if(provider === "mysql") {
             const settings = {
                 hostname: process.env.MYSQL_HOST,
                 port: parseInt(process.env.MYSQL_PORT),
