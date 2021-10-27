@@ -131,7 +131,7 @@ export default class Core {
     }
 
     private getDatabase(namespace: string): Database {
-        const provider = process.env.ZEKO_DB_PROVIDER ? process.env.ZEKO_DB_PROVIDER.toLowerCase() || "sqlite"
+        const provider = process.env.ZEKO_DB_PROVIDER ? process.env.ZEKO_DB_PROVIDER.toLowerCase() : "sqlite"
         if(provider === "mysql") {
             const settings = {
                 hostname: process.env.MYSQL_HOST,
