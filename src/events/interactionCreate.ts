@@ -29,10 +29,10 @@ export default class extends CoreEvent {
                 return false
             }
         } catch(err) {
-            if(interaction.replied)
-                await interaction.editReply(err.message)
-            else
-                await interaction.reply(err.message)
+            this.logger.warn(`Command ${slash.data.name} experienced option parsing error:\n    `, err.stack)
+            const msg = `**Internal Error**\n${err.message}`
+            if(interaction.replied) await interaction.editReply(msg) 
+            else await interaction.reply(msg)
         }
         return true
     }
