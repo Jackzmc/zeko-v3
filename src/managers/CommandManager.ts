@@ -183,7 +183,7 @@ export default class CommandManager extends Manager {
                 return null
             }
 
-            const guilds = data.guilds
+            const guilds = data.guilds || []
             if(process.env.DISCORD_FORCE_SLASH_GUILD && !guilds.includes(process.env.DISCORD_FORCE_SLASH_GUILD))
                 guilds.push(process.env.DISCORD_FORCE_SLASH_GUILD)
 
