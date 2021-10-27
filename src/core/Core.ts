@@ -20,10 +20,12 @@ import EventManager from '../managers/EventManager.js';
 import SqliteDatabase from '../managers/database/SqliteDatabase.js';
 import Database from '../managers/database/Database.js'
 import MySQLDatabase from '../managers/database/MySQLDatabase.js'
+import JsonDatabase from '../managers/database/JsonDatabase.js'
 
 export enum DatabaseType {
     SQLITE,
-    MYSQL
+    MYSQL,
+    JSON
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -143,6 +145,10 @@ export default class Core {
             this.logger.info(`Using database provider: MySQLDatabase`)
             this.dataProvider = DatabaseType.MYSQL
             return new MySQLDatabase(namespace, settings)
+        } else if(provider === "json") {
+            this.logger.info(`Using database provider: JSONDatabase`)
+            this.dataProvider = DatabaseType.JSON
+            return new JsonDatabase(namespace)
         } else {
             this.logger.info(`Using database provider: SqliteDatabase`)
             this.dataProvider = DatabaseType.SQLITE
