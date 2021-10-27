@@ -3,13 +3,15 @@
  @module CommandManager
 */
 import Logger from '../Logger.js'
-import { Client, Collection, ApplicationCommand, Snowflake } from 'discord.js';
+import { Client, Collection, ApplicationCommand, Snowflake, GuildResolvable } from 'discord.js';
 import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/Command.js';
+import jsum from 'jsum'
 import SlashCommand from '../types/SlashCommand.js'
 import { SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
 import Manager from './Manager.js';
 import Core from '../core/Core.js';
+import SqliteDatabase from './database/SqliteDatabase.js';
 
 //TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that
 
@@ -32,10 +34,15 @@ interface SlashCommandRegistry {
     guilds: Snowflake[]
 }
  
-export interface RegisteredSlashCommand extends SlashCommandRegistry {
-    guildCommands?: Record<Snowflake, ApplicationCommand>,
-    globalCommand?: ApplicationCommand  
+export interface RegisteredGlobalSlashCommand extends SlashCommandRegistry {
+    globalCommandId: Snowflake  
 }
+
+export interface RegisteredGuildsSlashCommand extends SlashCommandRegistry {
+    guildCommandsIds: Record<Snowflake, Snowflake>, //guildID: CommandID
+}
+
+export type RegisteredSlashCommand = RegisteredGlobalSlashCommand | RegisteredGuildsSlashCommand
 
 export interface PendingSlashCommand extends SlashCommandRegistry {
     builder: SlashCommandBuilder,
@@ -67,6 +74,7 @@ export default class CommandManager extends Manager {
     #pendingSlash: Record<string, PendingSlashCommand>
     #groups: string[]
     #firstRegisterDone: boolean
+    private core: Core
 
     constructor(client: Client) {
         super(client, 'CommandManager')
@@ -281,6 +289,14 @@ export default class CommandManager extends Manager {
     get commandsCount() : number {
         return this.#commands.size;
     }
+
+    get slashCommandCount() {
+        return this.#slashCommands.size
+    }
+
+    get slashCommandTotalCount() {
+        return this.#slashCommands.size + Object.keys(this.#pendingSlash).length
+    }
     /**
      * Get the the total number of aliases registered
      *
@@ -383,14 +399,14 @@ export default class CommandManager extends Manager {
     }
 
     public async ready() {
+        this.core = Core.getInstance()
         await this.registerPending()
-        const core = Core.getInstance()
         const promises = []
         for(const registered of this.#slashCommands.values()) {
-            promises.push(registered.command.onReady(core))
+            promises.push(registered.command.onReady(this.core))
         }
         for(const registered of this.#commands.values()) {
-            promises.push(registered.command.onReady(core))
+            promises.push(registered.command.onReady(this.core))
         }
         return Promise.allSettled(promises)
     }
@@ -411,35 +427,66 @@ export default class CommandManager extends Manager {
         const globalCommands = []
         
         for(const slash of Object.values(this.#pendingSlash)) {
+            const name = slash.data.name.toLowerCase()
+            const checksum = jsum.digest(slash.builder.toJSON(), 'SHA256', 'hex')
             if(!slash.guilds || slash.guilds.length == 0) {
                 //Global command
-                globalCommands.push(new Promise(async(resolve) => {
-                    const cmd = await this.client.application.commands.create(slash.builder.toJSON())
+                const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.global.${name}`)
+                if(storedCmd && checksum === storedCmd.checksum) {
+                    // No need to re-register, skip
+                    this.logger.debug(`Skipping global /${slash.data.name}: Checksum same`)
                     const registeredCommand: RegisteredSlashCommand = {
                         ...slash,
-                        globalCommand: cmd
+                        globalCommandId: storedCmd.id
                     }
-                    if(process.env.DEBUG_SLASH_REGISTER) {
-                        this.logger.debug(`Registered global /${slash.data.name} with ${slash.data.options?.length} options`)
-                    }
-                    this.#slashCommands.set(slash.data.name.toLowerCase(), registeredCommand)
-                    resolve(true)
-                }))
+                    this.#slashCommands.set(name, registeredCommand)
+                } else {
+                    globalCommands.push(new Promise(async(resolve) => {
+                        const cmd = await this.client.application.commands.create(slash.builder.toJSON())
+                        const registeredCommand: RegisteredGlobalSlashCommand = {
+                            ...slash,
+                            globalCommandId: cmd.id
+                        }
+                        if(process.env.DEBUG_SLASH_REGISTER) {
+                            this.logger.debug(`Registered global /${slash.data.name} with ${slash.data.options?.length} options`)
+                        }
+                        this.core.db.set(`commands.global.${name}`, {
+                            checksum,
+                            id: cmd.id
+                        })
+                        this.#slashCommands.set(name, registeredCommand)
+                        resolve(true)
+                    }))
+                }
             } else {
                 let guildCommands = {}
                 for(const guildID of slash.guilds) {
-                    guildCommands[guildID] = await this.client.application.commands.create(slash.builder.toJSON(), guildID)
+                    const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.guild.${guildID}.${name}`)
+                    if(storedCmd && storedCmd.checksum == checksum) {
+                        guildCommands[guildID] = storedCmd.id
+                        if(process.env.DEBUG_SLASH_REGISTER) {
+                            this.logger.debug(`Skipping /${slash.data.name} on guild ${guildID}: Checksum same`)
+                        }
+                    } else {
+                        const cmd = await this.client.application.commands.create(slash.builder.toJSON(), guildID)
+                        this.core.db.set(`commands.guild.${guildID}.${name}`, {
+                            checksum,
+                            id: cmd.id
+                        })
+                        guildCommands[guildID] = cmd.id
+                        if(process.env.DEBUG_SLASH_REGISTER) {
+                            this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options on guild ${guildID}`)
+                        }
+                    }
                 }
 
-                const registeredCommand: RegisteredSlashCommand = {
+                const registeredCommand: RegisteredGuildsSlashCommand = {
                     ...slash,
-                    guildCommands
+                    guildCommandsIds: guildCommands
                 }
 
-                if(process.env.DEBUG_SLASH_REGISTER) {
-                    this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options on guilds=${slash.guilds}`)
-                }
-                this.#slashCommands.set(slash.data.name.toLowerCase(), registeredCommand)
+                
+                this.#slashCommands.set(name.toLowerCase(), registeredCommand)
             }
         }
 
@@ -460,5 +507,5 @@ export default class CommandManager extends Manager {
 
 interface SavedSlashCommandData {
     id: Snowflake,
-    data: any
+    checksum: string
 }
