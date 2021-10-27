@@ -68,9 +68,9 @@ export interface SlashNumberOption extends SlashDefaultOption<number> {
     type: "NUMBER",
 }
 
-export type SlashOption = SlashSubCommandOption | SlashSubCommandGroupOption | SlashStringOption | SlashIntegerOption | SlashBooleanOption | SlashUserOption | SlashChannelOption | SlashRoleOption | SlashMentionableOption | SlashNumberOption
 // Subcommands do not support nesting:
 export type SlashSubOption = SlashStringOption | SlashIntegerOption | SlashBooleanOption | SlashUserOption | SlashChannelOption | SlashRoleOption | SlashMentionableOption | SlashNumberOption
+export type SlashOption = SlashSubCommandOption | SlashSubCommandGroupOption | SlashSubOption
 
 export type SlashHasDefault = SlashStringOption | SlashIntegerOption | SlashBooleanOption | SlashNumberOption
 export type SlashHasChoices = SlashStringOption | SlashIntegerOption | SlashBooleanOption | SlashNumberOption

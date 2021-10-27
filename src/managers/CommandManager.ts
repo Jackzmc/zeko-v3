@@ -4,7 +4,7 @@
 */
 import Logger from '../Logger.js'
 import { Client, Collection, ApplicationCommand, Snowflake } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/Command.js';
 import SlashCommand from '../types/SlashCommand.js'
 import { SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
@@ -304,7 +304,7 @@ export default class CommandManager extends Manager {
         return Promise.all(promises)
     }
 
-    private addSlashOption(builder: SlashCommandBuilder, data: SlashOption) {
+    private addSlashOption<T extends SlashCommandBuilder | SlashCommandSubcommandBuilder>(builder: T, data: SlashOption): T {
         function setData(option) {
             option = option.setName(data.name).setDescription(data.description)
             if('choices' in data) {
@@ -349,7 +349,24 @@ export default class CommandManager extends Manager {
                 builder.addMentionableOption(setData)
                 break    
             case "SUB_COMMAND":
-                builder.addSubcommand(setData)
+                if(builder instanceof SlashCommandBuilder) {
+                    builder.addSubcommand(cmd => {
+                        cmd = setData(cmd)
+                        for(const option of data.options) {
+                            cmd = this.addSlashOption<SlashCommandSubcommandBuilder>(cmd, option)
+                        }
+                        return cmd
+                    })
+                } else {
+                    throw new Error("Subcommands can only be added to SlashCommandBuilder")
+                }
+                break    
+            case "SUB_COMMAND_GROUP":
+                if(builder instanceof SlashCommandBuilder) {
+                    builder.addSubcommandGroup(setData)
+                } else {
+                    throw new Error("Subcommand groups can only be added to SlashCommandBuilder")
+                }
                 break    
         }
         return builder
