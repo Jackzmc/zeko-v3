@@ -443,24 +443,28 @@ export default class CommandManager extends Manager {
                     this.#slashCommands.set(name, registeredCommand)
                 } else {
                     globalCommands.push(new Promise(async(resolve) => {
-                        const cmd = await this.client.application.commands.create(discordData)
-                        const registeredCommand: RegisteredGlobalSlashCommand = {
-                            ...slash,
-                            globalCommandId: cmd.id
+                        try {
+                            const cmd = await this.client.application.commands.create(discordData)
+                            const registeredCommand: RegisteredGlobalSlashCommand = {
+                                ...slash,
+                                globalCommandId: cmd.id
+                            }
+                            if(process.env.DEBUG_SLASH_REGISTER) {
+                                this.logger.debug(`Registered global /${slash.data.name} with ${slash.data.options?.length} options`)
+                            }
+                            this.core.db.set(`commands.global.${name}`, {
+                                checksum,
+                                id: cmd.id
+                            })
+                            this.#slashCommands.set(name, registeredCommand)
+                        } catch(err) {
+                            this.logger.error(`Registering global /${name} errored: `, err)
                         }
-                        if(process.env.DEBUG_SLASH_REGISTER) {
-                            this.logger.debug(`Registered global /${slash.data.name} with ${slash.data.options?.length} options`)
-                        }
-                        this.core.db.set(`commands.global.${name}`, {
-                            checksum,
-                            id: cmd.id
-                        })
-                        this.#slashCommands.set(name, registeredCommand)
                         resolve(true)
                     }))
                 }
             } else {
-                let guildCommands = {}
+                let guildCommands: Record<Snowflake, Snowflake> = {}
                 for(const guildID of slash.guilds) {
                     const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.guild.${guildID}.${name}`)
                     if(storedCmd && storedCmd.checksum == checksum) {
@@ -469,14 +473,18 @@ export default class CommandManager extends Manager {
                             this.logger.debug(`Skipping /${slash.data.name} on guild ${guildID}: Checksum same`)
                         }
                     } else {
-                        const cmd = await this.client.application.commands.create(discordData, guildID)
-                        this.core.db.set(`commands.guild.${guildID}.${name}`, {
-                            checksum,
-                            id: cmd.id
-                        })
-                        guildCommands[guildID] = cmd.id
-                        if(process.env.DEBUG_SLASH_REGISTER) {
-                            this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options on guild ${guildID}`)
+                        try {
+                            const cmd = await this.client.application.commands.create(discordData, guildID)
+                            this.core.db.set(`commands.guild.${guildID}.${name}`, {
+                                checksum,
+                                id: cmd.id
+                            })
+                            guildCommands[guildID] = cmd.id
+                            if(process.env.DEBUG_SLASH_REGISTER) {
+                                this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options on guild ${guildID}`)
+                            }
+                        } catch(err) {
+                            this.logger.error(`Registering /${name} for ${guildID} errored: `, err)
                         }
                     }
                 }
