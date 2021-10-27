@@ -1,5 +1,5 @@
 import { CommandInteractionOption, User, GuildMember, GuildChannel, ThreadChannel, CommandInteractionOptionResolver, Role } from 'discord.js'
-import { SlashOption, SlashHasDefault, SlashDefaultOption, Integer, SlashSubCommandOption, SlashSubCommandGroupOption } from '../types/SlashOptions.js'
+import { SlashOption, Integer, SlashSubCommandOption, SlashSubCommandGroupOption } from '../types/SlashOptions.js'
 
 interface StoredOptionResult extends CommandInteractionOption {
     value?: number | string | boolean | Integer
@@ -32,8 +32,6 @@ export default class OptionResult {
                 if(value) {
                     this.#count++
                     this.#results[option.name] = value
-                } else if('default' in option) {
-                    this.#results[option.name].value = option.default
                 }
             }
         }

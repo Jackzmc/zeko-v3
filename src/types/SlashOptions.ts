@@ -18,9 +18,8 @@ export interface SlashOptionValue extends SlashOptionBase {
     required?: boolean
 }
 
-export interface SlashDefaultOption<T> extends SlashOptionValue {
+export interface SlashChoicesOption<T> extends SlashOptionValue {
     choices?: Record<string, T> | T[],
-    default?: T
 }
 
 export type Integer = number
@@ -35,15 +34,15 @@ export interface SlashSubCommandGroupOption extends SlashOptionBase {
     options?: SlashSubOption[]
 }
 
-export interface SlashStringOption extends SlashDefaultOption<string> {
+export interface SlashStringOption extends SlashChoicesOption<string> {
     type: "STRING",
 }
 
-export interface SlashIntegerOption extends SlashDefaultOption<Integer>  {
+export interface SlashIntegerOption extends SlashChoicesOption<Integer>  {
     type: "INTEGER",
 }
 
-export interface SlashBooleanOption extends SlashDefaultOption<boolean> {
+export interface SlashBooleanOption extends SlashOptionValue {
     type: "BOOLEAN",
 }
 
@@ -64,7 +63,7 @@ export interface SlashMentionableOption extends SlashOptionValue {
     type: "MENTIONABLE",
 }
 
-export interface SlashNumberOption extends SlashDefaultOption<number> {
+export interface SlashNumberOption extends SlashChoicesOption<number> {
     type: "NUMBER",
 }
 
@@ -72,5 +71,4 @@ export interface SlashNumberOption extends SlashDefaultOption<number> {
 export type SlashSubOption = SlashStringOption | SlashIntegerOption | SlashBooleanOption | SlashUserOption | SlashChannelOption | SlashRoleOption | SlashMentionableOption | SlashNumberOption
 export type SlashOption = SlashSubCommandOption | SlashSubCommandGroupOption | SlashSubOption
 
-export type SlashHasDefault = SlashStringOption | SlashIntegerOption | SlashBooleanOption | SlashNumberOption
 export type SlashHasChoices = SlashStringOption | SlashIntegerOption | SlashBooleanOption | SlashNumberOption

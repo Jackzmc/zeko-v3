@@ -143,15 +143,12 @@ export default abstract class SlashTraditionalCommand extends SlashCommand {
         switch(flag.type) {
             case FlagType.Boolean:
                 obj.type = "BOOLEAN"
-                obj.default = flag.default === "true"
                 return obj as SlashBooleanOption
             case FlagType.Number:
                 obj.type = "NUMBER"
-                obj.default = Number(flag.default)    
                 return obj as SlashNumberOption
             default:
                 obj.type = "STRING"
-                obj.default = flag.default.toString()
                 return obj as SlashStringOption
         }
     }
