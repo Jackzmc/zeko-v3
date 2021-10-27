@@ -3,7 +3,7 @@
  @module CommandManager
 */
 import Logger from '../Logger.js'
-import { Client, Collection, ApplicationCommand, Snowflake, GuildResolvable } from 'discord.js';
+import { Client, Collection, Snowflake } from 'discord.js';
 import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/Command.js';
 import jsum from 'jsum'
@@ -331,6 +331,8 @@ export default class CommandManager extends Manager {
     private addSlashOption<T extends SlashCommandBuilder | SlashCommandSubcommandBuilder>(builder: T, data: SlashOption): T {
         function setData(option) {
             option = option.setName(data.name).setDescription(data.description)
+            if('required' in data)
+                option = option.setRequired(data.required)
             if('choices' in data) {
                 if(Array.isArray(data.choices)) {
                     for(const name of data.choices) {
@@ -429,6 +431,8 @@ export default class CommandManager extends Manager {
         // Process all global commands at once. In future use .set()?
         const globalCommands = []
         
+        const useChecksum = !process.env.DISCORD_FORCE_SLASH_REGISTER 
+
         for(const slash of Object.values(this.#pendingSlash)) {
             const name = slash.data.name.toLowerCase()
             const discordData = slash.builder.toJSON()
@@ -436,7 +440,7 @@ export default class CommandManager extends Manager {
             if(!slash.guilds || slash.guilds.length == 0) {
                 //Global command
                 const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.global.${name}`)
-                if(storedCmd && checksum === storedCmd.checksum) {
+                if(useChecksum && storedCmd && checksum === storedCmd.checksum) {
                     // No need to re-register, skip
                     this.logger.debug(`Skipping global /${slash.data.name}: Checksum same`)
                     const registeredCommand: RegisteredSlashCommand = {
@@ -470,7 +474,7 @@ export default class CommandManager extends Manager {
                 let guildCommands: Record<Snowflake, Snowflake> = {}
                 for(const guildID of slash.guilds) {
                     const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.guild.${guildID}.${name}`)
-                    if(storedCmd && storedCmd.checksum == checksum) {
+                    if(useChecksum && storedCmd && storedCmd.checksum == checksum) {
                         guildCommands[guildID] = storedCmd.id
                         if(process.env.DEBUG_SLASH_REGISTER) {
                             this.logger.debug(`Skipping /${slash.data.name} on guild ${guildID}: Checksum same`)
