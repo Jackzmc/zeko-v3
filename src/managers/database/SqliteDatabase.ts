@@ -1,12 +1,12 @@
 import Keyv from 'keyv'
-import Database from './Database.js'
+import KeyvDatabase from './KeyvDatabase.js'
 
 import path from 'path'
 import fs from 'fs'
 
-export default class SqliteDatabase extends Database implements Keyv  {
+export default class SqliteDatabase extends KeyvDatabase implements Keyv  {
     keyv: Keyv
-    private _filepath: String
+    private _filepath: string
     constructor(namespace: string, sqlitePath?: string) {
         super(namespace)
         if(sqlitePath && !fs.existsSync(sqlitePath)) {

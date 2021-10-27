@@ -1,5 +1,6 @@
 import Keyv from 'keyv'
 import Logger from '../../Logger.js'
+import Database from './Database.js'
 
 import path from 'path'
 import fs from 'fs'
@@ -19,19 +20,32 @@ export interface ConnectionSQLDetails extends ConnectionDetails {
 }
 
 
-export default abstract class Database{
+export default abstract class KeyvDatabase extends Database implements Keyv {
     protected logger: Logger
+    protected keyv: Keyv
     constructor(namespace: string) {
-        this.logger = new Logger(`DataManager/${namespace}`)
+        super(namespace)
     }
 
-    abstract get<T>(key: string, defaultValue?: T): T
+    get<T>(key: string, defaultValue?: T): T {
+        return this.keyv.get(key) || defaultValue
+    }
 
-    abstract set(key: string, value: any, ttlMS?: number): Promise<boolean>
+    set(key: string, value: any, ttlMS?: number): Promise<boolean> {
+        return this.keyv.set(key, value, ttlMS)
+    }
 
-    abstract delete(key: string): Promise<boolean>
+    setWithTTL(key: string, value: any, ttlMS: number): Promise<boolean> {
+        return this.keyv.set(key, value, ttlMS)
+    }
 
-    abstract clear(): Promise<boolean>
+    delete(key: string): Promise<boolean> {
+        return this.keyv.delete(key)
+    }
+
+    clear(): Promise<boolean> {
+        return this.keyv.clear()
+    }
 
      /**
      * Gets the root data directory or a subdirectory
