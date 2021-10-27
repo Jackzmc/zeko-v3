@@ -352,8 +352,10 @@ export default class CommandManager extends Manager {
                 if(builder instanceof SlashCommandBuilder) {
                     builder.addSubcommand(cmd => {
                         cmd = setData(cmd)
-                        for(const option of data.options) {
-                            cmd = this.addSlashOption<SlashCommandSubcommandBuilder>(cmd, option)
+                        if(data.options) {
+                            for(const option of data.options) {
+                                cmd = this.addSlashOption<SlashCommandSubcommandBuilder>(cmd, option)
+                            }
                         }
                         return cmd
                     })
