@@ -29,11 +29,12 @@ interface SlashCommandRegistry {
     isCore: boolean
     command: SlashCommand,
     data: SlashCommandConfig,
-    guild: Snowflake
+    guilds: Snowflake[]
 }
  
 export interface RegisteredSlashCommand extends SlashCommandRegistry {
-    slashCommand: ApplicationCommand
+    guildCommands?: Record<Snowflake, ApplicationCommand>,
+    globalCommand?: ApplicationCommand  
 }
 
 export interface PendingSlashCommand extends SlashCommandRegistry {
@@ -181,13 +182,18 @@ export default class CommandManager extends Manager {
                 this.logger.error(`Registering slash command "${data.name}" failed during meta processing: `, err)
                 return null
             }
+
+            const guilds = data.guilds
+            if(process.env.DISCORD_FORCE_SLASH_GUILD && !guilds.includes(process.env.DISCORD_FORCE_SLASH_GUILD))
+                guilds.push(process.env.DISCORD_FORCE_SLASH_GUILD)
+
             const pendingCommand: PendingSlashCommand = {
                 group,
                 isCore,
                 command,
                 data,
                 builder,
-                guild: process.env.DISCORD_FORCE_SLASH_GUILD || data.guild
+                guilds
             }
 
             this.#pendingSlash[data.name] = pendingCommand
@@ -397,19 +403,45 @@ export default class CommandManager extends Manager {
             await this.client.application.commands.set([], process.env.DISCORD_FORCE_SLASH_GUILD)
         }
         if(process.env.DISCORD_FORCE_SLASH_GUILD)
-            this.logger.debug(`DISCORD_FORCE_SLASH_GUILD was set, using forced-guild ID ${process.env.DISCORD_FORCE_SLASH_GUILD}`)
+            this.logger.debug(`DISCORD_FORCE_SLASH_GUILD was set, adding guild ${process.env.DISCORD_FORCE_SLASH_GUILD}`)
 
+        // Process all global commands at once. In future use .set()?
+        const globalCommands = []
+        
         for(const slash of Object.values(this.#pendingSlash)) {
-            const cmd = await this.client.application.commands.create(slash.builder.toJSON(), slash.guild)
-            const registeredCommand: RegisteredSlashCommand = {
-                ...slash,
-                slashCommand: cmd
+            if(!slash.guilds || slash.guilds.length == 0) {
+                //Global command
+                globalCommands.push(new Promise(async(resolve) => {
+                    const cmd = await this.client.application.commands.create(slash.builder.toJSON())
+                    const registeredCommand: RegisteredSlashCommand = {
+                        ...slash,
+                        globalCommand: cmd
+                    }
+                    if(process.env.DEBUG_SLASH_REGISTER) {
+                        this.logger.debug(`Registered global /${slash.data.name} with ${slash.data.options?.length} options`)
+                    }
+                    this.#slashCommands.set(slash.data.name.toLowerCase(), registeredCommand)
+                    resolve(true)
+                }))
+            } else {
+                let guildCommands = {}
+                for(const guildID of slash.guilds) {
+                    guildCommands[guildID] = await this.client.application.commands.create(slash.builder.toJSON(), guildID)
+                }
+
+                const registeredCommand: RegisteredSlashCommand = {
+                    ...slash,
+                    guildCommands
+                }
+
+                if(process.env.DEBUG_SLASH_REGISTER) {
+                    this.logger.debug(`Registered global /${slash.data.name} with ${slash.data.options?.length} options on guilds=${slash.guilds}`)
+                }
+                this.#slashCommands.set(slash.data.name.toLowerCase(), registeredCommand)
             }
-            if(process.env.DEBUG_SLASH_REGISTER) {
-                this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options. guild=${slash.guild}`)
-            }
-            this.#slashCommands.set(slash.data.name.toLowerCase(), registeredCommand)
         }
+
+        Promise.all(globalCommands)
     }
 
     getSlashCommand(name: string, fetchPending: boolean = false): RegisteredSlashCommand | PendingSlashCommand | null {

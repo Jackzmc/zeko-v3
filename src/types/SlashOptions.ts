@@ -3,7 +3,7 @@ import { ApplicationCommandOptionType, Snowflake } from 'discord.js'
 export interface SlashCommandConfig {
     name: string,
     description: string,
-    guild?: Snowflake
+    guilds?: Snowflake[]
     options?: SlashOption[],
 }
 export type ChannelType = "GUILD_TEXT" | "DM" | "GUILD_VOICE" | "GROUP_DM" | "GUILD_CATEGORY" | "GUILD_NEWS" | "GUILD_STORE" | "GUILD_NEWS_THREAD" | "GUILD_NEWS_THREAD" | "GUILD_PUBLIC_THREAD" |"GUILD_PRIVATE_THREAD" | "GUILD_STAGE_VOICE"

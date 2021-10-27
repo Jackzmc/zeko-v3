@@ -28,7 +28,7 @@ export interface TraditionalConfig {
     usage?: string,
     showUsageIfNoArgs?: boolean
     guildOnly?: boolean
-    guild?: Snowflake
+    guilds?: Snowflake[]
 }
 
 export default abstract class SlashTraditionalCommand extends SlashCommand {
@@ -120,7 +120,7 @@ export default abstract class SlashTraditionalCommand extends SlashCommand {
         return {
             name: this.sConfig.name,
             description: this.sConfig.description,
-            guild: this.sConfig.guild,
+            guilds: this.sConfig.guilds,
             options: [
                 {
                     name: "args",
