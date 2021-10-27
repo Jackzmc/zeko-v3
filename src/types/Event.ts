@@ -32,7 +32,8 @@ export default class {
     }
 
     // Called when everything is ready (discord.js ready and zeko core is ready)
-    ready?(core?: Core): Promise<any> | any;
+    ready(core?: Core): Promise<any> | any {}
+    
 
     //Internal function, don't overwrite
     onReady(core: Core) {
