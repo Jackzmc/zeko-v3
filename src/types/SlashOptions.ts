@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType, Snowflake } from 'discord.js'
+import { ChannelType } from 'discord-api-types/v9'
 
 export interface SlashCommandConfig {
     name: string,
@@ -6,7 +7,6 @@ export interface SlashCommandConfig {
     guilds?: Snowflake[]
     options?: SlashOption[],
 }
-export type ChannelType = "GUILD_TEXT" | "DM" | "GUILD_VOICE" | "GROUP_DM" | "GUILD_CATEGORY" | "GUILD_NEWS" | "GUILD_STORE" | "GUILD_NEWS_THREAD" | "GUILD_NEWS_THREAD" | "GUILD_PUBLIC_THREAD" |"GUILD_PRIVATE_THREAD" | "GUILD_STAGE_VOICE"
 
 export interface SlashOptionBase {
     name: string,
@@ -23,6 +23,7 @@ export interface SlashChoicesOption<T> extends SlashOptionValue {
 }
 
 export type Integer = number
+export type AllowedChannelType = ChannelType.GuildText | ChannelType.GuildVoice | ChannelType.GuildCategory | ChannelType.GuildNews | ChannelType.GuildStore | ChannelType.GuildNewsThread | ChannelType.GuildPublicThread | ChannelType.GuildPrivateThread | ChannelType.GuildStageVoice
 
 export interface SlashSubCommandOption extends SlashOptionBase {
     type: "SUB_COMMAND",
@@ -52,8 +53,9 @@ export interface SlashUserOption extends SlashOptionValue {
 
 export interface SlashChannelOption extends SlashOptionValue {
     type: "CHANNEL",
-    channelTypes?: ChannelType[] 
+    channelTypes?: AllowedChannelType[] 
 }
+
 
 export interface SlashRoleOption extends SlashOptionValue {
     type: "ROLE",

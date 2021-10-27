@@ -11,7 +11,6 @@ import SlashCommand from '../types/SlashCommand.js'
 import { SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
 import Manager from './Manager.js';
 import Core from '../core/Core.js';
-import SqliteDatabase from './database/SqliteDatabase.js';
 
 //TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that
 
@@ -360,7 +359,9 @@ export default class CommandManager extends Manager {
                 builder.addUserOption(setData)
                 break
             case "CHANNEL":
-                builder.addChannelOption(setData)
+                builder.addChannelOption(opt => {
+                    return setData(opt).addChannelTypes(data.channelTypes)
+                })
                 break
             case "NUMBER":
                 builder.addNumberOption(setData)
