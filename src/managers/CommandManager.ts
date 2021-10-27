@@ -66,6 +66,8 @@ export default class CommandManager extends Manager {
     #slashCommands:  Collection<string, RegisteredSlashCommand>
     #pendingSlash: Record<string, PendingSlashCommand>
     #groups: string[]
+    #firstRegisterDone: boolean
+
     constructor(client: Client) {
         super(client, 'CommandManager')
         this.#commands = new Collection();
@@ -435,13 +437,18 @@ export default class CommandManager extends Manager {
                 }
 
                 if(process.env.DEBUG_SLASH_REGISTER) {
-                    this.logger.debug(`Registered global /${slash.data.name} with ${slash.data.options?.length} options on guilds=${slash.guilds}`)
+                    this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options on guilds=${slash.guilds}`)
                 }
                 this.#slashCommands.set(slash.data.name.toLowerCase(), registeredCommand)
             }
         }
 
-        Promise.all(globalCommands)
+        await Promise.all(globalCommands)
+        this.#firstRegisterDone = true
+    }
+
+    get areCommandsReady() {
+        return this.#firstRegisterDone
     }
 
     getSlashCommand(name: string, fetchPending: boolean = false): RegisteredSlashCommand | PendingSlashCommand | null {
