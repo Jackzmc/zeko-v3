@@ -2,7 +2,7 @@ import SlashCommand, { SlashCommandConfig, OptionResult, CommandInteraction } fr
 
 export default class extends SlashCommand {
 	async run(interact: CommandInteraction, options: OptionResult) {
-		await interact.deferReply({ ephemeral: true, fetchReply: true })
+		await interact.deferReply({ fetchReply: true })
 		interact.followUp(`Pong! Heartbeat: \`\`${Math.round(this.client.ws.ping)}ms\`\``)
 	}
 	
