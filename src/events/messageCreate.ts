@@ -1,9 +1,9 @@
 import CoreEvent from '../core/types/CoreEvent.js'
 import getopts, { ParsedOptions } from 'getopts'
-import { CommandFlag, CommandFlagOptions, FlagType } from '../types/Command.js'
+import { CommandFlag, CommandFlagOptions, FlagType } from '../types/TraditionalCommand.js'
 import { Client, Message } from 'discord.js';
 import Logger from '../Logger.js'
-import { RegisteredLegacyCommand } from '../managers/CommandManager.js';
+import { RegisteredTraditionalCommand } from '../managers/CommandManager.js';
 import CommandManager from '../managers/CommandManager.js';
 import { Intents } from 'discord.js'
 
@@ -32,7 +32,7 @@ export default class extends CoreEvent {
                 
                 if(/\s/.test(this.client.PREFIX)) args.shift(); //shift if prefix has space
                 const command_name: string = /\s/.test(this.client.PREFIX) ? args.shift().toLowerCase() : args.shift().slice(this.client.PREFIX.length).toLowerCase();
-                const cmd: RegisteredLegacyCommand = this.core.commands.getLegacyCommand(command_name, true)
+                const cmd: RegisteredTraditionalCommand = this.core.commands.getTraditionalCommand(command_name, true)
                 if(cmd) {
                     if(cmd.config.guildOnly && msg.channel.type === "DM") {
                         return msg.reply('This commanad only works in guilds.')

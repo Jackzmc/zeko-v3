@@ -5,7 +5,7 @@
 import Logger from '../Logger.js'
 import { Client, Collection, Snowflake } from 'discord.js';
 import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
-import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/Command.js';
+import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/TraditionalCommand.js';
 import jsum from 'jsum'
 import SlashCommand from '../types/SlashCommand.js'
 import { SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
@@ -47,7 +47,7 @@ export interface PendingSlashCommand extends SlashCommandRegistry {
     builder: SlashCommandBuilder,
 }
 
-export interface RegisteredLegacyCommand {
+export interface RegisteredTraditionalCommand {
     config: CommandConfigOptions
     help: CommandHelpOptions
     group?: string
@@ -57,7 +57,7 @@ export interface RegisteredLegacyCommand {
 }
 
 
-export type RegisteredCommand = RegisteredSlashCommand | RegisteredLegacyCommand
+export type RegisteredCommand = RegisteredSlashCommand | RegisteredTraditionalCommand
 
 
 export default class CommandManager extends Manager {
@@ -67,7 +67,7 @@ export default class CommandManager extends Manager {
      * @param {Client} client The current discord.js client
      */
     private static instance: CommandManager
-    #commands: Collection<string, RegisteredLegacyCommand>
+    #commands: Collection<string, RegisteredTraditionalCommand>
     #aliases: Collection<string, string>
     #slashCommands:  Collection<string, RegisteredSlashCommand>
     #pendingSlash: Record<string, PendingSlashCommand>
@@ -96,7 +96,7 @@ export default class CommandManager extends Manager {
         return this.instance;
     }
 
-    async register(commandClass: any, filename: string, group: string = "default", isCore: boolean): Promise<RegisteredLegacyCommand | PendingSlashCommand> {
+    async register(commandClass: any, filename: string, group: string = "default", isCore: boolean): Promise<RegisteredTraditionalCommand | PendingSlashCommand> {
         if(!commandClass.default || typeof commandClass.default !== "function") {
             throw new Error('Invalid commandClass: must be a class.')
         }else if(commandClass.default !instanceof Command) {
@@ -105,7 +105,7 @@ export default class CommandManager extends Manager {
         const command: (Command|SlashCommand) = new commandClass.default(this.client, new Logger(`cmd/${filename}`))
         // No clue why the other way around doesn't work (SlashCommand vs. Command)
         if(command instanceof Command) {
-            return this.registerLegacyCommand(commandClass, filename, group, isCore)
+            return this.registerTraditionalCommand(commandClass, filename, group, isCore)
         } else {
             return this.registerSlashCommand(command, isCore, group)
         }
@@ -120,7 +120,7 @@ export default class CommandManager extends Manager {
      * @param {boolean} isCore Is the plugin a core plugin? 
      * @returns {Promise<RegisteredCommand}
      */
-    async registerLegacyCommand(commandClass: any, filename: string, group: string = "default", isCore: boolean): Promise<RegisteredLegacyCommand> {
+    async registerTraditionalCommand(commandClass: any, filename: string, group: string = "default", isCore: boolean): Promise<RegisteredTraditionalCommand> {
         if(!commandClass.default || typeof commandClass.default !== "function") {
             throw new Error('Invalid commandClass: must be a class.')
         }else if(commandClass.default !instanceof Command) {
@@ -137,7 +137,7 @@ export default class CommandManager extends Manager {
             delete command.help;
             delete command.config;
 
-            const registeredCommand: RegisteredLegacyCommand = {
+            const registeredCommand: RegisteredTraditionalCommand = {
                 help,
                 group,
                 isCore,
@@ -224,12 +224,25 @@ export default class CommandManager extends Manager {
     }
 
 
-    async unregister(command: string): Promise<boolean> {
+    async unregisterTraditional(command: string){
         const query = command.replace(/.js$/, '');
         const cmd = this.#commands.get(query);
         if(cmd) {
-            await cmd.command.exit(true);
+            if(cmd.command.exit)
+                await cmd.command.exit(true)
             return this.#commands.delete(query);
+        }else{
+            return false;
+        }
+    }
+
+    async unregisterSlash(command: string) {
+        const query = command.replace(/.js$/, '');
+        const cmd = this.getSlashCommand(query, false)
+        if(cmd) {
+            if(cmd.command.exit)
+                await cmd.command.exit(true)
+            this.#slashCommands.delete(cmd.data.name)
         }else{
             return false;
         }
@@ -244,7 +257,7 @@ export default class CommandManager extends Manager {
      * @param {boolean} [includeHidden=false] Should hidden commands (cmd.config.hidden) be provided?
      * @returns {?RegisteredCommand}
      */
-    getLegacyCommand(name: string, includeHidden:boolean = false) : RegisteredLegacyCommand {
+    getTraditionalCommand(name: string, includeHidden:boolean = false) : RegisteredTraditionalCommand {
         const command = this.#commands.get(name);
         if(!command) {
             const alias = this.#aliases.get(name);
@@ -263,7 +276,7 @@ export default class CommandManager extends Manager {
         }
     }
 
-    getCommand(name: string) : RegisteredLegacyCommand | RegisteredSlashCommand | PendingSlashCommand {
+    getCommand(name: string) : RegisteredTraditionalCommand | RegisteredSlashCommand | PendingSlashCommand {
         return this.getCommand(name) || this.getSlashCommand(name, true)
     }
 
@@ -273,7 +286,7 @@ export default class CommandManager extends Manager {
      * @param {boolean} includeHidden Should hidden commands be provided?
      * @returns {RegisteredCommand} 
      */
-    getCommandsGrouped(includeHidden?: boolean, onlyKeys?: boolean): { [group: string]: RegisteredLegacyCommand[] | string[] } {
+    getTraditionalCommandsGrouped(includeHidden?: boolean, onlyKeys?: boolean): { [group: string]: RegisteredTraditionalCommand[] | string[] } {
         let object = {}
         this.#commands.forEach((cmd,key) => {
             const group = cmd.isCore ? 'core' : ((cmd.group === "default") ? 'misc' : cmd.group);
@@ -283,7 +296,7 @@ export default class CommandManager extends Manager {
         })
         return object;
     }
-    getCommands(includeHidden?: boolean) : Collection<string, RegisteredLegacyCommand> {
+    getTraditionalCommands(includeHidden?: boolean) : Collection<string, RegisteredTraditionalCommand> {
         return includeHidden ? this.#commands.filter(v => !v.config.hidden) : this.#commands
     }
 

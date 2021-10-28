@@ -9,7 +9,7 @@ import path from 'path'
 import Logger from '../../Logger.js'
 
 import CommandManager from '../../managers/CommandManager.js'
-import Command, { CommandConfigOptions, CommandHelpOptions } from '../../types/Command.js';
+import Command, { CommandConfigOptions, CommandHelpOptions } from '../../types/TraditionalCommand.js';
 
 const folders = ['src/commands','commands'];
 
@@ -53,7 +53,7 @@ export default class{
                     //delete command from map, load it, initalize it, and then add it back if successful
                     const result: CommandBit = await loadCommand(folder, file, command.group, command.isCore)
                     if(!result) return this.#logger.debug('bit was null')
-                    await CommandManager.getInstance().unregister(filename);
+                    await CommandManager.getInstance().unregisterTraditional(filename);
                     await CommandManager.getInstance().register(result.command, result.name, result.group, result.isCore);
                     this.#logger.info(`Watcher: Reloaded command '${filename}' successfully`)
                 }catch(err) {

@@ -1,4 +1,4 @@
-import Command, {FlagList} from '../types/Command.js'
+import Command, {FlagList} from '../types/TraditionalCommand.js'
 import { Message } from 'discord.js';
 export default class extends Command {
 	run(msg: Message, args: string[], flags: FlagList) {
