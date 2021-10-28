@@ -107,7 +107,7 @@ export default class{
             for(const failedCommand of failed) {
                 this.#logger.error(`Command failed to load: ${failedCommand.reason}`)
             }
-            this.#logger.success(`Loaded ${this.manager.slashCommandTotalCount} slash, and ${this.manager.commandsCount} legacy commands`)
+            this.#logger.success(`Loaded ${this.manager.slashCommandTotalCount} slash commands, ${this.manager.commandsCount} legacy commands`)
             return;
         }catch(err) {
             this.#logger.severe('A failure occurred while registering commands.\n', err)

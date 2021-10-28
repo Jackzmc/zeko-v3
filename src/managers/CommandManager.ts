@@ -213,6 +213,10 @@ export default class CommandManager extends Manager {
                 this.#groups.push(group)
             }
 
+            //TODO: Use refactored internal register-logic
+            if(this.areCommandsReady) {
+                this.registerAllPendingSlash()
+            }
             return pendingCommand;
         } catch(err) {
             throw err
@@ -418,6 +422,7 @@ export default class CommandManager extends Manager {
         return Promise.allSettled(promises)
     }
 
+    // TODO: Split registeration into own methods, direct calling
     async registerAllPendingSlash() {
         // TODO: Auto call register on register past areCommandsReady
         if(!this.core) throw Error('Not ready, areCommandsReady must be true before registering pending ')
