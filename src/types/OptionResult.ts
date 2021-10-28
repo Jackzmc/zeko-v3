@@ -88,20 +88,20 @@ export default class OptionResult {
     }
 
     getString(name: string, defaultValue?: string): string {
-        return this.#results[name]?.value as string || defaultValue
+        return this.#results[name]?.value as string ?? defaultValue
     
     }
 
     getStringLower(name: string, defaultValue?: string): string {
-        return this.getString(name)?.toLowerCase() || defaultValue
+        return this.getString(name)?.toLowerCase() ?? defaultValue
     }
 
     getStringUpper(name: string, defaultValue?: string): string {
-        return this.getString(name)?.toUpperCase() || defaultValue
+        return this.getString(name)?.toUpperCase() ?? defaultValue
     }
 
     getBoolean(name: string, defaultValue?: boolean): boolean {
-        return this.#results[name]?.value === "true" || defaultValue
+        return this.#results[name]?.value as boolean ?? defaultValue
     }
 
     getInteger(name: string, defaultValue?: Integer): Integer {
@@ -109,7 +109,7 @@ export default class OptionResult {
     }
 
     getNumber(name: string, defaultValue?: number) {
-        return (this.#results[name]?.value) ?  Number(this.#results[name].value) : defaultValue
+        return (this.#results[name]?.value) ? Number(this.#results[name].value) : defaultValue
     }
 
     getUser(name: string): User {
