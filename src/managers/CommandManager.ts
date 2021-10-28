@@ -441,7 +441,8 @@ export default class CommandManager extends Manager {
             const name = slash.data.name.toLowerCase()
             const discordData = slash.builder.toJSON()
             // Jsum mutates all arrays, so a copy is to be made:
-            const checksum = jsum.digest(slash.builder.toJSON(), 'SHA256', 'hex')
+            const discordDataClone = JSON.parse(JSON.stringify(discordData))
+            const checksum = jsum.digest(discordDataClone, 'SHA256', 'hex')
             if(!slash.guilds || slash.guilds.length == 0) {
                 //Global command
                 const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.global.${name}`)
@@ -495,7 +496,7 @@ export default class CommandManager extends Manager {
                                 this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options on guild ${guildID}`)
                             }
                         } catch(err) {
-                            this.logger.error(`Registering /${name} for ${guildID} failed:`, err)
+                            this.logger.severe(`Registering /${name} for ${guildID} failed:`, err)
                         }
                     }
                 }
