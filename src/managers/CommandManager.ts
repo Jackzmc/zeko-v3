@@ -182,6 +182,8 @@ export default class CommandManager extends Manager {
                 builder = new SlashCommandBuilder()
                     .setName(data.name)
                     .setDescription(data.description)
+                if(data.disabled !== undefined)
+                   builder.setDefaultPermission(false)
                 if(data.options) {
                     for(const option of data.options) {
                         builder = this.addSlashOption<SlashCommandBuilder>(builder, option)
@@ -405,7 +407,7 @@ export default class CommandManager extends Manager {
 
     public async ready() {
         this.core = Core.getInstance()
-        await this.registerPending()
+        await this.registerAllPendingSlash()
         const promises = []
         for(const registered of this.#slashCommands.values()) {
             promises.push(registered.command.onReady(this.core))
@@ -416,7 +418,9 @@ export default class CommandManager extends Manager {
         return Promise.allSettled(promises)
     }
 
-    private async registerPending() {
+    async registerAllPendingSlash() {
+        // TODO: Auto call register on register past areCommandsReady
+        if(!this.core) throw Error('Not ready, areCommandsReady must be true before registering pending ')
         if(process.env.DISCORD_CLEAR_SLASH_GLOBAL) {
             this.logger.debug(`DISCORD_CLEAR_SLASH_GLOBAL: Clearing all global commands`)
             await this.client.application.commands.set([])
@@ -429,14 +433,15 @@ export default class CommandManager extends Manager {
             this.logger.debug(`DISCORD_FORCE_SLASH_GUILD was set, adding guild ${process.env.DISCORD_FORCE_SLASH_GUILD}`)
 
         // Process all global commands at once. In future use .set()?
-        const globalCommands = []
+        const globalCommands: Promise<boolean>[] = []
         
         const useChecksum = !process.env.DISCORD_FORCE_SLASH_REGISTER 
 
         for(const slash of Object.values(this.#pendingSlash)) {
             const name = slash.data.name.toLowerCase()
             const discordData = slash.builder.toJSON()
-            const checksum = jsum.digest(discordData, 'SHA256', 'hex')
+            // Jsum mutates all arrays, so a copy is to be made:
+            const checksum = jsum.digest(slash.builder.toJSON(), 'SHA256', 'hex')
             if(!slash.guilds || slash.guilds.length == 0) {
                 //Global command
                 const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.global.${name}`)
@@ -448,7 +453,6 @@ export default class CommandManager extends Manager {
                         globalCommandId: storedCmd.id
                     }
                     this.#slashCommands.set(name, registeredCommand)
-                } else {
                     globalCommands.push(new Promise(async(resolve) => {
                         try {
                             const cmd = await this.client.application.commands.create(discordData)
@@ -505,7 +509,7 @@ export default class CommandManager extends Manager {
                 this.#slashCommands.set(name.toLowerCase(), registeredCommand)
             }
         }
-
+        this.#pendingSlash = {}
         await Promise.all(globalCommands)
         this.#firstRegisterDone = true
     }

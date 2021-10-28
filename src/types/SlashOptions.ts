@@ -6,6 +6,7 @@ export interface SlashCommandConfig {
     description: string,
     guilds?: Snowflake[]
     options?: SlashOption[],
+    disabled?: boolean
 }
 
 export interface SlashOptionBase {
