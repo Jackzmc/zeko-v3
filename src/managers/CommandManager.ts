@@ -448,7 +448,8 @@ export default class CommandManager extends Manager {
                 const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.global.${name}`)
                 if(useChecksum && storedCmd && checksum === storedCmd.checksum) {
                     // No need to re-register, skip
-                    this.logger.debug(`Skipping global /${slash.data.name}: Checksum same`)
+                    if(process.env.DEBUG_SLASH_REGISTER)
+                        this.logger.debug(`Skipping global /${slash.data.name}: Checksum same`)
                     const registeredCommand: RegisteredSlashCommand = {
                         ...slash,
                         globalCommandId: storedCmd.id
@@ -461,9 +462,9 @@ export default class CommandManager extends Manager {
                                 ...slash,
                                 globalCommandId: cmd.id
                             }
-                            if(process.env.DEBUG_SLASH_REGISTER) {
+                            if(process.env.DEBUG_SLASH_REGISTER)
                                 this.logger.debug(`Registered global /${slash.data.name} with ${slash.data.options?.length} options`)
-                            }
+                            
                             this.core.db.set(`commands.global.${name}`, {
                                 checksum,
                                 id: cmd.id
@@ -481,9 +482,8 @@ export default class CommandManager extends Manager {
                     const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.guild.${guildID}.${name}`)
                     if(useChecksum && storedCmd && storedCmd.checksum == checksum) {
                         guildCommands[guildID] = storedCmd.id
-                        if(process.env.DEBUG_SLASH_REGISTER) {
+                        if(process.env.DEBUG_SLASH_REGISTER)
                             this.logger.debug(`Skipping /${slash.data.name} on guild ${guildID}: Checksum same`)
-                        }
                     } else {
                         try {
                             const cmd = await this.client.application.commands.create(discordData, guildID)
@@ -492,9 +492,9 @@ export default class CommandManager extends Manager {
                                 id: cmd.id
                             })
                             guildCommands[guildID] = cmd.id
-                            if(process.env.DEBUG_SLASH_REGISTER) {
+                            if(process.env.DEBUG_SLASH_REGISTER)
                                 this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options on guild ${guildID}`)
-                            }
+                            
                         } catch(err) {
                             this.logger.severe(`Registering /${name} for ${guildID} failed:`, err)
                         }
