@@ -117,23 +117,23 @@ export default class OptionResult {
     }
 
     getMember(name: string): GuildMember {
-        return this.#results[name].member as GuildMember
+        return this.#results[name]?.member as GuildMember
     }
 
     getChannel(name: string): GuildChannel | ThreadChannel {
-        return this.#results[name].channel as (GuildChannel | ThreadChannel)
+        return this.#results[name]?.channel as (GuildChannel | ThreadChannel)
     }
 
     getMentionable(name: string) {
-        return this.#results[name].member || this.#results[name].user|| this.#results[name].role
+        return this.#results[name]?.member || this.#results[name].user|| this.#results[name].role
     }
 
     getRole(name: string): Role {
-        return this.#results[name].role as Role
+        return this.#results[name]?.role as Role
     }
 
     getOptions(name: string): CommandInteractionOption[] {
-        return this.#results[name].options
+        return this.#results[name]?.options
     }
 
 } 
