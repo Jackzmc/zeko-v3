@@ -8,9 +8,9 @@ export default class extends CoreEvent {
             // TODO: Delay until this.core.isReady to prevent race-condition
             this.#fired = true;
             await Promise.all([
-                this.core.modules.ready(),
-                this.core.commands.ready(),
-                this.core.events.ready()
+                this.core.modules._ready(),
+                this.core.commands._ready(),
+                this.core.events._ready()
             ])
             this.logger.info(`Bot now ready`);
         }

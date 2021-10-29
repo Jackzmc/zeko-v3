@@ -33,7 +33,8 @@ const eventRequiredIntents = {
 
 export default class EventManager extends Manager {
     private static instance: EventManager
-    #events: {
+    private core: Core
+    private events: {
         core: Map<string, RegisteredCoreEvent>,
         custom: Map<string, RegisteredCustomEvent>
     }
@@ -45,7 +46,7 @@ export default class EventManager extends Manager {
      */
     constructor(client: Client) {
         super(client, 'EventManager')
-        this.#events = {
+        this.events = {
             core: new Map<string, RegisteredCoreEvent>(),
             custom: new Map<string, RegisteredCustomEvent>()
         }
@@ -120,7 +121,7 @@ export default class EventManager extends Manager {
                     name: registeredName
                 }
             }
-            this.#events.core.set(registeredName, registeredEvent);
+            this.events.core.set(registeredName, registeredEvent);
             if(event.config) {
                 const config = await event.config()
             }
@@ -134,7 +135,7 @@ export default class EventManager extends Manager {
                     name: registeredName
                 }
             }
-            this.#events.custom.set(registeredName, registeredEvent);
+            this.events.custom.set(registeredName, registeredEvent);
             if(event.config) {
                 const config = await event.config()
             }
@@ -142,14 +143,15 @@ export default class EventManager extends Manager {
         }
     }
 
-    async ready() {
-        const core = Core.getInstance()
+    async _ready() {
+        if(this.core) throw new Error("ready has already been called")
+        this.core = Core.getInstance()
         const promises = []
-        for(const registered of this.#events.core.values()) {
-            promises.push(registered.event.onReady(core))
+        for(const registered of this.events.core.values()) {
+            promises.push(registered.event.onReady(this.core))
         }
-        for(const registered of this.#events.custom.values()) {
-            promises.push(registered.event.onReady(core))
+        for(const registered of this.events.custom.values()) {
+            promises.push(registered.event.onReady(this.core))
         }
         return await Promise.allSettled(promises)
     }
@@ -162,7 +164,7 @@ export default class EventManager extends Manager {
      * @returns EventObject
      */
     getCoreEvent(query: string) : RegisteredCoreEvent {
-        return this.#events.core.get(query.toLowerCase())
+        return this.events.core.get(query.toLowerCase())
     } 
 
     /**
@@ -172,7 +174,7 @@ export default class EventManager extends Manager {
      * @returns EventObject
      */
     getCustomEvent(query: string) : RegisteredCustomEvent {
-        return this.#events.custom.get(query.toLowerCase())
+        return this.events.custom.get(query.toLowerCase())
     }
 
 
@@ -184,7 +186,7 @@ export default class EventManager extends Manager {
      * @memberof EventManager
      */
     get(query: string): RegisteredCoreEvent | RegisteredCustomEvent {
-        return this.#events.core.get(query.toLowerCase()) || this.#events.custom.get(query.toLowerCase());
+        return this.events.core.get(query.toLowerCase()) || this.events.custom.get(query.toLowerCase());
     }
 
 
@@ -197,14 +199,14 @@ export default class EventManager extends Manager {
      */
     async unregister(query: string): Promise<boolean> {
         query = query.replace(/.js$/, '');
-        const core = this.#events.core.get(query);
-        const custom = this.#events.custom.get(query);
+        const core = this.events.core.get(query);
+        const custom = this.events.custom.get(query);
         if(core) {
             await core.event.exit(true)
-            return this.#events.core.delete(query);
+            return this.events.core.delete(query);
         }else if(custom) {
             await custom.event.exit(true)
-            return this.#events.custom.delete(query);
+            return this.events.custom.delete(query);
         }else{
             return null;
         }
@@ -216,7 +218,7 @@ export default class EventManager extends Manager {
      * @readonly
      */
     get coreLoaded(): number {
-        return this.#events.core.size;
+        return this.events.core.size;
     }
     
     /**
@@ -225,7 +227,7 @@ export default class EventManager extends Manager {
      * @readonly
      */
     get customLoaded(): number {
-        return this.#events.custom.size;
+        return this.events.custom.size;
     }
     
     /**
@@ -235,8 +237,8 @@ export default class EventManager extends Manager {
      */
     getEvents() : { core: RegisteredCoreEvent[], custom: RegisteredCustomEvent[] } {
         return {
-            core: Array.from(this.#events.core.values()),
-            custom: Array.from(this.#events.custom.values())
+            core: Array.from(this.events.core.values()),
+            custom: Array.from(this.events.custom.values())
         }
     }
 
@@ -247,19 +249,19 @@ export default class EventManager extends Manager {
      */
     getEventsNames() : { core: string[], custom: string[] } {
         return {
-            core: Object.keys(this.#events.core),
-            custom: Object.keys(this.#events.custom)
+            core: Object.keys(this.events.core),
+            custom: Object.keys(this.events.custom)
         }
     }
 
     async exit(waitable: boolean): Promise<void[]>  {
         const promises = [];
-        this.#events.core.forEach(event => {
+        this.events.core.forEach(event => {
             if(event.event.exit) {
                 promises.push(Promise.resolve(event.event.exit(waitable)))
             }
         })
-        this.#events.custom.forEach(event => {
+        this.events.custom.forEach(event => {
             if(event.event.exit) {
                 promises.push(Promise.resolve(event.event.exit(waitable)))
             }

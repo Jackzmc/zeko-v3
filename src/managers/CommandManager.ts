@@ -422,7 +422,8 @@ export default class CommandManager extends Manager {
         return builder
     }
 
-    public async ready() {
+    public async _ready() {
+        if(this.core) throw new Error("ready has already been called")
         this.core = Core.getInstance()
         await this.registerAllPendingSlash()
         const promises = []

@@ -25,10 +25,11 @@ export interface RegisteredModule extends Registered {
 
 
 export default class ModuleManager extends Manager {
-    #modules: {
+    private modules: {
         core: Map<string, RegisteredModule>
         custom: Map<string, RegisteredModule>
     }
+    private core: Core
     /**
      * Create a new ModuleManager
      *
@@ -37,7 +38,7 @@ export default class ModuleManager extends Manager {
     constructor(client: Client) {
         super(client, "ModuleManager")
         //Prevents custom overriding core modules
-        this.#modules = {
+        this.modules = {
             core: new Map(),
             custom: new Map()
         }
@@ -55,10 +56,12 @@ export default class ModuleManager extends Manager {
     }
 
     //Called internally by src/events/ready on once(), and is then sent to all modules
-    async ready() {
+    async _ready() {
+        if(this.core) throw new Error("ready has already been called")
+        this.core = Core.getInstance()
         const modules = [
-            ...this.#modules.core.values(),
-            ...this.#modules.custom.values()
+            ...this.modules.core.values(),
+            ...this.modules.custom.values()
         ]
         const core = Core.getInstance()
         const promises = []
@@ -103,7 +106,7 @@ export default class ModuleManager extends Manager {
 
             const type = isCore ? 'core' : 'custom'
             const registeredName = name.toLowerCase().replace('.js', '');
-            this.#modules[type].set(registeredName, registeredModule);
+            this.modules[type].set(registeredName, registeredModule);
             resolve(registeredModule)
             
         })
@@ -116,12 +119,12 @@ export default class ModuleManager extends Manager {
      * @param {string} query The name of the module
      */
     getCustomModule<T extends Module>(query: string): T {
-        const { module } = this.#modules.custom.get(query.toLowerCase());
+        const { module } = this.modules.custom.get(query.toLowerCase());
         return module as T
     }
 
     getRegisteredCustomModule<T extends Module>(query: string): RegisteredModule {
-        return this.#modules.custom.get(query.toLowerCase());
+        return this.modules.custom.get(query.toLowerCase());
     }
 
     /**
@@ -130,13 +133,13 @@ export default class ModuleManager extends Manager {
      * @param {string} query The name of the module
      */
     getCoreModule<T extends Module>(query: string) : T {
-        const { module } = this.#modules.core.get(query.toLowerCase());
+        const { module } = this.modules.core.get(query.toLowerCase());
         return module as T
     }
 
 
     getRegisteredCoreModule(query: string) : RegisteredModule {
-        return this.#modules.core.get(query.toLowerCase());
+        return this.modules.core.get(query.toLowerCase());
     }
 
     /**
@@ -148,7 +151,7 @@ export default class ModuleManager extends Manager {
      * @memberof ModuleManager
      */
     get(query: string, moduleOnly: boolean = false): RegisteredModule | Module {
-        const module = this.#modules.core.get(query.toLowerCase()) || this.#modules.custom.get(query.toLowerCase());
+        const module = this.modules.core.get(query.toLowerCase()) || this.modules.custom.get(query.toLowerCase());
         if(!module) return null;
         return moduleOnly ? module.module : module;
     }
@@ -163,14 +166,14 @@ export default class ModuleManager extends Manager {
      */
     async unregister(query: string): Promise<boolean> {
         query = query.replace(/.js$/, '');
-        const coreMod = this.#modules.core.get(query);
-        const customMod = this.#modules.custom.get(query);
+        const coreMod = this.modules.core.get(query);
+        const customMod = this.modules.custom.get(query);
         if(coreMod) {
             await coreMod.module.exit(true)
-            return this.#modules.core.delete(query);
+            return this.modules.core.delete(query);
         }else if(customMod) {
             await customMod.module.exit(true)
-            return this.#modules.custom.delete(query);
+            return this.modules.custom.delete(query);
         }else{
             return null;
         }
@@ -183,7 +186,7 @@ export default class ModuleManager extends Manager {
      * @readonly
      */
     get coreLoaded() : number {
-        return this.#modules.core.size;
+        return this.modules.core.size;
     } 
     /**
      * Gets the total number of custom modules loaded
@@ -191,7 +194,7 @@ export default class ModuleManager extends Manager {
      * @readonly
      */
     get customLoaded() : number {
-        return this.#modules.custom.size;
+        return this.modules.custom.size;
     }
 
     /**
@@ -204,12 +207,12 @@ export default class ModuleManager extends Manager {
         //{type: 'custom'}
         if(filter) {
             if(filter === "core") {
-                return Array.from(this.#modules.core.values())
+                return Array.from(this.modules.core.values())
             }else {
-                return Array.from(this.#modules.custom.values())
+                return Array.from(this.modules.custom.values())
             }
         }else{
-            return Array.from(this.#modules.core.values()).concat(Array.from(this.#modules.custom.values()))
+            return Array.from(this.modules.core.values()).concat(Array.from(this.modules.custom.values()))
         }
     }
 
@@ -222,12 +225,12 @@ export default class ModuleManager extends Manager {
     getModulesNames(filter: "core" | "custom") : string[] {
         if(filter) {
             if(filter === "core") {
-                return Array.from(this.#modules.core.keys())
+                return Array.from(this.modules.core.keys())
             }else {
-                return Array.from(this.#modules.custom.keys())
+                return Array.from(this.modules.custom.keys())
             }
         }else{
-            return Array.from(this.#modules.core.keys()).concat(Array.from(this.#modules.custom.keys()))
+            return Array.from(this.modules.core.keys()).concat(Array.from(this.modules.custom.keys()))
         }
 
     }
@@ -240,12 +243,12 @@ export default class ModuleManager extends Manager {
      */
     async exit(waitable: boolean): Promise<void[]> {
         const promises = [];
-        this.#modules.core.forEach(module => {
+        this.modules.core.forEach(module => {
             if(module.module.exit) {
                 promises.push(Promise.resolve(module.module.exit(waitable)));
             }
         })
-        this.#modules.custom.forEach(module => {
+        this.modules.custom.forEach(module => {
             if(module.module.exit) {
                 promises.push(Promise.resolve(module.module.exit(waitable)));
             }
