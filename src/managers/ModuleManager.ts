@@ -116,11 +116,12 @@ export default class ModuleManager extends Manager {
      * @param {string} query The name of the module
      * @returns {?RegisteredModule}
      */
-    getCustomModule(query: string, moduleOnly: boolean = false) : RegisteredModule | Module {
-        if(moduleOnly) {
-            const registered = this.#modules.custom.get(query.toLowerCase());
-            return registered ? registered.module : null;
-        }
+    getCustomModule<T extends Module>(query: string): T {
+        const registered = this.#modules.custom.get(query.toLowerCase());
+        return registered ? registered.module as T : null;
+    }
+
+    getRegisteredCustomModule<T extends Module>(query: string): RegisteredModule {
         return this.#modules.custom.get(query.toLowerCase());
     }
 
@@ -130,14 +131,15 @@ export default class ModuleManager extends Manager {
      * @param {string} query The name of the module
      * @returns {?RegisteredModule}
      */
-    getCoreModule(query: string, moduleOnly: boolean = false) : RegisteredModule | Module {
-        if(moduleOnly) {
-            const registered = this.#modules.core.get(query.toLowerCase());
-            return registered ? registered.module : null;
-        }
-        return this.#modules.core.get(query.toLowerCase());
+    getCoreModule<T extends Module>(query: string) : T {
+        const registered = this.#modules.core.get(query.toLowerCase());
+        return registered ? registered.module as T : null;
     }
 
+
+    getRegisteredCoreModule(query: string) : RegisteredModule {
+        return this.#modules.core.get(query.toLowerCase());
+    }
 
     /**
      * Retrieve either core or custom module, in order.
