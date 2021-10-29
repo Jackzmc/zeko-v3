@@ -436,6 +436,7 @@ export default class CommandManager extends Manager {
     }
 
     // TODO: Split registeration into own methods, direct calling
+    // TODO: Optimize, still very slow even with cache
     async registerAllPendingSlash() {
         // TODO: Auto call register on register past areCommandsReady
         if(!this.core) throw Error('Not ready, areCommandsReady must be true before registering pending ')
@@ -471,7 +472,9 @@ export default class CommandManager extends Manager {
                         ...slash,
                         globalCommandId: storedCmd.id
                     }
+                    slash.command.globalId = storedCmd.id
                     this.#slashCommands.set(name, registeredCommand)
+                } else {
                     globalCommands.push(new Promise(async(resolve) => {
                         try {
                             const cmd = await this.client.application.commands.create(discordData)
@@ -517,6 +520,7 @@ export default class CommandManager extends Manager {
                         }
                     }
                 }
+                slash.command.guildIds = guildCommands
 
                 const registeredCommand: RegisteredGuildsSlashCommand = {
                     ...slash,

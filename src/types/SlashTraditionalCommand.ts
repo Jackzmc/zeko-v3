@@ -2,14 +2,12 @@
  @module types/Command
  @description The Commands class
 */
-import Discord, { CommandInteraction } from 'discord.js';
-import Logger from '../Logger.js'
+import Discord, { CommandInteraction, Snowflake } from 'discord.js';
 import OptionResult from '../types/OptionResult.js';
 
 import { SlashCommandConfig, SlashOption } from './SlashOptions.js' 
-import SlashCommand, {} from './SlashCommand.js'
+import SlashCommand, { Client, Logger } from './SlashCommand.js'
 
-import { Client, Snowflake } from 'discord.js'
 import { FlagList, CommandFlagOptions, FlagType, CommandFlag } from './TraditionalCommand.js';
 import { SlashStringOption, SlashBooleanOption, SlashNumberOption } from 'SlashOptions';
 
@@ -36,6 +34,7 @@ export default abstract class SlashTraditionalCommand extends SlashCommand {
     public client: Client;
     public logger: Logger;
     private sConfig: TraditionalConfig
+    discordID: Snowflake
     
     /**
      * Create a new command 

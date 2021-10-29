@@ -2,7 +2,7 @@
  @module types/Command
  @description The Commands class
 */
-import Discord, { CommandInteraction } from 'discord.js';
+import Discord, { CommandInteraction, Snowflake } from 'discord.js';
 import Logger from '../Logger.js'
 import OptionResult from '../types/OptionResult.js';
 
@@ -25,6 +25,8 @@ export default abstract class SlashCommand {
     protected client: Discord.Client;
     protected logger: Logger;
     protected core: Core;
+    globalId?: Snowflake
+    guildIds?: Record<Snowflake, Snowflake>
     
     /**
      * Create a new command 
