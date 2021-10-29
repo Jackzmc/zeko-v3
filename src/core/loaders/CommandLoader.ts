@@ -100,13 +100,14 @@ export default class{
         try {
             let bits = await Promise.all(promises);
             bits = bits.filter(bit => bit)
-            const results = await Promise.allSettled(bits.map(bit => {
-                return this.manager.register(bit.command, bit.name, bit.group, bit.isCore)
+            await Promise.allSettled(bits.map(bit => {
+                try {
+                    return this.manager.register(bit.command, bit.name, bit.group, bit.isCore)
+                } catch(err) {
+                    this.#logger.error(`Error registering command '${bit.name}':\n`, err)
+                    return null;
+                }
             }))
-            const failed = results.filter(res => res.status === "rejected") as PromiseRejectedResult[]
-            for(const failedCommand of failed) {
-                this.#logger.error(`Command failed to load: ${failedCommand.reason}`)
-            }
             this.#logger.success(`Loaded ${this.manager.slashCommandTotalCount} slash commands, ${this.manager.commandsCount} legacy commands`)
             return;
         }catch(err) {
