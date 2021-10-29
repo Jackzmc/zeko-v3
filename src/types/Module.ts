@@ -48,7 +48,7 @@ export default class Module {
     }
 
     onReady(core: Core) {
-        this.core = Core.getInstance()
+        this.core = core
         return this.ready(core)
     }
 
