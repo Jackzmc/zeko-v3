@@ -453,14 +453,13 @@ export default class CommandManager extends Manager {
         // Process all global commands at once. In future use .set()?
         const globalCommands: Promise<boolean>[] = []
         
-        const useChecksum = !process.env.DISCORD_FORCE_SLASH_REGISTER 
-
         for(const slash of Object.values(this.#pendingSlash)) {
             const name = slash.data.name.toLowerCase()
             const discordData = slash.builder.toJSON()
             // Jsum mutates all arrays, so a copy is to be made:
             const discordDataClone = JSON.parse(JSON.stringify(discordData))
             const checksum = jsum.digest(discordDataClone, 'SHA256', 'hex')
+            const useChecksum = process.env.DISCORD_FORCE_SLASH_REGISTER || slash.data.forceRegister
             if(!slash.guilds || slash.guilds.length == 0) {
                 //Global command
                 const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.global.${name}`)

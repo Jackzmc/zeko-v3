@@ -1,12 +1,17 @@
 import { ApplicationCommandOptionType, Snowflake } from 'discord.js'
 import { ChannelType } from 'discord-api-types/v9'
 
-export interface SlashCommandConfig {
+// Includes elements that are part of official api and not custom to zeko
+export interface SlashOfficialConfig {
     name: string,
     description: string,
-    guilds?: Snowflake[]
     options?: SlashOption[],
-    disabled?: boolean
+}
+
+export interface SlashCommandConfig extends SlashOfficialConfig {
+    guilds?: Snowflake[]
+    disabled?: boolean,
+    forceRegister?: boolean
 }
 
 export interface SlashOptionBase {
