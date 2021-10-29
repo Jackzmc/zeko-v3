@@ -18,6 +18,3 @@ A complete rewrite of [jackzmc/zeko](https://github.com/jackzmc/zeko)
 ## License
 
 [MIT License](https://github.com/Jackzmc/zeko-v3/blob/master/LICENSE)
-
-
-PRIVATE BRANCH
