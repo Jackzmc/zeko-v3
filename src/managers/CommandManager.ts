@@ -277,7 +277,7 @@ export default class CommandManager extends Manager {
     }
 
     getCommand(name: string) : RegisteredTraditionalCommand | RegisteredSlashCommand | PendingSlashCommand {
-        return this.getCommand(name) || this.getSlashCommand(name, true)
+        return this.getTraditionalCommand(name) || this.getSlashCommand(name, true)
     }
 
     /**

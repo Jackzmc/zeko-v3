@@ -114,7 +114,6 @@ export default class ModuleManager extends Manager {
      * Retrieve custom module by query
      *
      * @param {string} query The name of the module
-     * @returns {?RegisteredModule}
      */
     getCustomModule<T extends Module>(query: string): T {
         const registered = this.#modules.custom.get(query.toLowerCase());
@@ -129,7 +128,6 @@ export default class ModuleManager extends Manager {
      * Retrieve a core module by query
      *
      * @param {string} query The name of the module
-     * @returns {?RegisteredModule}
      */
     getCoreModule<T extends Module>(query: string) : T {
         const registered = this.#modules.core.get(query.toLowerCase());
