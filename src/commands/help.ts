@@ -1,6 +1,6 @@
 import SlashCommand, { SlashCommandConfig, OptionResult } from '../types/SlashCommand.js'
 import { CommandInteraction, Client } from 'discord.js';
-import { RegisteredCommand, RegisteredLegacyCommand } from '../managers/CommandManager.js';
+import { RegisteredCommand, RegisteredTraditionalCommand } from '../managers/CommandManager.js';
 import Logger from "../Logger.js";
 
 const PREFIX_REGEX = new RegExp(/%(prefix|p)%/,"g")
@@ -13,13 +13,13 @@ export default class HelpCommand extends SlashCommand {
     run(inter: CommandInteraction, options: OptionResult) {
         if(options.has("command")) {
             // TODO: Support non-legacy
-            const cmd: RegisteredLegacyCommand = this.core.commands.getLegacyCommand(options.getString("command"), false);
+            const cmd: RegisteredTraditionalCommand = this.core.commands.getTraditionalCommand(options.getString("command"), false);
             if(!cmd) return inter.reply("Couldn't find that command");
             return inter.reply({
                 embeds: [this.generateLegacyHelpCommand(cmd)]
             })
         }else{
-            const grouped = this.core.commands.getCommands(true)
+            const grouped = this.core.commands.getTraditionalCommands(true)
             //loop the sorted commands
             for(const key in grouped) {
                 //make the name pretty, and filter non-hidden groups
@@ -30,7 +30,7 @@ export default class HelpCommand extends SlashCommand {
                 inter.reply({ 
                     embeds: [{
                         title:`${group_name} Commands`,
-                        description: cmds.map((cmd: RegisteredLegacyCommand) => {
+                        description: cmds.map((cmd: RegisteredTraditionalCommand) => {
                             const desc = cmd.help.description.replace(/\*\*/g,'\\**')
                             return `**${cmd.name}** - ${desc}`
                         }).join("\n")
@@ -57,7 +57,7 @@ export default class HelpCommand extends SlashCommand {
         }
     }
 
-    generateLegacyHelpCommand(cmd: RegisteredLegacyCommand) {
+    generateLegacyHelpCommand(cmd: RegisteredTraditionalCommand) {
         let fields = [];
         //print information about flags if not hidden
         if(cmd.help.flags && !cmd.config.hideFlags) {
