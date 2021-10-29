@@ -33,8 +33,8 @@ export default class {
      *
      * @param {...*} any Any discord.js event properties
      */
-    every(...args: any[]) : Promise<boolean> | void {
-        
+    every(...args: any[]) : Promise<boolean> | boolean {
+        return true
     }
 
     /**
@@ -43,7 +43,7 @@ export default class {
      * @param {...*} any Any discord.js event properties
      */
     once(...args: any[]) : void{
-
+        
     }
 
     exit?(waitable?: boolean): void | Promise<any>;
