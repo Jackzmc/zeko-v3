@@ -19,7 +19,8 @@ export {
     Logger,
     Client,
     SlashCommandConfig,
-    SlashOption
+    SlashOption,
+    FlagList
 }
 
 export interface TraditionalConfig {
