@@ -483,8 +483,7 @@ export default class CommandManager extends Manager {
                                 ...slash,
                                 globalCommandId: cmd.id
                             }
-                            if(process.env.DEBUG_SLASH_REGISTER)
-                                this.logger.debug(`Registered global /${slash.data.name} with ${slash.data.options?.length} options`)
+                            this.logger.debug(`Registered global /${slash.data.name} with ${slash.data.options?.length} options`)
                             
                             this.core.db.set(`commands.global.${name}`, {
                                 checksum,
@@ -513,9 +512,7 @@ export default class CommandManager extends Manager {
                                 id: cmd.id
                             })
                             guildCommands[guildID] = cmd.id
-                            if(process.env.DEBUG_SLASH_REGISTER)
-                                this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options on guild ${guildID}`)
-                            
+                            this.logger.debug(`Registered /${slash.data.name} with ${slash.data.options?.length} options on guild ${guildID}`)
                         } catch(err) {
                             this.logger.severe(`Registering /${name} for ${guildID} failed:`, err)
                         }
