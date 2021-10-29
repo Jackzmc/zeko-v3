@@ -460,7 +460,7 @@ export default class CommandManager extends Manager {
             // Jsum mutates all arrays, so a copy is to be made:
             const discordDataClone = JSON.parse(JSON.stringify(discordData))
             const checksum = jsum.digest(discordDataClone, 'SHA256', 'hex')
-            const useChecksum = process.env.DISCORD_FORCE_SLASH_REGISTER || slash.data.forceRegister
+            const useChecksum = process.env.DISCORD_FORCE_SLASH_REGISTER === undefined && !slash.data.forceRegister
             if(!slash.guilds || slash.guilds.length == 0) {
                 //Global command
                 const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.global.${name}`)
