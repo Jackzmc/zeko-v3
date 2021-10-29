@@ -447,7 +447,7 @@ export default class CommandManager extends Manager {
         }
         if(process.env.DISCORD_CLEAR_SLASH_GUILD) {
             this.logger.debug(`DISCORD_CLEAR_SLASH_GUILD: Clearing commands for ${process.env.DISCORD_CLEAR_SLASH_GUILD}`)
-            await this.client.application.commands.set([], process.env.DISCORD_FORCE_SLASH_GUILD)
+            await this.client.application.commands.set([], process.env.DISCORD_CLEAR_SLASH_GUILD)
         }
         if(process.env.DISCORD_FORCE_SLASH_GUILD)
             this.logger.debug(`DISCORD_FORCE_SLASH_GUILD was set, adding guild ${process.env.DISCORD_FORCE_SLASH_GUILD}`)

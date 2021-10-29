@@ -100,10 +100,6 @@ export default class Core {
             this.commandManager = commandLoader.manager
             this.eventManager = eventLoader.manager
 
-
-            if(!process.env.ZEKO_DISABLE_SETTINGS)
-                // client.managers.settingsManager = new SettingsManager(client);
-            
             this.client.login(process.env.DISCORD_BOT_TOKEN)
 
             this.isLoaded = true
