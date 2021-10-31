@@ -71,33 +71,21 @@ export default class EventManager extends Manager {
      * @param {...*} args Any discord.js event arguments
      */
     //Optimize, to use list of hooks per discord event? 
-    event(name: string, args: any[]) {
+    async event(name: string, args: any[]) {
         const core: RegisteredCoreEvent = this.getCoreEvent(name);
         const custom: RegisteredCustomEvent = this.getCustomEvent(name);
         if(custom) {
-            Promise.resolve(custom.event.before(...args) as unknown)
-            .then(beforeResponse => {
-                if(beforeResponse !== true && custom.event.after) {
-                    if(core) {
-                        Promise.resolve(core.event.every(...args) as unknown)
-                        .then(coreResponse => {
-                            if(coreResponse !== true) custom.event.after(...args);
-                        }).catch(err => {
-                            this.logger.error(`Core Event ${name} errored: ${process.env.PRODUCTION?err.message:err.stack}`)
-                        })
-                    }else{
-                        custom.event.after(...args)
-                    }
-                }
-            })
-        }else if(core) {
-            Promise.resolve(core.event.every(...args) as unknown)
-            .catch(err => {
-                this.logger.error(`Core Event '${name}' errored:\n`, err)
-            })
+            const response = await custom.event.before(...args)
+            if(!response) return;
+        }
+        if(core) {
+            const response = await core.event.every(...args)
+            if(!response) return
+        }
+        if(custom) {
+            await custom.event.after(...args)
         }
     }
-
 
     /**
      * Register an event handler for EventManager
