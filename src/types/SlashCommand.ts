@@ -35,6 +35,10 @@ export default abstract class SlashCommand {
         this.client = client;
         this.logger = logger;
     }
+    
+    onRegistered(isGlobal: boolean, guildIds?: Record<Snowflake, Snowflake>, globalId?: Snowflake ) {
+
+    }
 
     // Called when everything is ready (discord.js ready and zeko core is ready)
     ready(core?: Core): Promise<any> | any {

@@ -474,7 +474,9 @@ export default class CommandManager extends Manager {
                         globalCommandId: storedCmd.id
                     }
                     slash.command.globalId = storedCmd.id
+                    slash.command.onRegistered(false, null, storedCmd.id)
                     this.#slashCommands.set(name, registeredCommand)
+                    
                 } else {
                     globalCommands.push(new Promise(async(resolve) => {
                         try {
@@ -489,6 +491,8 @@ export default class CommandManager extends Manager {
                                 checksum,
                                 id: cmd.id
                             })
+                            slash.command.globalId = cmd.id
+                            slash.command.onRegistered(false, null, cmd.id)
                             this.#slashCommands.set(name, registeredCommand)
                         } catch(err) {
                             this.logger.error(`Registering global /${name} failed:`, err)
@@ -518,6 +522,7 @@ export default class CommandManager extends Manager {
                         }
                     }
                 }
+                slash.command.onRegistered(false, guildCommands, null)
                 slash.command.guildIds = guildCommands
 
                 const registeredCommand: RegisteredGuildsSlashCommand = {
