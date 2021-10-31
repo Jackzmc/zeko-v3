@@ -474,7 +474,7 @@ export default class CommandManager extends Manager {
                         globalCommandId: storedCmd.id
                     }
                     slash.command.globalId = storedCmd.id
-                    slash.command.onRegistered(false, null, storedCmd.id)
+                    slash.command.onRegistered(true, null, storedCmd.id)
                     this.#slashCommands.set(name, registeredCommand)
                     
                 } else {
@@ -492,7 +492,7 @@ export default class CommandManager extends Manager {
                                 id: cmd.id
                             })
                             slash.command.globalId = cmd.id
-                            slash.command.onRegistered(false, null, cmd.id)
+                            slash.command.onRegistered(true, null, cmd.id)
                             this.#slashCommands.set(name, registeredCommand)
                         } catch(err) {
                             this.logger.error(`Registering global /${name} failed:`, err)
