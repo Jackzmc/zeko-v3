@@ -45,16 +45,14 @@ export default class {
 
     /**
      * Fires before the core event (if exists & this is custom event) is fired. Must return a promise.
-     * Return a promise of true if core/after events should be cancelled
+     * Return a value of false if core/after events should be cancelled
      *
      * @param {...*} any Any discord.js event properties
      *
-     * @returns {Promise<boolean>} Return a promised true to cancel event
+     * @returns {Promise<boolean>} Return false to stop event propogating
      */
-    before?(...args: any[]): Promise<boolean> | void {
-        return new Promise((resolve,reject) => {
-            resolve(false)
-        })
+    before?(...args: any[]): Promise<boolean> | boolean {
+        return true
     }
     //
      /**
