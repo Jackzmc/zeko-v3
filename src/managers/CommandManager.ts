@@ -182,8 +182,8 @@ export default class CommandManager extends Manager {
                 builder = new SlashCommandBuilder()
                     .setName(data.name)
                     .setDescription(data.description)
-                if(data.disabled !== undefined)
-                   builder.setDefaultPermission(false)
+                if(data.defaultPermissions)
+                   builder.setDefaultPermission(data.defaultPermissions === "ALL")
                 if(data.options) {
                     for(const option of data.options) {
                         builder = this.addSlashOption<SlashCommandBuilder>(builder, option)

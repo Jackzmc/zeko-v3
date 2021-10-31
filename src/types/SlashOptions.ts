@@ -10,7 +10,7 @@ export interface SlashOfficialConfig {
 
 export interface SlashCommandConfig extends SlashOfficialConfig {
     guilds?: Snowflake[]
-    disabled?: boolean,
+    defaultPermissions?: "ALL" | "NONE"
     forceRegister?: boolean
 }
 
