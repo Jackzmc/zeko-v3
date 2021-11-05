@@ -56,7 +56,7 @@ export default abstract class SlashCommand {
      * @param {string} msg The raw discord.js message
      * @param {string[]} args Any arguments (the message content split by spaces)
      */
-    abstract run(interaction: Discord.CommandInteraction, options?: OptionResult): void;
+    abstract run(interaction: Discord.CommandInteraction, options?: OptionResult): void | Promise<void>;
 
     /**
      * Sets the setup information for the slash command

@@ -19,12 +19,17 @@ export default class extends CoreEvent {
             try {
                 await slash.command.run(interaction, options)
             } catch(err) {
-                if(interaction.replied)
-                    await interaction.editReply('**Command Error**\n`' + err.message + "`")
-                    .catch(err => this.logger.warn("Failed to send command error message",err.message))
-                else
-                    await interaction.reply('**Command Error**\n`' + err.message + "`")
-                    .catch(err => this.logger.warn("Failed to send command error message",err.message))
+                const msg = '**Command Error**\n`' + err.message + "`"
+                try {
+                    if(interaction.replied)
+                        await interaction.editReply(msg)
+                    else if(interaction.deferred) 
+                        await interaction.followUp(msg)
+                    else
+                        await interaction.reply(msg)
+                } catch(err) {
+                    this.logger.warn("Failed to send command error message",err.message)
+                }
                 this.logger.warn(`Command ${slash.data.name} had an error:\n    `, err.stack)
                 return false
             }
