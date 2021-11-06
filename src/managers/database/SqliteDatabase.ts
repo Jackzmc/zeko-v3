@@ -14,7 +14,7 @@ export default class SqliteDatabase extends KeyvDatabase implements Keyv  {
                 if(!sqlitePath.endsWith(".db")) sqlitePath = `${sqlitePath}.db`
                 sqlitePath = path.join(SqliteDatabase.getDataDirectory(), sqlitePath)
             }
-            if(!fs.existsSync(sqlitePath)) throw new Error(`Provided path \"${sqlitePath}\" does not exist`)
+            // if(!fs.existsSync(sqlitePath)) throw new Error(`Provided path \"${sqlitePath}\" does not exist`)
         }
         else if(!sqlitePath) sqlitePath = path.join(SqliteDatabase.getDataDirectory(), `data.db`)
         this._filepath = sqlitePath
