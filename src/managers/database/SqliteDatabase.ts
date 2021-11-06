@@ -9,8 +9,12 @@ export default class SqliteDatabase extends KeyvDatabase implements Keyv  {
     private _filepath: string
     constructor(namespace: string, sqlitePath?: string) {
         super(namespace)
-        if(sqlitePath && !fs.existsSync(sqlitePath)) {
-            throw new Error(`Provided path \"${sqlitePath}\" does not exist`)
+        if(sqlitePath) {
+            if(!sqlitePath.includes('/')) {
+                if(!sqlitePath.endsWith(".db")) sqlitePath = `${sqlitePath}.db`
+                sqlitePath = path.join(SqliteDatabase.getDataDirectory(), sqlitePath)
+            }
+            if(!fs.existsSync(sqlitePath)) throw new Error(`Provided path \"${sqlitePath}\" does not exist`)
         }
         else if(!sqlitePath) sqlitePath = path.join(SqliteDatabase.getDataDirectory(), `data.db`)
         this._filepath = sqlitePath
