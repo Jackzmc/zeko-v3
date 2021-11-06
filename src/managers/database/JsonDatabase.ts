@@ -41,6 +41,10 @@ export default class JsonDatabase extends Database {
     get filepath() {
         return this._filepath
     }
+    
+    async getFilesize() {
+        return (await fs.promises.stat(this._filepath)).size
+    }
 
     get<T>(key: string, defaultValue?: T): T {
         return this.data[`${this.namespace}/${key}`] || defaultValue

@@ -25,7 +25,15 @@ export default class SqliteDatabase extends KeyvDatabase implements Keyv  {
         this.keyv = keyv
     }
 
+    get filename() {
+        return path.basename(this._filepath)
+    }
+
     get filepath() {
         return this._filepath
+    }
+    
+    async getFilesize() {
+        return (await fs.promises.stat(this._filepath)).size
     }
 }
