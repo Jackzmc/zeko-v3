@@ -20,7 +20,11 @@ export default class JsonDatabase extends Database {
         }
         else if(!storagePath) storagePath = path.join(JsonDatabase.getDataDirectory(), `data.json`)
         this._filepath = storagePath
-        this.data = JSON.parse(fs.readFileSync(this._filepath, 'utf-8'))
+        try {
+            this.data = JSON.parse(fs.readFileSync(this._filepath, 'utf-8'))
+        } catch(err) {
+            this.data = {}
+        }
     }
 
     get filepath() {
