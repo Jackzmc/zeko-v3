@@ -11,8 +11,12 @@ export default class JsonDatabase extends Database {
     private lastSave: number
     constructor(namespace: string, storagePath?: string) {
         super(namespace)
-        if(storagePath && !fs.existsSync(storagePath)) {
-            throw new Error(`Provided path \"${storagePath}\" does not exist`)
+        if(storagePath) {
+            if(!storagePath.includes('/')) {
+                if(!storagePath.endsWith(".db")) storagePath = `${storagePath}.json`
+                storagePath = path.join(JsonDatabase.getDataDirectory(), storagePath)
+            }
+            // if(!fs.existsSync(sqlitePath)) throw new Error(`Provided path \"${sqlitePath}\" does not exist`)
         }
         else if(!storagePath) storagePath = path.join(JsonDatabase.getDataDirectory(), `data.json`)
         this._filepath = storagePath
