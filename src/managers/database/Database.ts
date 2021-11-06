@@ -21,7 +21,9 @@ export interface ConnectionSQLDetails extends ConnectionDetails {
 
 export default abstract class Database{
     protected logger: Logger
+    protected namespace: string
     constructor(namespace: string) {
+        this.namespace = namespace
         this.logger = new Logger(`DataManager/${namespace}`)
     }
 
