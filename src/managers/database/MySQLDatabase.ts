@@ -5,7 +5,6 @@ import { ConnectionSQLDetails } from './Database';
 
 
 export default class MySQLDatabase extends KeyvDatabase implements Keyv  {
-    keyv: Keyv
     private _database: string
     constructor(namespace: string, settings: ConnectionSQLDetails) {
         super(namespace)

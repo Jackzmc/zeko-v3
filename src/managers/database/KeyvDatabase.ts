@@ -21,7 +21,6 @@ export interface ConnectionSQLDetails extends ConnectionDetails {
 
 
 export default abstract class KeyvDatabase extends Database implements Keyv {
-    protected logger: Logger
     protected keyv: Keyv
     constructor(namespace: string) {
         super(namespace)

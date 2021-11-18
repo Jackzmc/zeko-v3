@@ -5,7 +5,6 @@ import path from 'path'
 import fs from 'fs'
 
 export default class SqliteDatabase extends KeyvDatabase implements Keyv  {
-    keyv: Keyv
     private _filepath: string
     constructor(namespace: string, sqlitePath?: string) {
         super(namespace)

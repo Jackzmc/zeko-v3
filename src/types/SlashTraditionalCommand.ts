@@ -31,8 +31,6 @@ export interface TraditionalConfig {
 }
 
 export default abstract class SlashTraditionalCommand extends SlashCommand {
-    public client: Client;
-    public logger: Logger;
     private sConfig: TraditionalConfig
     discordID: Snowflake
     
