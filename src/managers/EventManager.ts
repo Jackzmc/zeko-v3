@@ -134,14 +134,14 @@ export default class EventManager extends Manager {
     async _ready() {
         if(this.core) throw new Error("ready has already been called")
         this.core = Core.getInstance()
-        const promises = []
-        for(const registered of this.events.core.values()) {
-            promises.push(registered.event.onReady(this.core))
+        for(const { event, config } of [...this.events.core.values(), ...this.events.custom.values()]) {
+            try {
+                await event.onReady(this.core)
+            } catch(err) {
+                this.logger.error(`Event \"${config.name}\" encountered an error on .ready(): `)
+                throw err
+            }
         }
-        for(const registered of this.events.custom.values()) {
-            promises.push(registered.event.onReady(this.core))
-        }
-        return await Promise.allSettled(promises)
     }
 
 

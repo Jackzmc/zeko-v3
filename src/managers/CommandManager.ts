@@ -426,14 +426,22 @@ export default class CommandManager extends Manager {
         if(this.core) throw new Error("ready has already been called")
         this.core = Core.getInstance()
         await this.registerAllPendingSlash()
-        const promises = []
-        for(const registered of this.#slashCommands.values()) {
-            promises.push(registered.command.onReady(this.core))
+        for(const { command, data } of this.#slashCommands.values()) {
+            try {
+                await command.onReady(this.core)
+            } catch(err) {
+                this.logger.error(`Slash Command \"${data.name}\" encountered an error on .ready(): `)
+                throw err
+            }
         }
-        for(const registered of this.#commands.values()) {
-            promises.push(registered.command.onReady(this.core))
+        for(const { command, name } of this.#commands.values()) {
+            try {
+                await command.onReady(this.core)
+            } catch(err) {
+                this.logger.error(`Traditional Command \"${name}\" encountered an error on .ready(): `)
+                throw err
+            }
         }
-        return Promise.allSettled(promises)
     }
 
     // TODO: Split registeration into own methods, direct calling

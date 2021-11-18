@@ -64,11 +64,14 @@ export default class ModuleManager extends Manager {
             ...this.modules.custom.values()
         ]
         const core = Core.getInstance()
-        const promises = []
-        for(const { module } of modules) {
-            promises.push(module.onReady(core))
+        for(const { module, name } of modules) {
+            try {
+                await module.onReady(core)
+            } catch(err) {
+                this.logger.error(`Module \"${name}\" encountered an error on .ready(): `)
+                throw err
+            }
         }
-        return await Promise.allSettled(promises)
     }
 
     /**
