@@ -15,6 +15,7 @@ export default class extends CoreEvent {
         const slash = this.core.commands.getSlashCommand(interaction.commandName)
         if(!slash) return;
         try {
+            interaction.options
             let options: OptionResult = new OptionResult(interaction.options, slash.data.options)
             try {
                 await slash.command.run(interaction, options)

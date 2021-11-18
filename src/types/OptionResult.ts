@@ -1,4 +1,4 @@
-import { CommandInteractionOption, User, GuildMember, GuildChannel, ThreadChannel, CommandInteractionOptionResolver, Role } from 'discord.js'
+import { CommandInteractionOption, User, GuildMember, GuildChannel, ThreadChannel, CommandInteractionOptionResolver, Role, CacheType } from 'discord.js'
 import { SlashOption, Integer, SlashSubCommandOption, SlashSubCommandGroupOption } from '../types/SlashOptions.js'
 
 interface StoredOptionResult extends CommandInteractionOption {
@@ -14,7 +14,7 @@ export default class OptionResult {
     #count: number
     #subcmd: string
     #subcmdGroup: string
-    constructor(results: CommandInteractionOptionResolver, options: SlashOption[]) {
+    constructor(results: Omit<CommandInteractionOptionResolver<CacheType>, "getMessage" | "getFocused">, options: SlashOption[]) {
         this.#results = {}
         this.#count = 0
         if(options) {
