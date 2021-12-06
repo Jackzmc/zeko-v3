@@ -1,7 +1,7 @@
 import Keyv from 'keyv'
 import KeyvDatabase from './KeyvDatabase.js'
 
-import { ConnectionSQLDetails } from './Database';
+import { ConnectionSQLDetails } from '../Database';
 
 
 export default class MySQLDatabase extends KeyvDatabase implements Keyv  {

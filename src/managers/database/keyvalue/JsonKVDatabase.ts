@@ -1,4 +1,4 @@
-import Database from './Database.js'
+import Database from '../Database.js'
 
 import path from 'path'
 import fs from 'fs'

@@ -17,10 +17,10 @@ import ModuleManager from '../managers/ModuleManager.js';
 import CommandManager from '../managers/CommandManager.js';
 import EventManager from '../managers/EventManager.js';
 
-import SqliteDatabase from '../managers/database/SqliteDatabase.js';
+import SqliteDatabase from '../managers/database/keyvalue/SqliteKVDatabase.js';
 import Database from '../managers/database/Database.js'
-import MySQLDatabase from '../managers/database/MySQLDatabase.js'
-import JsonDatabase from '../managers/database/JsonDatabase.js'
+import MySQLDatabase from '../managers/database/keyvalue/MySQLKVDatabase.js'
+import JsonDatabase from '../managers/database/keyvalue/JsonKVDatabase.js'
 
 export enum DatabaseType {
     SQLITE,
