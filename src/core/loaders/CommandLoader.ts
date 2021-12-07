@@ -21,13 +21,13 @@ interface CommandBit {
 }
 
 export default class{ 
-    #client: Client;
-    #logger: Logger;
     manager: CommandManager
-    #rootDir: string
+    private client: Client;
+    private logger: Logger;
+    private rootDir: string
     constructor(rootDir: string, logger: Logger) {
-        this.#rootDir = rootDir
-        this.#logger = logger;
+        this.rootDir = rootDir
+        this.logger = logger;
     }
     
     setupWatcher() {
@@ -37,7 +37,7 @@ export default class{
             ignoreInitial: true,
             persistent: true
         })
-        .on('add', filepath => this.#logger.debug('Command was added:', filepath))
+        .on('add', filepath => this.logger.debug('Command was added:', filepath))
         .on('change', (filepath) => {
             const file = filepath.replace(/^.*[\\\/]/, '')
             if(file.split(".").slice(-1)[0] !== "js") return;
@@ -45,25 +45,25 @@ export default class{
             const filename = file.split(".").slice(0,-1).join(".")
 
             const command = CommandManager.getInstance().getCommand(filename);
-            if(!command) return this.#logger.debug(`command ${filename} not registered. ignoring.`)
+            if(!command) return this.logger.debug(`command ${filename} not registered. ignoring.`)
             const folder = path.parse(filepath).dir;
 
             setTimeout(async() => {
                 try {
                     //delete command from map, load it, initalize it, and then add it back if successful
                     const result: CommandBit = await loadCommand(folder, file, command.group, command.isCore)
-                    if(!result) return this.#logger.debug('bit was null')
+                    if(!result) return this.logger.debug('bit was null')
                     await CommandManager.getInstance().unregisterTraditional(filename);
                     await CommandManager.getInstance().register(result.command, result.name, result.group, result.isCore);
-                    this.#logger.info(`Watcher: Reloaded command '${filename}' successfully`)
+                    this.logger.info(`Watcher: Reloaded command '${filename}' successfully`)
                 }catch(err) {
-                    this.#logger.error(`Watcher: '${filename}' Failed Reload: ${process.env.PRODUCTION?err.message:err.stack}`)
+                    this.logger.error(`Watcher: '${filename}' Failed Reload: ${process.env.PRODUCTION?err.message:err.stack}`)
                 }
             },500)
         })
     }
     async load(client: Client) {
-        this.#client = client;
+        this.client = client;
         this.manager = new CommandManager(client)
         client.managers.commandManager = this.manager;
         if(!process.env.DISABLE_LOADER_HOT_RELOAD) {
@@ -72,7 +72,7 @@ export default class{
         const promises: Promise<CommandBit>[] = [];
         for(const cmdFolder of folders) {
             const isCore = cmdFolder.startsWith("src/");
-            let filepath = path.join(this.#rootDir, cmdFolder);
+            let filepath = path.join(this.rootDir, cmdFolder);
             try {
                 const files = await fs.readdir(filepath, { withFileTypes: true})
                 for(const parent of files) {
@@ -93,7 +93,7 @@ export default class{
                 }
             }catch(err) {
                 if(err.code !== "ENOENT") {
-                    this.#logger.error(`Error reading directory \"${cmdFolder}\":\n`, err);
+                    this.logger.error(`Error reading directory \"${cmdFolder}\":\n`, err);
                 }
             }
         }
@@ -104,14 +104,14 @@ export default class{
                 try {
                     return this.manager.register(bit.command, bit.name, bit.group, bit.isCore)
                 } catch(err) {
-                    this.#logger.error(`Error registering command '${bit.name}':\n`, err)
+                    this.logger.error(`Error registering command '${bit.name}':\n`, err)
                     return null;
                 }
             }))
-            this.#logger.success(`Loaded ${this.manager.slashCommandTotalCount} slash commands, ${this.manager.commandsCount} legacy commands`)
+            this.logger.success(`Loaded ${this.manager.slashCommandTotalCount} slash commands, ${this.manager.commandsCount} legacy commands`)
             return;
         }catch(err) {
-            this.#logger.severe('A failure occurred while registering commands.\n', err)
+            this.logger.severe('A failure occurred while registering commands.\n', err)
         }
     }
 }

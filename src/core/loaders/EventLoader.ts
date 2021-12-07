@@ -24,12 +24,12 @@ interface EventBit {
 
 export default class {
     manager: EventManager;
-    #logger: Logger
-    #client: Client
-    #rootDir: string
+    private logger: Logger
+    private client: Client
+    private rootDir: string
     constructor(rootDir: string, log: Logger) {
-        this.#rootDir = rootDir
-        this.#logger = log;
+        this.rootDir = rootDir
+        this.logger = log;
     }
     setupWatcher() {
         const distFolders = folders.map(v => path.join('dist',v))
@@ -38,7 +38,7 @@ export default class {
             ignoreInitial: true,
             persistent: true
         })
-        .on('add', filepath => this.#logger.debug('Event was added:', filepath))
+        .on('add', filepath => this.logger.debug('Event was added:', filepath))
         .on('change', (filepath) => {
             const file = filepath.replace(/^.*[\\\/]/, '')
             if(file.split(".").slice(-1)[0] !== "js") return;
@@ -46,19 +46,19 @@ export default class {
             const filename = file.split(".").slice(0,-1).join(".")
 
             const event = EventManager.getInstance().get(filename);
-            if(!event) return this.#logger.debug(`Event ${filename} not registered. ignoring.`)
+            if(!event) return this.logger.debug(`Event ${filename} not registered. ignoring.`)
             const folder = path.parse(filepath).dir;
 
             setTimeout(async() => {
                 try {
                     //delete event from map, load it, initalize it, and then add it back if successful
                     const result: EventBit = await loadEvent(folder, file, event.config.core)
-                    if(!result) return this.#logger.debug('bit was null')
+                    if(!result) return this.logger.debug('bit was null')
                     await EventManager.getInstance().unregister(filename);
                     await EventManager.getInstance().register(result.event, result.name, result.isCore);
-                    this.#logger.info(`Watcher: Reloaded event '${filename}' successfully`)
+                    this.logger.info(`Watcher: Reloaded event '${filename}' successfully`)
                 }catch(err) {
-                    this.#logger.error(`Watcher: '${filename}' Failed Reload: ${process.env.PRODUCTION?err.message:err.stack}`)
+                    this.logger.error(`Watcher: '${filename}' Failed Reload: ${process.env.PRODUCTION?err.message:err.stack}`)
                 }
             },500)
         })
@@ -67,7 +67,7 @@ export default class {
         const promises: Promise<EventBit>[] = [];
         for(const folder of folders) {
             const isCore = folder.startsWith("src")
-            let filepath = path.join(this.#rootDir, folder);
+            let filepath = path.join(this.rootDir, folder);
             try {
                 const files = await fs.readdir(filepath, { withFileTypes: true })
                 for(const dirent of files) {
@@ -75,9 +75,9 @@ export default class {
                 }
             }catch(err) {
                 if(err.code === "ENOENT") {
-                    //this.#logger.warn(`'${folder}' directory does not exist.`)
+                    //this.logger.warn(`'${folder}' directory does not exist.`)
                 }else {
-                    this.#logger.error(`Loading ${folder} failed:\n`, err);
+                    this.logger.error(`Loading ${folder} failed:\n`, err);
                 }
             }
         }
@@ -92,7 +92,7 @@ export default class {
             })
             return { intents, events: eventBits }
         } catch(err) {
-            this.#logger.severe('A failure occurred while pre-loading events.\n', err)
+            this.logger.severe('A failure occurred while pre-loading events.\n', err)
         }
     }
     async load(client: Client, eventBits: EventBit[]) {
@@ -107,11 +107,11 @@ export default class {
             await Promise.all(eventBits.map(async(eventBit) => {
                 await this.manager.register(eventBit.event, eventBit.name, eventBit.isCore)
             }))
-            this.#logger.success(`Loaded ${this.manager.coreLoaded} core events, ${this.manager.customLoaded} custom events`)
+            this.logger.success(`Loaded ${this.manager.coreLoaded} core events, ${this.manager.customLoaded} custom events`)
             return;
         }catch(err) {
             //TODO: change logic?
-            this.#logger.severe('A failure occurred while loading events.\n', err)
+            this.logger.severe('A failure occurred while loading events.\n', err)
         }
     }
 }

@@ -23,13 +23,13 @@ interface ModuleBit {
 }
 
 export default class {
-    #client: Client
-    #logger: Logger
     manager: ModuleManager
-    #rootDir: string
+    private client: Client
+    private logger: Logger
+    private rootDir: string
     constructor(rootDir: string, logger: Logger) {
-        this.#rootDir = rootDir;
-        this.#logger = logger;
+        this.rootDir = rootDir;
+        this.logger = logger;
     }
     setupWatcher() {
         const distFolders = folders.map(v => path.join('dist',v))
@@ -38,7 +38,7 @@ export default class {
             ignoreInitial: true,
             persistent: true
         })
-        .on('add', filepath => this.#logger.debug('Event was added:', filepath))
+        .on('add', filepath => this.logger.debug('Event was added:', filepath))
         .on('change', (filepath) => {
             const file = filepath.replace(/^.*[\\\/]/, '')
             if(file.split(".").slice(-1)[0] !== "js") return;
@@ -46,19 +46,19 @@ export default class {
             const filename = file.split(".").slice(0,-1).join(".")
 
             const module = ModuleManager.getInstance().get(filename, false) as RegisteredModule;
-            if(!module) return this.#logger.debug(`Module ${filename} not registered. ignoring.`)
+            if(!module) return this.logger.debug(`Module ${filename} not registered. ignoring.`)
             const folder = path.parse(filepath).dir;
 
             setTimeout(async() => {
                 try {
                     //delete event from map, load it, initalize it, and then add it back if successful
                     const result: ModuleBit = await loadModule(folder, file, module.group, module.isCore)
-                    if(!result) return this.#logger.debug('bit was null')
+                    if(!result) return this.logger.debug('bit was null')
                     await ModuleManager.getInstance().unregister(filename);
                     await ModuleManager.getInstance().register(result.module, result.name, result.group, result.isCore);
-                    this.#logger.info(`Watcher: Reloaded module '${filename}' successfully`)
+                    this.logger.info(`Watcher: Reloaded module '${filename}' successfully`)
                 }catch(err) {
-                    this.#logger.error(`Watcher: '${filename}' Failed Reload: ${process.env.PRODUCTION?err.message:err.stack}`)
+                    this.logger.error(`Watcher: '${filename}' Failed Reload: ${process.env.PRODUCTION?err.message:err.stack}`)
                 }
             },500)
         })
@@ -72,7 +72,7 @@ export default class {
         const promises: Promise<ModuleBit>[] = [];
         for(const folder of folders) {
             const isCore = folder.startsWith("src/")
-            let filepath = path.join(this.#rootDir, folder);
+            let filepath = path.join(this.rootDir, folder);
             try {
                 const files = await fs.readdir(filepath, { withFileTypes: true})
                 for(const dirent of files) {
@@ -91,9 +91,9 @@ export default class {
                 }
             }catch(err) {
                 if(err.code === "ENOENT") {
-                    //this.#logger.warn(`'${folder}' directory does not exist.`)
+                    //this.logger.warn(`'${folder}' directory does not exist.`)
                 }else {
-                    this.#logger.error(`Loading ${folder} failed:\n`, err);
+                    this.logger.error(`Loading ${folder} failed:\n`, err);
                 }
             }
         }
@@ -109,11 +109,11 @@ export default class {
             await Promise.all(moduleBits.map(async(moduleBit) => {
                 await this.manager.register(moduleBit.module, moduleBit.name, moduleBit.group, moduleBit.isCore)
             }))
-            this.#logger.success(`Loaded ${this.manager.coreLoaded} core modules, ${this.manager.customLoaded} custom modules`)
+            this.logger.success(`Loaded ${this.manager.coreLoaded} core modules, ${this.manager.customLoaded} custom modules`)
             return;
         }catch(err) {
             //TODO: change logic?
-            this.#logger.severe('A failure occurred while loading modules.\n', err)
+            this.logger.severe('A failure occurred while loading modules.\n', err)
         }
     }
     

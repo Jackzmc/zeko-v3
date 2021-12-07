@@ -38,7 +38,6 @@ export default class EventManager extends Manager {
         core: Map<string, RegisteredCoreEvent>,
         custom: Map<string, RegisteredCustomEvent>
     }
-    #intents: number = 0
     /**
      * Create a new EventManager
      *

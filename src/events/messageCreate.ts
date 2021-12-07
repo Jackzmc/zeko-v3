@@ -12,14 +12,14 @@ import HelpCommand from '../commands/help.js'
 export const INTENTS = Intents.FLAGS.GUILD_MESSAGES | Intents.FLAGS.DIRECT_MESSAGES
 
 export default class extends CoreEvent {
-    #generateHelpCommand: Function
+    private generateHelpCommand: Function
     constructor(client: Client, logger: Logger) {
         super(client, logger);
     }
 
     async ready() {
         const helpCmd = this.core.commands.getSlashCommand('help', true)
-        if(helpCmd) this.#generateHelpCommand = (helpCmd.command as HelpCommand).generateLegacyHelpCommand
+        if(helpCmd) this.generateHelpCommand = (helpCmd.command as HelpCommand).generateLegacyHelpCommand
         else this.logger.warn(`Could not find internal help command, legacy command usage help will not run properly`)
     }
 
@@ -74,8 +74,8 @@ export default class extends CoreEvent {
                         //show help message if flag: help, or no args & usageIfNotSet is true
                         if(options.help || (cmd.config.usageIfNotSet && newArgs.length == 0)) {
                             //const help = cmdManager.getCommand('help').generateHelpCommand(client,cmd);
-                            if(this.#generateHelpCommand) {
-                                return msg.reply(this.#generateHelpCommand(cmd))
+                            if(this.generateHelpCommand) {
+                                return msg.reply(this.generateHelpCommand(cmd))
                             }else{
                                 return msg.reply("Could not print help command at this time.")
                             }

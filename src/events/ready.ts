@@ -1,12 +1,12 @@
 import CoreEvent from '../core/types/CoreEvent.js'
 export default class extends CoreEvent {
-    #fired = false
+    private fired = false
 
     async every(/* args */) {
         this.logger.info(`Discord.js now ready`);
-        if(!this.#fired) {
+        if(!this.fired) {
             // TODO: Delay until this.core.isReady to prevent race-condition
-            this.#fired = true;
+            this.fired = true;
             await Promise.all([
                 this.core.modules._ready(),
                 this.core.commands._ready(),

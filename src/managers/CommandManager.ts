@@ -67,21 +67,21 @@ export default class CommandManager extends Manager {
      * @param {Client} client The current discord.js client
      */
     private static instance: CommandManager
-    #commands: Collection<string, RegisteredTraditionalCommand>
-    #aliases: Collection<string, string>
-    #slashCommands:  Collection<string, RegisteredSlashCommand>
-    #pendingSlash: Record<string, PendingSlashCommand>
-    #groups: string[]
-    #firstRegisterDone: boolean
+    private commands: Collection<string, RegisteredTraditionalCommand>
+    private aliases: Collection<string, string>
+    private slashCommands:  Collection<string, RegisteredSlashCommand>
+    private pendingSlash: Record<string, PendingSlashCommand>
+    private groups: string[]
+    private firstRegisterDone: boolean
     private core: Core
 
     constructor(client: Client) {
         super(client, 'CommandManager')
-        this.#commands = new Collection();
-        this.#slashCommands = new Collection()
-        this.#pendingSlash = {}
-        this.#aliases = new Collection();
-        this.#groups = [];
+        this.commands = new Collection();
+        this.slashCommands = new Collection()
+        this.pendingSlash = {}
+        this.aliases = new Collection();
+        this.groups = [];
         
         CommandManager.instance = this;
     }
@@ -145,15 +145,15 @@ export default class CommandManager extends Manager {
                 command,
                 name: cmdName
             }
-            this.#commands.set(cmdName.toLowerCase(), registeredCommand);
+            this.commands.set(cmdName.toLowerCase(), registeredCommand);
             if(Array.isArray(help.name) && help.name.length > 0) {
                 help.name.forEach(alias => {
-                    this.#aliases.set(alias.toLowerCase(), cmdName.toLowerCase())
+                    this.aliases.set(alias.toLowerCase(), cmdName.toLowerCase())
                 })
             }
             //Add to list of groups.
-            if(group !== "default" && !this.#groups.includes(group)) {
-                this.#groups.push(group)
+            if(group !== "default" && !this.groups.includes(group)) {
+                this.groups.push(group)
             }
             return registeredCommand;
         } catch(err) {
@@ -175,7 +175,7 @@ export default class CommandManager extends Manager {
             let data = command.slashConfig()
             data.name = data.name.toLowerCase()
             // Overwrite any previousc ommands, such that a custom can overwrite a core command
-            delete this.#pendingSlash[data.name]
+            delete this.pendingSlash[data.name]
 
             let builder: SlashCommandBuilder
             try {
@@ -207,10 +207,10 @@ export default class CommandManager extends Manager {
                 guilds
             }
 
-            this.#pendingSlash[data.name] = pendingCommand
+            this.pendingSlash[data.name] = pendingCommand
             //Add to list of groups.
-            if(group !== "default" && !this.#groups.includes(group)) {
-                this.#groups.push(group)
+            if(group !== "default" && !this.groups.includes(group)) {
+                this.groups.push(group)
             }
 
             //TODO: Use refactored internal register-logic
@@ -226,11 +226,11 @@ export default class CommandManager extends Manager {
 
     async unregisterTraditional(command: string){
         const query = command.replace(/.js$/, '');
-        const cmd = this.#commands.get(query);
+        const cmd = this.commands.get(query);
         if(cmd) {
             if(cmd.command.exit)
                 await cmd.command.exit(true)
-            return this.#commands.delete(query);
+            return this.commands.delete(query);
         }else{
             return false;
         }
@@ -242,7 +242,7 @@ export default class CommandManager extends Manager {
         if(cmd) {
             if(cmd.command.exit)
                 await cmd.command.exit(true)
-            this.#slashCommands.delete(cmd.data.name)
+            this.slashCommands.delete(cmd.data.name)
         }else{
             return false;
         }
@@ -258,11 +258,11 @@ export default class CommandManager extends Manager {
      * @returns {?RegisteredCommand}
      */
     getTraditionalCommand(name: string, includeHidden:boolean = false) : RegisteredTraditionalCommand {
-        const command = this.#commands.get(name);
+        const command = this.commands.get(name);
         if(!command) {
-            const alias = this.#aliases.get(name);
+            const alias = this.aliases.get(name);
             if(alias) {
-                const command = this.#commands.get(alias)
+                const command = this.commands.get(alias)
                 if(command && (includeHidden || !command.config.hidden)) {
                     return command
                 }else {
@@ -288,7 +288,7 @@ export default class CommandManager extends Manager {
      */
     getTraditionalCommandsGrouped(includeHidden?: boolean, onlyKeys?: boolean): { [group: string]: RegisteredTraditionalCommand[] | string[] } {
         let object = {}
-        this.#commands.forEach((cmd,key) => {
+        this.commands.forEach((cmd,key) => {
             const group = cmd.isCore ? 'core' : ((cmd.group === "default") ? 'misc' : cmd.group);
 
             if(!object[group]) object[group] = []
@@ -297,7 +297,7 @@ export default class CommandManager extends Manager {
         return object;
     }
     getTraditionalCommands(includeHidden?: boolean) : Collection<string, RegisteredTraditionalCommand> {
-        return includeHidden ? this.#commands.filter(v => !v.config.hidden) : this.#commands
+        return includeHidden ? this.commands.filter(v => !v.config.hidden) : this.commands
     }
 
     /**
@@ -306,15 +306,15 @@ export default class CommandManager extends Manager {
      * @readonly
      */
     get commandsCount() : number {
-        return this.#commands.size;
+        return this.commands.size;
     }
 
     get slashCommandCount() {
-        return this.#slashCommands.size
+        return this.slashCommands.size
     }
 
     get slashCommandTotalCount() {
-        return this.#slashCommands.size + Object.keys(this.#pendingSlash).length
+        return this.slashCommands.size + Object.keys(this.pendingSlash).length
     }
     /**
      * Get the the total number of aliases registered
@@ -322,7 +322,7 @@ export default class CommandManager extends Manager {
      * @readonly
      */
     get aliasesCount() : number {
-        return this.#aliases.size;
+        return this.aliases.size;
     }
     /**
      * Get the list of groups
@@ -330,12 +330,12 @@ export default class CommandManager extends Manager {
      * @returns {string[]} List of group names
      */
     getGroups() : string[] {
-        return this.#groups
+        return this.groups
     }
 
     exit(waitable: boolean): Promise<void[]>  {
         const promises = [];
-        this.#commands.forEach(command => {
+        this.commands.forEach(command => {
             if(command.command.exit && typeof command.command.exit === "function") {
                 if(waitable) {
                     promises.push(Promise.resolve(command.command.exit(waitable)))
@@ -426,7 +426,7 @@ export default class CommandManager extends Manager {
         if(this.core) throw new Error("ready has already been called")
         this.core = Core.getInstance()
         await this.registerAllPendingSlash()
-        for(const { command, data } of this.#slashCommands.values()) {
+        for(const { command, data } of this.slashCommands.values()) {
             try {
                 await command.onReady(this.core)
             } catch(err) {
@@ -434,7 +434,7 @@ export default class CommandManager extends Manager {
                 throw err
             }
         }
-        for(const { command, name } of this.#commands.values()) {
+        for(const { command, name } of this.commands.values()) {
             try {
                 await command.onReady(this.core)
             } catch(err) {
@@ -463,7 +463,7 @@ export default class CommandManager extends Manager {
         // Process all global commands at once. In future use .set()?
         const globalCommands: Promise<boolean>[] = []
         
-        for(const slash of Object.values(this.#pendingSlash)) {
+        for(const slash of Object.values(this.pendingSlash)) {
             const name = slash.data.name.toLowerCase()
             const discordData = slash.builder.toJSON()
             // Jsum mutates all arrays, so a copy is to be made:
@@ -483,7 +483,7 @@ export default class CommandManager extends Manager {
                     }
                     slash.command.globalId = storedCmd.id
                     slash.command.onRegistered(true, null, storedCmd.id)
-                    this.#slashCommands.set(name, registeredCommand)
+                    this.slashCommands.set(name, registeredCommand)
                     
                 } else {
                     globalCommands.push(new Promise(async(resolve) => {
@@ -501,7 +501,7 @@ export default class CommandManager extends Manager {
                             })
                             slash.command.globalId = cmd.id
                             slash.command.onRegistered(true, null, cmd.id)
-                            this.#slashCommands.set(name, registeredCommand)
+                            this.slashCommands.set(name, registeredCommand)
                         } catch(err) {
                             this.logger.error(`Registering global /${name} failed:`, err)
                         }
@@ -539,21 +539,21 @@ export default class CommandManager extends Manager {
                 }
 
                 
-                this.#slashCommands.set(name.toLowerCase(), registeredCommand)
+                this.slashCommands.set(name.toLowerCase(), registeredCommand)
             }
         }
-        this.#pendingSlash = {}
+        this.pendingSlash = {}
         await Promise.all(globalCommands)
-        this.#firstRegisterDone = true
+        this.firstRegisterDone = true
     }
 
     get areCommandsReady() {
-        return this.#firstRegisterDone
+        return this.firstRegisterDone
     }
 
     getSlashCommand(name: string, fetchPending: boolean = false): RegisteredSlashCommand | PendingSlashCommand | null {
-        const cmd = this.#slashCommands.get(name.toLowerCase())
-        if(!cmd && fetchPending) return this.#pendingSlash[name.toLowerCase()]
+        const cmd = this.slashCommands.get(name.toLowerCase())
+        if(!cmd && fetchPending) return this.pendingSlash[name.toLowerCase()]
         return cmd
     }
 }
