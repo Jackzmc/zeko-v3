@@ -2,7 +2,6 @@ import CoreEvent from '../core/types/CoreEvent.js'
 import { Interaction, Client } from 'discord.js'
 import Logger from '../Logger.js';
 
-import CommandManager from '../managers/CommandManager.js'
 import OptionResult from '../types/OptionResult.js'
 export default class extends CoreEvent {
     constructor(client: Client, logger: Logger) {
@@ -15,7 +14,6 @@ export default class extends CoreEvent {
         const slash = this.core.commands.getSlashCommand(interaction.commandName)
         if(!slash) return;
         try {
-            interaction.options
             let options: OptionResult = new OptionResult(interaction.options, slash.data.options)
             try {
                 await slash.command.run(interaction, options)
