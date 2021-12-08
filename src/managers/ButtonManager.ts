@@ -7,6 +7,7 @@ export default class ButtonManager {
     static instance: ButtonManager
 
     static getInstance(): ButtonManager {
+        if(!ButtonManager.instance) ButtonManager.instance = new ButtonManager()
         return ButtonManager.instance
     }
 
