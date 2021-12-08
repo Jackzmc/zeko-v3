@@ -12,12 +12,14 @@ export default class extends CoreEvent {
     }
 
     async every(interaction: Interaction) {
-        if (!interaction.isCommand()) return;
         if(interaction.isButton()) {
+            this.logger.debug(`btn press -> ${interaction.id}`)
             if(this.buttonManager.onInteract(interaction)) {
                 return false
             }
         }
+        if (!interaction.isCommand()) return;
+        
 
         if (!interaction.isCommand()) return;
 
