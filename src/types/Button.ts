@@ -1,4 +1,4 @@
-import { TextChannel, Snowflake, MessageActionRow, MessageButton, MessageButtonStyleResolvable, TextBasedChannels} from "discord.js";
+import { TextChannel, Snowflake, MessageActionRow, MessageButton, MessageButtonStyleResolvable, TextBasedChannels, ButtonInteraction} from "discord.js";
 import EventEmitter from "events";
 import ButtonManager from "../managers/ButtonManager.js";
 
@@ -9,13 +9,15 @@ interface ButtonResultParams {
 
 const DEFAULT_MAX_TIME = 1500
 
+export interface ButtonCallback {
+    (interaction: ButtonInteraction): void
+}
 
-export default class Button extends EventEmitter {
+export default class Button {
     private data: MessageActionRow;
     private userId?: Snowflake
 
     constructor(id: string, name: string, type: MessageButtonStyleResolvable = "SECONDARY") {
-        super()
         this.data = new MessageActionRow()
         .addComponents(
             new MessageButton()
@@ -25,8 +27,8 @@ export default class Button extends EventEmitter {
         )
     }
 
-    watch() {
-        ButtonManager.getInstance().addButton(this)
+    onPress(callback: ButtonCallback) {
+        ButtonManager.getInstance().watch(this, callback)
     }
 
     get allowedInteractorId() {

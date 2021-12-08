@@ -1,8 +1,13 @@
 import { ButtonInteraction } from 'discord.js';
-import Button from '../types/Button.js';
+import Button, { ButtonCallback } from '../types/Button.js';
+
+interface WatchData {
+    button: Button,
+    callback: ButtonCallback
+}
 
 export default class ButtonManager {
-    private buttons: Record<string, Button> = {}
+    private buttons: Record<string, WatchData> = {}
 
     static instance: ButtonManager
 
@@ -12,10 +17,10 @@ export default class ButtonManager {
     }
 
     onInteract(interaction: ButtonInteraction) {
-        const button = this.buttons[interaction.customId]
-        if(button) {
-            if(!button.allowedInteractorId || button.allowedInteractorId === interaction.user.id) {
-                button.emit('pressed', interaction)
+        const item = this.buttons[interaction.customId]
+        if(item) {
+            if(!item.button.allowedInteractorId || item.button.allowedInteractorId === interaction.user.id) {
+                item.callback(interaction)
                 delete this.buttons[interaction.customId]
                 return true
             }
@@ -23,8 +28,8 @@ export default class ButtonManager {
         return false
     }
 
-    addButton(button: Button) {
-        this.buttons[button.id] = button
+    watch(button: Button, callback: ButtonCallback) {
+        this.buttons[button.id] = { button, callback }
     }
 
 }
