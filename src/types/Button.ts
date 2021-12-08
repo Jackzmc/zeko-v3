@@ -1,5 +1,6 @@
 import { TextChannel, Snowflake, MessageActionRow, MessageButton, MessageButtonStyleResolvable, TextBasedChannels} from "discord.js";
 import EventEmitter from "events";
+import ButtonManager from "../managers/ButtonManager.js";
 
 interface ButtonResultParams {
     userid?: Snowflake,
@@ -22,6 +23,10 @@ export default class Button extends EventEmitter {
                 .setLabel(name)
                 .setStyle(type)
         )
+    }
+
+    watch() {
+        ButtonManager.getInstance().addButton(this)
     }
 
     get allowedInteractorId() {

@@ -11,15 +11,19 @@ export default class ButtonManager {
     }
 
     onInteract(interaction: ButtonInteraction) {
-        const button = this.buttons[interaction.id]
+        const button = this.buttons[interaction.customId]
         if(button) {
             if(!button.allowedInteractorId || button.allowedInteractorId === interaction.user.id) {
                 button.emit('pressed', interaction)
-                delete this.buttons[interaction.id]
+                delete this.buttons[interaction.customId]
                 return true
             }
         }
         return false
+    }
+
+    addButton(button: Button) {
+        this.buttons[button.id] = button
     }
 
 }
