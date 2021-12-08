@@ -16,6 +16,7 @@ export interface ButtonCallback {
 export default class Button {
     private data: MessageActionRow;
     private userId?: Snowflake
+    private callback: ButtonCallback
 
     constructor(id: string, name: string, type: MessageButtonStyleResolvable = "SECONDARY") {
         this.data = new MessageActionRow()

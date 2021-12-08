@@ -9,10 +9,16 @@ interface WatchData {
 export default class ButtonManager {
     private buttons: Record<string, WatchData> = {}
 
+    constructor() {
+        if(ButtonManager.instance) {
+            throw new Error('ButtonManager is a singleton')
+        }
+        ButtonManager.instance = this
+    }
+
     static instance: ButtonManager
 
     static getInstance(): ButtonManager {
-        if(!ButtonManager.instance) ButtonManager.instance = new ButtonManager()
         return ButtonManager.instance
     }
 
