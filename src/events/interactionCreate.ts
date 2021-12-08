@@ -3,12 +3,22 @@ import { Interaction, Client } from 'discord.js'
 import Logger from '../Logger.js';
 
 import OptionResult from '../types/OptionResult.js'
+import ButtonManager from '../managers/ButtonManager.js';
 export default class extends CoreEvent {
+    private buttonManager: ButtonManager
     constructor(client: Client, logger: Logger) {
         super(client, logger)
+        this.buttonManager = new ButtonManager()
     }
 
     async every(interaction: Interaction) {
+        if (!interaction.isCommand()) return;
+        if(interaction.isButton()) {
+            if(this.buttonManager.onInteract(interaction)) {
+                return false
+            }
+        }
+
         if (!interaction.isCommand()) return;
 
         const slash = this.core.commands.getSlashCommand(interaction.commandName)
