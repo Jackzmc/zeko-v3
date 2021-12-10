@@ -1,4 +1,4 @@
-import { TextChannel, Snowflake, MessageActionRow, MessageButton, MessageButtonStyleResolvable, TextBasedChannels, ButtonInteraction} from "discord.js";
+import { TextChannel, Snowflake, MessageActionRow, MessageButton, MessageButtonStyleResolvable, TextBasedChannels, ButtonInteraction, EmojiIdentifierResolvable} from "discord.js";
 import EventEmitter from "events";
 import ButtonManager from "../managers/ButtonManager.js";
 
@@ -7,24 +7,35 @@ interface ButtonResultParams {
     time?: number
 }
 
-const DEFAULT_MAX_TIME = 1500
+const DEFAULT_MAX_TIME = 15000
 
 export interface ButtonCallback {
     (interaction: ButtonInteraction): void
 }
 
+export interface ButtonOptions {
+    style?: MessageButtonStyleResolvable,
+    emoji?: EmojiIdentifierResolvable
+    disabled?: boolean,
+    url?: string,
+    id?: string
+}
+
 export default class Button {
     private data: MessageActionRow;
     private userId?: Snowflake
-    private callback: ButtonCallback
 
-    constructor(id: string, name: string, type: MessageButtonStyleResolvable = "SECONDARY") {
+    constructor(name: string, options: ButtonOptions = {}) {
+        if(!options.id) options.id = Math.random().toString(16).slice(2)
         this.data = new MessageActionRow()
         .addComponents(
             new MessageButton()
-                .setCustomId(id)
+                .setCustomId(options.id)
                 .setLabel(name)
-                .setStyle(type)
+                .setStyle(options.style ?? "SECONDARY")
+                .setDisabled(options.disabled === true)
+                .setEmoji(options.emoji)
+                .setURL(options.url)
         )
     }
 
