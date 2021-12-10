@@ -17,7 +17,6 @@ export interface ButtonOptions {
     style?: MessageButtonStyleResolvable,
     emoji?: EmojiIdentifierResolvable
     disabled?: boolean,
-    url?: string,
     id?: string
 }
 
@@ -25,17 +24,23 @@ export default class Button {
     private data: MessageActionRow;
     private userId?: Snowflake
 
-    constructor(name: string, options: ButtonOptions = {}) {
+    
+    /**
+     * Create a new discord.js button component. If no id provided, a random id will be generated
+     * @param {string} label The displayed name of the button
+     * @param {ButtonOptions} [options={}] Any optional options
+     * @memberof Button
+     */
+    constructor(label: string, options: ButtonOptions = {}) {
         if(!options.id) options.id = Math.random().toString(16).slice(2)
         this.data = new MessageActionRow()
         .addComponents(
             new MessageButton()
                 .setCustomId(options.id)
-                .setLabel(name)
+                .setLabel(label)
                 .setStyle(options.style ?? "SECONDARY")
                 .setDisabled(options.disabled === true)
                 .setEmoji(options.emoji)
-                .setURL(options.url)
         )
     }
 
