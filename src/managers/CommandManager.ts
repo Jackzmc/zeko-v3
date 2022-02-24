@@ -472,7 +472,7 @@ export default class CommandManager extends Manager {
             const useChecksum = process.env.DISCORD_FORCE_SLASH_REGISTER === undefined && !slash.data.forceRegister
             if(!slash.guilds || slash.guilds.length === 0) {
                 //Global command
-                const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.global.${name}`)
+                const storedCmd = await this.core.db.get<SavedSlashCommandData>(`commands.global.${name}`, null)
                 if(useChecksum && storedCmd && checksum === storedCmd.checksum) {
                     // No need to re-register, skip
                     if(process.env.DEBUG_SLASH_REGISTER)
@@ -511,7 +511,7 @@ export default class CommandManager extends Manager {
             } else {
                 let guildCommands: Record<Snowflake, Snowflake> = {}
                 for(const guildID of slash.guilds) {
-                    const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.guild.${guildID}.${name}`)
+                    const storedCmd = await this.core.db.get<SavedSlashCommandData>(`commands.guild.${guildID}.${name}`, null)
                     if(useChecksum && storedCmd && storedCmd.checksum == checksum) {
                         guildCommands[guildID] = storedCmd.id
                         if(process.env.DEBUG_SLASH_REGISTER)
