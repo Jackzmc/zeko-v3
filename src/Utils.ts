@@ -7,7 +7,7 @@ import { Client } from 'discord.js';
 import { inspect } from 'util';
 
 export default function(client: Client) {
-    const token_regex = new RegExp(`(${client.token})`,"g")
+    const token_regex = new RegExp(/(${client.token})/,"g")
     return {
 
         /**
@@ -22,7 +22,7 @@ export default function(client: Client) {
             return text
             .replace(/`/g, "`" + String.fromCharCode(8203))
             .replace(/@/g, "@" + String.fromCharCode(8203))
-            .replace(token_regex,"[token]")
+            .replace(token_regex, "[token]")
         },
 
         /**

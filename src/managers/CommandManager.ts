@@ -551,7 +551,7 @@ export default class CommandManager extends Manager {
         return this.firstRegisterDone
     }
 
-    getSlashCommand(name: string, fetchPending: false): RegisteredSlashCommand
+    getSlashCommand(name: string, fetchPending?: false): RegisteredSlashCommand
     getSlashCommand(name: string, fetchPending: true): RegisteredSlashCommand | PendingSlashCommand | null
     getSlashCommand(name: string, fetchPending: boolean = false): RegisteredSlashCommand | PendingSlashCommand | null {
         const cmd = this.slashCommands.get(name.toLowerCase())

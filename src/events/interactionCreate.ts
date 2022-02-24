@@ -21,8 +21,6 @@ export default class extends CoreEvent {
         if (!interaction.isCommand()) return;
         
 
-        if (!interaction.isCommand()) return;
-
         const slash = this.core.commands.getSlashCommand(interaction.commandName)
         if(!slash) return;
         try {
