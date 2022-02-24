@@ -473,10 +473,12 @@ export default class CommandManager extends Manager {
             if(!slash.guilds || slash.guilds.length === 0) {
                 //Global command
                 const storedCmd = await this.core.db.get<SavedSlashCommandData>(`commands.global.${name}`, null)
+                if(process.env.DEBUG_SLASH_REGISTER == "2")
+                    this.logger.log(`${name}: Checksum ${storedCmd.checksum} - New: ${checksum}`)
                 if(useChecksum && storedCmd && checksum === storedCmd.checksum) {
                     // No need to re-register, skip
                     if(process.env.DEBUG_SLASH_REGISTER)
-                        this.logger.info(`Skipping global /${slash.data.name}: Checksum same`)
+                        this.logger.info(`Skipping global /${slash.data.name}: Checksum same (${storedCmd.checksum})`)
                     const registeredCommand: RegisteredSlashCommand = {
                         ...slash,
                         globalCommandId: storedCmd.id
@@ -512,10 +514,12 @@ export default class CommandManager extends Manager {
                 let guildCommands: Record<Snowflake, Snowflake> = {}
                 for(const guildID of slash.guilds) {
                     const storedCmd = await this.core.db.get<SavedSlashCommandData>(`commands.guild.${guildID}.${name}`, null)
+                    if(process.env.DEBUG_SLASH_REGISTER == "2")
+                        this.logger.log(`${name}: Checksum ${storedCmd.checksum} - New: ${checksum}`)
                     if(useChecksum && storedCmd && storedCmd.checksum == checksum) {
                         guildCommands[guildID] = storedCmd.id
                         if(process.env.DEBUG_SLASH_REGISTER)
-                            this.logger.info(`Skipping /${slash.data.name} on guild ${guildID}: Checksum same`)
+                            this.logger.info(`Skipping /${slash.data.name} on guild ${guildID}: Checksum same (${storedCmd.checksum})`)
                     } else {
                         try {
                             const cmd = await this.client.application.commands.create(discordData, guildID)
