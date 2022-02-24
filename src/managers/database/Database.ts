@@ -27,7 +27,7 @@ export default abstract class Database{
         this.logger = new Logger(`DataManager/${namespace}`)
     }
 
-    abstract get<T>(key: string, defaultValue?: T): T
+    abstract get<T>(key: string, defaultValue?: T): Promise<T>
 
     abstract set(key: string, value: any, ttlMS?: number): Promise<boolean>
 

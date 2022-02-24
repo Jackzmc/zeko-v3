@@ -26,7 +26,7 @@ export default abstract class KeyvDatabase extends Database implements Keyv {
         super(namespace)
     }
 
-    get<T>(key: string, defaultValue?: T): T {
+    get<T>(key: string, defaultValue?: T): Promise<T> {
         return this.keyv.get(key) || defaultValue
     }
 
