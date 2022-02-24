@@ -450,15 +450,15 @@ export default class CommandManager extends Manager {
         // TODO: Auto call register on register past areCommandsReady
         if(!this.core) throw Error('Not ready, areCommandsReady must be true before registering pending ')
         if(process.env.DISCORD_CLEAR_SLASH_GLOBAL) {
-            this.logger.debug(`DISCORD_CLEAR_SLASH_GLOBAL: Clearing all global commands`)
+            this.logger.info(`DISCORD_CLEAR_SLASH_GLOBAL: Clearing all global commands`)
             await this.client.application.commands.set([])
         }
         if(process.env.DISCORD_CLEAR_SLASH_GUILD) {
-            this.logger.debug(`DISCORD_CLEAR_SLASH_GUILD: Clearing commands for ${process.env.DISCORD_CLEAR_SLASH_GUILD}`)
+            this.logger.info(`DISCORD_CLEAR_SLASH_GUILD: Clearing commands for ${process.env.DISCORD_CLEAR_SLASH_GUILD}`)
             await this.client.application.commands.set([], process.env.DISCORD_CLEAR_SLASH_GUILD)
         }
         if(process.env.DISCORD_FORCE_SLASH_GUILD)
-            this.logger.debug(`DISCORD_FORCE_SLASH_GUILD was set, adding guild ${process.env.DISCORD_FORCE_SLASH_GUILD}`)
+            this.logger.info(`DISCORD_FORCE_SLASH_GUILD was set, adding guild ${process.env.DISCORD_FORCE_SLASH_GUILD}`)
 
         // Process all global commands at once. In future use .set()?
         const globalCommands: Promise<boolean>[] = []
@@ -470,13 +470,13 @@ export default class CommandManager extends Manager {
             const discordDataClone = JSON.parse(JSON.stringify(discordData))
             const checksum = jsum.digest(discordDataClone, 'SHA256', 'hex')
             const useChecksum = process.env.DISCORD_FORCE_SLASH_REGISTER === undefined && !slash.data.forceRegister
-            if(!slash.guilds || slash.guilds.length == 0) {
+            if(!slash.guilds || slash.guilds.length === 0) {
                 //Global command
                 const storedCmd: SavedSlashCommandData = await this.core.db.get(`commands.global.${name}`)
                 if(useChecksum && storedCmd && checksum === storedCmd.checksum) {
                     // No need to re-register, skip
                     if(process.env.DEBUG_SLASH_REGISTER)
-                        this.logger.debug(`Skipping global /${slash.data.name}: Checksum same`)
+                        this.logger.info(`Skipping global /${slash.data.name}: Checksum same`)
                     const registeredCommand: RegisteredSlashCommand = {
                         ...slash,
                         globalCommandId: storedCmd.id
@@ -515,7 +515,7 @@ export default class CommandManager extends Manager {
                     if(useChecksum && storedCmd && storedCmd.checksum == checksum) {
                         guildCommands[guildID] = storedCmd.id
                         if(process.env.DEBUG_SLASH_REGISTER)
-                            this.logger.debug(`Skipping /${slash.data.name} on guild ${guildID}: Checksum same`)
+                            this.logger.info(`Skipping /${slash.data.name} on guild ${guildID}: Checksum same`)
                     } else {
                         try {
                             const cmd = await this.client.application.commands.create(discordData, guildID)
