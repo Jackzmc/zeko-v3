@@ -6,7 +6,7 @@ import Discord, { CommandInteraction, Snowflake } from 'discord.js';
 import Logger from '../Logger.js'
 import OptionResult from '../types/OptionResult.js';
 
-import { SlashCommandConfig, SlashOption, ChannelType } from './SlashOptions.js' 
+import { SlashCommandConfig, SlashOption, ChannelType, SlashHandlerFunction } from './SlashOptions.js' 
 
 import { Client } from 'discord.js'
 import Core from '../core/Core.js';
@@ -52,11 +52,8 @@ export default abstract class SlashCommand {
 
     /**
      * Fired everytime a slash command is used
-     *
-     * @param {string} msg The raw discord.js message
-     * @param {string[]} args Any arguments (the message content split by spaces)
      */
-    abstract run(interaction: Discord.CommandInteraction, options?: OptionResult): void | Promise<any>;
+    abstract run: SlashHandlerFunction
 
     /**
      * Sets the setup information for the slash command
