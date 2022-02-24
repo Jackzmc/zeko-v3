@@ -25,8 +25,12 @@ export default class extends CoreEvent {
         if(!slash) return;
         try {
             let options: OptionResult = new OptionResult(interaction.options, slash.data.options)
+            const handler = slash.handlers[options.subcommand]
             try {
-                await slash.command.run(interaction, options)
+                if(handler)
+                    await handler(interaction, options)
+                else
+                    await slash.command.run(interaction, options)
             } catch(err) {
                 const msg = '**Command Error**\n`' + err.message + "`"
                 try {

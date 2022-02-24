@@ -11,6 +11,7 @@ import SlashCommand from '../types/SlashCommand.js'
 import { SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
 import Manager from './Manager.js';
 import Core from '../core/Core.js';
+import { SlashHandlerFunction } from 'SlashOptions';
 
 //TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that
 
@@ -30,7 +31,8 @@ interface SlashCommandRegistry {
     isCore: boolean
     command: SlashCommand,
     data: SlashCommandConfig,
-    guilds: Snowflake[]
+    guilds: Snowflake[],
+    handlers?: Record<string, SlashHandlerFunction>
 }
  
 export interface RegisteredGlobalSlashCommand extends SlashCommandRegistry {
@@ -176,6 +178,7 @@ export default class CommandManager extends Manager {
             data.name = data.name.toLowerCase()
             // Overwrite any previousc ommands, such that a custom can overwrite a core command
             delete this.pendingSlash[data.name]
+            const handlers = {}
 
             let builder: SlashCommandBuilder
             try {
@@ -186,6 +189,9 @@ export default class CommandManager extends Manager {
                    builder.setDefaultPermission(data.defaultPermissions === "ALL")
                 if(data.options) {
                     for(const option of data.options) {
+                        if(option.type === "SUB_COMMAND" && option.handler) {
+                            handlers[option.name] = option.handler
+                        }
                         builder = this.addSlashOption<SlashCommandBuilder>(builder, option)
                     }
                 }
@@ -204,7 +210,8 @@ export default class CommandManager extends Manager {
                 command,
                 data,
                 builder,
-                guilds
+                guilds,
+                handlers
             }
 
             this.pendingSlash[data.name] = pendingCommand
