@@ -1,5 +1,5 @@
 import { MessageActionRow, EmojiIdentifierResolvable, SelectMenuInteraction, MessageSelectOptionData, MessageSelectMenu } from "discord.js";
-import BaseInteraction from "interactions/BaseInteraction.js";
+import BaseInteraction from "./BaseInteraction.js";
 import SelectManager from "../../managers/interactions/SelectManager.js";
 
 export interface SelectMenuCallback {

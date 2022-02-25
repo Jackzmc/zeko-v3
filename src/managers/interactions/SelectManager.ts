@@ -1,5 +1,5 @@
 import { SelectMenuInteraction } from 'discord.js';
-import Select, { SelectMenuCallback } from 'interactions/Select.js';
+import Select, { SelectMenuCallback } from '../../types/interactions/Select.js';
 
 interface WatchData {
     select: Select,
