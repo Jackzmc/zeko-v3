@@ -4,7 +4,7 @@
 */
 import Logger from '../Logger.js'
 import { Client, Collection, Snowflake } from 'discord.js';
-import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
+import { SlashCommandBooleanOption, SlashCommandBuilder, SlashCommandChannelOption, SlashCommandIntegerOption, SlashCommandMentionableOption, SlashCommandNumberOption, SlashCommandRoleOption, SlashCommandStringOption, SlashCommandSubcommandBuilder, SlashCommandUserOption } from '@discordjs/builders';
 import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/TraditionalCommand.js';
 import jsum from 'jsum'
 import SlashCommand from '../types/SlashCommand.js'
@@ -13,7 +13,7 @@ import Manager from './Manager.js';
 import Core from '../core/Core.js';
 import { SlashHandlerFunction } from 'SlashOptions';
 
-//TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that
+//TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that (issue #6)
 
 /**
  * See {@link types/Command} for information of CommandConfigOptions and CommandHelpOptions
@@ -60,6 +60,7 @@ export interface RegisteredTraditionalCommand {
 
 
 export type RegisteredCommand = RegisteredSlashCommand | RegisteredTraditionalCommand
+export type SlashCommandOption = SlashCommandBooleanOption | SlashCommandIntegerOption | SlashCommandStringOption | SlashCommandRoleOption | SlashCommandUserOption | SlashCommandNumberOption | SlashCommandChannelOption | SlashCommandMentionableOption | SlashCommandSubcommandBuilder
 
 
 export default class CommandManager extends Manager {
@@ -381,7 +382,7 @@ export default class CommandManager extends Manager {
                 builder.addBooleanOption(setData)
                 break
             case "STRING":
-                builder.addStringOption(setData)
+                builder.addStringOption((setData))
                 break
             case "INTEGER":
                 builder.addIntegerOption(setData)

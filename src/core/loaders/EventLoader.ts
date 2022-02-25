@@ -109,8 +109,8 @@ export default class {
             }))
             this.logger.success(`Loaded ${this.manager.coreLoaded} core events, ${this.manager.customLoaded} custom events`)
             return;
-        }catch(err) {
-            //TODO: change logic?
+        } catch(err) {
+            //TODO: Implement system to either fail all, or allow failures to components (issue #5) 
             this.logger.severe('A failure occurred while loading events.\n', err)
         }
     }

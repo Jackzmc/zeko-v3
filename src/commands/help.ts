@@ -12,7 +12,7 @@ export default class HelpCommand extends SlashCommand {
 
     run(inter: CommandInteraction, options: OptionResult) {
         if(options.has("command")) {
-            // TODO: Support non-legacy
+            // TODO: Support non-legacy (issue #4)
             const cmd: RegisteredTraditionalCommand = this.core.commands.getTraditionalCommand(options.getString("command"), false);
             if(!cmd) return inter.reply("Couldn't find that command");
             return inter.reply({

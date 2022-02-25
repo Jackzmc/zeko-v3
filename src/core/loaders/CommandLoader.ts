@@ -110,7 +110,8 @@ export default class{
             }))
             this.logger.success(`Loaded ${this.manager.slashCommandTotalCount} slash commands, ${this.manager.commandsCount} legacy commands`)
             return;
-        }catch(err) {
+        } catch(err) {
+            //TODO: Implement system to either fail all, or allow failures to components (issue #5) 
             this.logger.severe('A failure occurred while registering commands.\n', err)
         }
     }

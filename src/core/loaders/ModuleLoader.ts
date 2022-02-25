@@ -112,7 +112,7 @@ export default class {
             this.logger.success(`Loaded ${this.manager.coreLoaded} core modules, ${this.manager.customLoaded} custom modules`)
             return;
         }catch(err) {
-            //TODO: change logic?
+            //TODO: Implement system to either fail all, or allow failures to components (issue #5) 
             this.logger.severe('A failure occurred while loading modules.\n', err)
         }
     }
