@@ -25,6 +25,7 @@ export default class Select extends BaseInteraction {
      */
     constructor(choices: MessageSelectOptionData[], options: SelectMenuOptions = {}) {
         super()
+        if(choices.length == 0) throw new Error('Empty list of options was given. Minimum of one options must be given')
         if(!options.id) options.id = Math.random().toString(16).slice(2)
         this.data = new MessageActionRow()
         .addComponents(
