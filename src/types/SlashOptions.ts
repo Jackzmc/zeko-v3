@@ -1,9 +1,10 @@
-import { ApplicationCommandOptionType, CommandInteraction, Snowflake } from 'discord.js'
+import { ApplicationCommandOptionChoice, ApplicationCommandOptionType, AutocompleteInteraction, CommandInteraction, Snowflake } from 'discord.js'
 import { ChannelType } from 'discord-api-types/v9'
 import OptionResult from './OptionResult.js'
 
 // Includes elements that are part of official api and not custom to zeko
 export type SlashHandlerFunction = (interaction: CommandInteraction, options?: OptionResult) => void | Promise<any>
+export type SlashAutocompleteHandlerFunction = (interaction: AutocompleteInteraction, focused: ApplicationCommandOptionChoice) => void | Promise<any>
 
 export interface SlashOfficialConfig {
     name: string,
@@ -40,6 +41,7 @@ export {
 export interface SlashSubCommandOption extends SlashOptionBase {
     type: "SUB_COMMAND",
     handler?: SlashHandlerFunction,
+    autocompleteHandler?: SlashAutocompleteHandlerFunction
     options?: SlashSubOption[]
 }
 

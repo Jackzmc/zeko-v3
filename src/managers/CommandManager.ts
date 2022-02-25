@@ -8,7 +8,7 @@ import { SlashCommandBooleanOption, SlashCommandBuilder, SlashCommandChannelOpti
 import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/TraditionalCommand.js';
 import jsum from 'jsum'
 import SlashCommand from '../types/SlashCommand.js'
-import { SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
+import { SlashAutocompleteHandlerFunction, SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
 import Manager from './Manager.js';
 import Core from '../core/Core.js';
 import { SlashHandlerFunction } from 'SlashOptions';
@@ -26,13 +26,18 @@ import { SlashHandlerFunction } from 'SlashOptions';
  * @property {types/Command} command - The actual command class
  */
 
+interface SlashHandlers {
+    default: Record<string, SlashHandlerFunction>,
+    autocomplete: Record<string, SlashAutocompleteHandlerFunction>
+}
+
 interface SlashCommandRegistry {
     group?: string
     isCore: boolean
     command: SlashCommand,
     data: SlashCommandConfig,
     guilds: Snowflake[],
-    handlers?: Record<string, SlashHandlerFunction>
+    handlers?: SlashHandlers
 }
  
 export interface RegisteredGlobalSlashCommand extends SlashCommandRegistry {
@@ -179,7 +184,10 @@ export default class CommandManager extends Manager {
             data.name = data.name.toLowerCase()
             // Overwrite any previousc ommands, such that a custom can overwrite a core command
             delete this.pendingSlash[data.name]
-            const handlers = {}
+            const handlers: SlashHandlers = {
+                default: {},
+                autocomplete: {}
+            }
 
             let builder: SlashCommandBuilder
             try {
@@ -192,8 +200,13 @@ export default class CommandManager extends Manager {
                 
                 if(data.options) {
                     for(const option of data.options) {
-                        if(option.type === "SUB_COMMAND" && option.handler) {
-                            handlers[option.name] = option.handler.bind(command)
+                        if(option.type === "SUB_COMMAND") {
+                            if(option.handler) {
+                                handlers.default[option.name] = option.handler.bind(command)
+                            }
+                            if(option.autocompleteHandler) {
+                                handlers.autocomplete[option.name] = option.autocompleteHandler.bind(command)
+                            }
                         }
                         builder = this.addSlashOption<SlashCommandBuilder>(builder, option)
                     }
@@ -382,7 +395,7 @@ export default class CommandManager extends Manager {
                 builder.addBooleanOption(setData)
                 break
             case "STRING":
-                builder.addStringOption((setData))
+                builder.addStringOption(setData)
                 break
             case "INTEGER":
                 builder.addIntegerOption(setData)

@@ -1,10 +1,11 @@
 import CoreEvent from '../core/types/CoreEvent.js'
-import { Interaction, Client } from 'discord.js'
+import { Interaction, Client, AutocompleteInteraction } from 'discord.js'
 import Logger from '../Logger.js';
 
 import OptionResult from '../types/OptionResult.js'
 import ButtonManager from '../managers/interactions/ButtonManager.js';
 import SelectManager from '../managers/interactions/SelectManager.js';
+import { isInteractionButton } from 'discord-api-types/utils/v9';
 export default class extends CoreEvent {
     private buttonManager: ButtonManager
     private selectManager: SelectManager
@@ -32,9 +33,27 @@ export default class extends CoreEvent {
 
         const slash = this.core.commands.getSlashCommand(interaction.commandName)
         if(!slash) return;
+
+        let options: OptionResult = new OptionResult(interaction.options, slash.data.options)
+
+        if(interaction.isAutocomplete()) { 
+            const autocomplete: AutocompleteInteraction = interaction //Fix being set to 'never
+            const focused = autocomplete.options.getFocused(true)
+            const handler = slash.handlers.autocomplete[options.subcommand]
+            try {
+                if(handler) {
+                    await handler(autocomplete, focused)
+                } else {
+                    await slash.command.onAutocomplete(autocomplete, focused)
+                }
+            } catch(err) {
+                this.logger.error(`[cmd/${slash.data.name}] autocomplete threw an error`, err)
+            }
+            return
+        }
+
         try {
-            let options: OptionResult = new OptionResult(interaction.options, slash.data.options)
-            const handler = slash.handlers[options.subcommand]
+            const handler = slash.handlers.default[options.subcommand]
             try {
                 if(handler)
                     await handler(interaction, options)

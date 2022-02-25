@@ -2,13 +2,13 @@
  @module types/Command
  @description The Commands class
 */
-import Discord, { CommandInteraction, Snowflake } from 'discord.js';
+import Discord, { ApplicationCommandOptionChoice, AutocompleteInteraction, CommandInteraction, Snowflake } from 'discord.js';
 import Logger from '../Logger.js'
 import OptionResult from '../types/OptionResult.js';
 
 import { SlashCommandConfig, SlashOption, ChannelType, SlashHandlerFunction } from './SlashOptions.js' 
 
-import { Client } from 'discord.js'
+import { Client, ApplicationCommandOptionType } from 'discord.js';
 import Core from '../core/Core.js';
 
 export { 
@@ -36,24 +36,33 @@ export default abstract class SlashCommand {
         this.logger = logger;
     }
 
-    onRegisteredGlobal(commandId: Snowflake) {}
+    onRegisteredGlobal?(commandId: Snowflake): any | Promise<any>
     
-    onRegistered(guild: Snowflake, commandId: Snowflake) {}
+    onRegistered?(guild: Snowflake, commandId: Snowflake): any | Promise<any>
 
-    // Called when everything is ready (discord.js ready and zeko core is ready)
-    ready(core?: Core): Promise<any> | any {
+    /**
+     * Called when everything is ready (discord.js ready and bot core is ready)
+     */
+    ready?(core?: Core): Promise<any> | any
 
-    }
-
+    // Internal ready system, don't overwrite
     onReady(core: Core) {
         this.core = Core.getInstance()
         return this.ready(core)
     }
 
     /**
-     * Fired everytime a slash command is used
+     * Called everytime a CommandInteraction is sent matching the defined name in slashConfig.
+     * @note Will not be called if a provided subcommand has a handler function attached
      */
-    abstract run(interaction: CommandInteraction, options?: OptionResult): void | Promise<any>
+    abstract run(interaction: CommandInteraction, options?: OptionResult): any | Promise<any>
+
+
+    /**
+     * Called everytime a AutocompleteInteraction is sent matching the defined name in slashConfig.
+     * @note Will not be called if a provided subcommand has an autocomplete handler function attached
+     */
+    onAutocomplete?(interaction: AutocompleteInteraction, focused: ApplicationCommandOptionChoice): any | Promise<any>
 
     /**
      * Sets the setup information for the slash command
