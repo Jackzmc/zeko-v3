@@ -23,7 +23,7 @@ export default class extends CoreEvent {
             }
         } else if(interaction.isSelectMenu()) {
             this.logger.debug(`sel press -> ${interaction.id}`)
-            if(this.selectManager.onInteract(interaction)) {
+            if(this.selectManager.onInteract(interaction, interaction.values)) {
                 return false
             }
         }

@@ -22,11 +22,11 @@ export default class SelectManager {
         return SelectManager.instance
     }
 
-    onInteract(interaction: SelectMenuInteraction) {
+    onInteract(interaction: SelectMenuInteraction, values: string[]) {
         const item = this.buttons[interaction.customId]
         if(item) {
             if(!item.select.allowedInteractorId || item.select.allowedInteractorId === interaction.user.id) {
-                item.callback(interaction)
+                item.callback(interaction, values)
                 delete this.buttons[interaction.customId]
                 return true
             }

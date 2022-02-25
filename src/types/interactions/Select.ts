@@ -3,7 +3,7 @@ import BaseInteraction from "interactions/BaseInteraction.js";
 import SelectManager from "../../managers/interactions/SelectManager.js";
 
 export interface SelectMenuCallback {
-    (interaction: SelectMenuInteraction): void
+    (interaction: SelectMenuInteraction, values: string[]): void
 }
 
 export interface SelectMenuOptions {
@@ -38,7 +38,7 @@ export default class Select extends BaseInteraction {
         )
     }
 
-    onSelect(callback: SelectMenuCallback) {
+    onSelect(callback: SelectMenuCallback, values: string[]) {
         SelectManager.getInstance().watch(this, callback)
     }
 }
