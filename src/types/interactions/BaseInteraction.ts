@@ -1,5 +1,4 @@
-import { Snowflake } from "discord-api-types";
-import { MessageActionRow, TextBasedChannels, TextChannel } from "discord.js";
+import { MessageActionRow, Snowflake, TextBasedChannel, TextChannel } from "discord.js";
 
 export interface InteractionResultParams {
     userid?: Snowflake,
@@ -44,7 +43,7 @@ export default class BaseInteraction {
         }) 
     }
 
-    async wasPressedIn(channel: TextBasedChannels, options: InteractionResultParams = {}): Promise<boolean> {
+    async wasPressedIn(channel: TextBasedChannel, options: InteractionResultParams = {}): Promise<boolean> {
         if(!options.userid) options.userid = this.userId
         return new Promise((resolve) => {
             const collector = channel.createMessageComponentCollector({ 

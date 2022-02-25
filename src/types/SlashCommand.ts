@@ -48,7 +48,7 @@ export default abstract class SlashCommand {
     // Internal ready system, don't overwrite
     onReady(core: Core) {
         this.core = Core.getInstance()
-        return this.ready(core)
+        return this.ready ? this.ready(core) : null
     }
 
     /**
