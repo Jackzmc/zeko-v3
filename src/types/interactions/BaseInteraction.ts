@@ -59,4 +59,8 @@ export default class BaseInteraction {
             collector.on('end', () => resolve(false))
         }) 
     }
+
+    valueOf() {
+        this.component
+    }
 }

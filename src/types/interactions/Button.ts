@@ -38,5 +38,4 @@ export default class Button extends BaseInteraction {
     onPress(callback: ButtonCallback) {
         ButtonManager.getInstance().watch(this, callback)
     }
-
 }

@@ -38,7 +38,7 @@ export default class Select extends BaseInteraction {
         )
     }
 
-    onSelect(callback: SelectMenuCallback, values: string[]) {
+    onSelect(callback: SelectMenuCallback) {
         SelectManager.getInstance().watch(this, callback)
     }
 }
