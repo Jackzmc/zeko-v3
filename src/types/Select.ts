@@ -1,5 +1,5 @@
-import { TextChannel, Snowflake, MessageActionRow, MessageButton, MessageButtonStyleResolvable, TextBasedChannels, ButtonInteraction, EmojiIdentifierResolvable} from "discord.js";
-import ButtonManager from "../managers/interactions/ButtonManager.js";
+import { TextChannel, Snowflake, MessageActionRow, TextBasedChannels, EmojiIdentifierResolvable, SelectMenuInteraction, MessageSelectOptionData, MessageSelectMenu} from "discord.js";
+import SelectManager from "../managers/interactions/SelectManager.js";
 
 interface ButtonResultParams {
     userid?: Snowflake,
@@ -8,18 +8,20 @@ interface ButtonResultParams {
 
 const DEFAULT_MAX_TIME = 15000
 
-export interface ButtonCallback {
-    (interaction: ButtonInteraction): void
+export interface SelectMenuCallback {
+    (interaction: SelectMenuInteraction): void
 }
 
-export interface ButtonOptions {
-    style?: MessageButtonStyleResolvable,
+export interface SelectMenuOptions {
     emoji?: EmojiIdentifierResolvable
     disabled?: boolean,
-    id?: string
+    id?: string,
+    placeholder?: string,
+    min?: number,
+    max?: number
 }
 
-export default class Button {
+export default class Select {
     private data: MessageActionRow;
     private userId?: Snowflake
 
@@ -30,21 +32,22 @@ export default class Button {
      * @param {ButtonOptions} [options={}] Any optional options
      * @memberof Button
      */
-    constructor(label: string, options: ButtonOptions = {}) {
+    constructor(label: string, choices: MessageSelectOptionData[], options: SelectMenuOptions = {}) {
         if(!options.id) options.id = Math.random().toString(16).slice(2)
         this.data = new MessageActionRow()
         .addComponents(
-            new MessageButton()
+            new MessageSelectMenu()
                 .setCustomId(options.id)
-                .setLabel(label)
-                .setStyle(options.style ?? "SECONDARY")
+                .setPlaceholder(options.placeholder)
                 .setDisabled(options.disabled === true)
-                .setEmoji(options.emoji)
+                .setMinValues(options.min || 1)
+                .setMinValues(options.max || 1)
+                .addOptions(choices)
         )
     }
 
-    onPress(callback: ButtonCallback) {
-        ButtonManager.getInstance().watch(this, callback)
+    onSelect(callback: SelectMenuCallback) {
+        SelectManager.getInstance().watch(this, callback)
     }
 
     get allowedInteractorId() {

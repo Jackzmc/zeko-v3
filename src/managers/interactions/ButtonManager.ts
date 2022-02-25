@@ -1,5 +1,5 @@
 import { ButtonInteraction } from 'discord.js';
-import Button, { ButtonCallback } from '../types/Button.js';
+import Button, { ButtonCallback } from '../../types/Button.js';
 
 interface WatchData {
     button: Button,

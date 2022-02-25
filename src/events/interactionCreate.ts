@@ -3,18 +3,27 @@ import { Interaction, Client } from 'discord.js'
 import Logger from '../Logger.js';
 
 import OptionResult from '../types/OptionResult.js'
-import ButtonManager from '../managers/ButtonManager.js';
+import ButtonManager from '../managers/interactions/ButtonManager.js';
+import SelectManager from '../managers/interactions/SelectManager.js';
 export default class extends CoreEvent {
     private buttonManager: ButtonManager
+    private selectManager: SelectManager
+
     constructor(client: Client, logger: Logger) {
         super(client, logger)
         this.buttonManager = new ButtonManager()
+        this.selectManager = new SelectManager()
     }
 
     async every(interaction: Interaction) {
         if(interaction.isButton()) {
             this.logger.debug(`btn press -> ${interaction.id}`)
             if(this.buttonManager.onInteract(interaction)) {
+                return false
+            }
+        } else if(interaction.isSelectMenu()) {
+            this.logger.debug(`sel press -> ${interaction.id}`)
+            if(this.selectManager.onInteract(interaction)) {
                 return false
             }
         }
