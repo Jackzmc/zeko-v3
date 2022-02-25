@@ -53,7 +53,7 @@ export default abstract class SlashCommand {
     /**
      * Fired everytime a slash command is used
      */
-    abstract run: SlashHandlerFunction
+    abstract run(interaction: CommandInteraction, options?: OptionResult): void | Promise<any>
 
     /**
      * Sets the setup information for the slash command
