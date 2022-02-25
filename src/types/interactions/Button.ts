@@ -1,6 +1,6 @@
 import { Snowflake, MessageActionRow, MessageButton, MessageButtonStyleResolvable, ButtonInteraction, EmojiIdentifierResolvable} from "discord.js";
 import ButtonManager from "../../managers/interactions/ButtonManager.js";
-import BaseInteraction from 'interactions/BaseInteraction';
+import BaseInteraction from './BaseInteraction.js';
 
 export interface ButtonCallback {
     (interaction: ButtonInteraction): void
