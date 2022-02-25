@@ -185,16 +185,19 @@ export default class CommandManager extends Manager {
                 builder = new SlashCommandBuilder()
                     .setName(data.name)
                     .setDescription(data.description)
+                
                 if(data.defaultPermissions)
                    builder.setDefaultPermission(data.defaultPermissions === "ALL")
+                
                 if(data.options) {
                     for(const option of data.options) {
                         if(option.type === "SUB_COMMAND" && option.handler) {
-                            handlers[option.name] = option.handler
+                            handlers[option.name] = option.handler.bind(command)
                         }
                         builder = this.addSlashOption<SlashCommandBuilder>(builder, option)
                     }
                 }
+
             } catch(err) {
                 this.logger.error(`Registering slash command "${data.name}" failed during meta processing: `, err)
                 return null
