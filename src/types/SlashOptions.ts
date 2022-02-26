@@ -28,6 +28,9 @@ export interface SlashOptionValue extends SlashOptionBase {
     required?: boolean
 }
 
+export interface SlashAutocomplete extends SlashOptionValue {
+    autocomplete?: SlashAutocompleteHandlerFunction | boolean | null
+}
 export interface SlashChoicesOption<T> extends SlashOptionValue {
     choices?: Record<string, T> | T[],
 }
@@ -41,7 +44,6 @@ export {
 export interface SlashSubCommandOption extends SlashOptionBase {
     type: "SUB_COMMAND",
     handler?: SlashHandlerFunction,
-    autocompleteHandler?: SlashAutocompleteHandlerFunction
     options?: SlashSubOption[]
 }
 
@@ -50,11 +52,11 @@ export interface SlashSubCommandGroupOption extends SlashOptionBase {
     options?: SlashSubOption[]
 }
 
-export interface SlashStringOption extends SlashChoicesOption<string> {
+export interface SlashStringOption extends SlashChoicesOption<string>, SlashAutocomplete  {
     type: "STRING",
 }
 
-export interface SlashIntegerOption extends SlashChoicesOption<Integer>  {
+export interface SlashIntegerOption extends SlashChoicesOption<Integer>, SlashAutocomplete  {
     type: "INTEGER",
 }
 
@@ -80,7 +82,7 @@ export interface SlashMentionableOption extends SlashOptionValue {
     type: "MENTIONABLE",
 }
 
-export interface SlashNumberOption extends SlashChoicesOption<number> {
+export interface SlashNumberOption extends SlashChoicesOption<number>, SlashAutocomplete  {
     type: "NUMBER",
 }
 

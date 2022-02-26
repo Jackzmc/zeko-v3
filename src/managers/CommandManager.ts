@@ -8,13 +8,12 @@ import { SlashCommandBooleanOption, SlashCommandBuilder, SlashCommandChannelOpti
 import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/TraditionalCommand.js';
 import jsum from 'jsum'
 import SlashCommand from '../types/SlashCommand.js'
-import { SlashAutocompleteHandlerFunction, SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
+import { SlashAutocomplete, SlashAutocompleteHandlerFunction, SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
 import Manager from './Manager.js';
 import Core from '../core/Core.js';
-import { SlashHandlerFunction } from 'SlashOptions';
+import { SlashHandlerFunction, SlashChoicesOption } from 'SlashOptions';
 
 //TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that (issue #6)
-
 /**
  * See {@link types/Command} for information of CommandConfigOptions and CommandHelpOptions
  * @typedef {Object} RegisteredCommand
@@ -204,8 +203,10 @@ export default class CommandManager extends Manager {
                             if(option.handler) {
                                 handlers.default[option.name] = option.handler.bind(command)
                             }
-                            if(option.autocompleteHandler) {
-                                handlers.autocomplete[option.name] = option.autocompleteHandler.bind(command)
+                            if("autocomplete" in option) {
+                                const { autocomplete, name } = (option as SlashAutocomplete)
+                                if(typeof autocomplete === "function")
+                                    handlers.autocomplete[name] = autocomplete.bind(command)
                             }
                         }
                         builder = this.addSlashOption<SlashCommandBuilder>(builder, option)
@@ -390,15 +391,16 @@ export default class CommandManager extends Manager {
             return option
         }
 
+        const a = new SlashCommandBuilder()
         switch(data.type) {
             case "BOOLEAN":
                 builder.addBooleanOption(setData)
                 break
             case "STRING":
-                builder.addStringOption(setData)
+                builder.addStringOption(option => setData(option.setAutocomplete(data.autocomplete !== null && data.autocomplete !== undefined)))
                 break
             case "INTEGER":
-                builder.addIntegerOption(setData)
+                builder.addIntegerOption(option => setData(option.setAutocomplete(data.autocomplete !== null && data.autocomplete !== undefined)))
                 break
             case "USER":
                 builder.addUserOption(setData)
@@ -409,7 +411,7 @@ export default class CommandManager extends Manager {
                 })
                 break
             case "NUMBER":
-                builder.addNumberOption(setData)
+                builder.addNumberOption(option => setData(option.setAutocomplete(data.autocomplete !== null && data.autocomplete !== undefined)))
                 break
             case "NUMBER":
                 builder.addNumberOption(setData)
