@@ -27,6 +27,8 @@ export default class Select extends BaseInteraction {
         super()
         if(choices.length == 0) throw new Error('Empty list of options was given. Minimum of one options must be given')
         if(!options.id) options.id = Math.random().toString(16).slice(2)
+        if(options.min && options.min >= choices.length) throw new Error('Minimum number of choices cannot be greater than the number of choices')
+        if(options.min && options.max && options.max < options.min) throw new Error('Maximum number of choices cannot be less than the minimum number of choices')
         this.data = new MessageActionRow()
         .addComponents(
             new MessageSelectMenu()
@@ -34,7 +36,7 @@ export default class Select extends BaseInteraction {
                 .setPlaceholder(options.placeholder)
                 .setDisabled(options.disabled === true)
                 .setMinValues(options.min || 1)
-                .setMinValues(options.max || 1)
+                .setMaxValues(Math.min(options.max, choices.length) || 1)
                 .addOptions(choices)
         )
     }
