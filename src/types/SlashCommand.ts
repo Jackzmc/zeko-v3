@@ -21,12 +21,25 @@ export {
     ChannelType
 }
 
+interface CommandRegistery  {
+    guildIds?: Record<Snowflake, Snowflake>,
+    globalId?: Snowflake,
+    type: "SLASH" | "CONTEXT_MENU" 
+}
+
+interface DiscordRegistery {
+    slash: CommandRegistery,
+    context: {
+        message?: CommandRegistery,
+        user?: CommandRegistery
+    }
+}
+
 export default abstract class SlashCommand {
     protected client: Discord.Client;
     protected logger: Logger;
     protected core: Core;
-    globalId?: Snowflake
-    guildIds?: Record<Snowflake, Snowflake>
+    register: DiscordRegistery
     
     /**
      * Create a new command 
