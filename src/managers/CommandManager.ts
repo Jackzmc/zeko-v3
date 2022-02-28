@@ -3,8 +3,9 @@
  @module CommandManager
 */
 import Logger from '../Logger.js'
+import BaseCommand from '../types/BaseCommand.js'
 import { Client, Collection, Snowflake } from 'discord.js';
-import { SlashCommandBooleanOption, SlashCommandBuilder, SlashCommandChannelOption, SlashCommandIntegerOption, SlashCommandMentionableOption, SlashCommandNumberOption, SlashCommandRoleOption, SlashCommandStringOption, SlashCommandSubcommandBuilder, SlashCommandUserOption } from '@discordjs/builders';
+import { ContextMenuCommandBuilder, ContextMenuCommandType, SlashCommandBooleanOption, SlashCommandBuilder, SlashCommandChannelOption, SlashCommandIntegerOption, SlashCommandMentionableOption, SlashCommandNumberOption, SlashCommandRoleOption, SlashCommandStringOption, SlashCommandSubcommandBuilder, SlashCommandUserOption } from '@discordjs/builders';
 import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/TraditionalCommand.js';
 import jsum from 'jsum'
 import SlashCommand from '../types/SlashCommand.js'
@@ -12,6 +13,8 @@ import { SlashAutocomplete, SlashAutocompleteHandlerFunction, SlashCommandConfig
 import Manager from './Manager.js';
 import Core from '../core/Core.js';
 import { SlashHandlerFunction, SlashChoicesOption } from 'SlashOptions';
+import ContextCommand, { ContextMenuType } from 'ContextCommand.js';
+import { ApplicationCommandType } from 'discord-api-types';
 
 //TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that (issue #6)
 /**
@@ -62,6 +65,17 @@ export interface RegisteredTraditionalCommand {
     command: Command
 }
 
+export interface RegisterInfo {
+    group?: string,
+    internal?: boolean
+}
+
+export interface RegisteredContextMenu {
+    command: ContextCommand,
+    info: RegisterInfo,
+    builder: ContextMenuCommandBuilder
+}
+
 
 export type RegisteredCommand = RegisteredSlashCommand | RegisteredTraditionalCommand
 export type SlashCommandOption = SlashCommandBooleanOption | SlashCommandIntegerOption | SlashCommandStringOption | SlashCommandRoleOption | SlashCommandUserOption | SlashCommandNumberOption | SlashCommandChannelOption | SlashCommandMentionableOption | SlashCommandSubcommandBuilder
@@ -81,6 +95,8 @@ export default class CommandManager extends Manager {
     private groups: string[]
     private firstRegisterDone: boolean
     private core: Core
+
+    private contextMenus: Collection<string, RegisteredContextMenu>
 
     constructor(client: Client) {
         super(client, 'CommandManager')
@@ -109,13 +125,41 @@ export default class CommandManager extends Manager {
         }else if(commandClass.default !instanceof Command) {
             throw new Error('commandClass must contain a default Command class.')
         }
-        const command: (Command|SlashCommand) = new commandClass.default(this.client, new Logger(`cmd/${filename}`))
+        const command: (Command|SlashCommand|ContextCommand) = new commandClass.default(this.client, new Logger(`cmd/${filename}`))
         // No clue why the other way around doesn't work (SlashCommand vs. Command)
         if(command instanceof Command) {
             return this.registerTraditionalCommand(commandClass, filename, group, isCore)
-        } else {
-            return this.registerSlashCommand(command, isCore, group)
+        } 
+
+        if(command instanceof SlashCommand) {
+            const slashCmd = await this.registerSlashCommand(command, isCore, group)
+            this.initalize(slashCmd, slashCmd.guilds)
+        } 
+        if(command instanceof ContextCommand) {
+            const contextCmd = await this.registerContextCommand(command, { 
+                group: group,
+                internal: isCore
+            })
+            this.initalize(contextCmd, slashCm, null)
         }
+
+    }
+
+    private async initalize(command: BaseCommand, data: RegisterInfo, guilds: Snowflake[] = null) {
+        if(guilds && guilds.length > 0) {
+            const id = await this.initalizeGlobal(command)
+        } else {
+
+        }
+    }
+
+    private async initalizeGlobal(command: BaseCommand) {
+        const name = slash.data.name.toLowerCase()
+        const discordData = slash.builder.toJSON()
+        // Jsum mutates all arrays, so a copy is to be made:
+        const discordDataClone = JSON.parse(JSON.stringify(discordData))
+        const checksum = jsum.digest(discordDataClone, 'SHA256', 'hex')
+        const useChecksum = process.env.DISCORD_FORCE_SLASH_REGISTER === undefined && !slash.data.forceRegister
     }
 
     /**
@@ -168,6 +212,26 @@ export default class CommandManager extends Manager {
         }
     }
 
+    async registerContextCommand(command: ContextCommand, info: RegisterInfo): Promise<RegisteredContextMenu> {
+        try {
+            let data = command.contextConfig()
+            
+            const builder = new ContextMenuCommandBuilder()
+                .setName(data.name.toLowerCase().replace(/\.js$/, ''))
+                .setType(data.type === ContextMenuType.USER ? ApplicationCommandType.User : ApplicationCommandType.Message)
+                
+            if(data.defaultPermissions)
+                builder.setDefaultPermission(data.defaultPermissions === "ALL")
+
+            return {
+                command,
+                info,
+                builder
+            }
+        }
+    }
+
+
         /**
      * Registers a command with the CommandManager
      *
@@ -179,7 +243,7 @@ export default class CommandManager extends Manager {
      */
     async registerSlashCommand(command: SlashCommand, isCore: boolean, group: string = "default"): Promise<PendingSlashCommand> {
         try {
-            let data = command.slashConfig()
+            let data = (command instanceof SlashCommand) ? command.slashConfig() :
             data.name = data.name.toLowerCase()
             // Overwrite any previousc ommands, such that a custom can overwrite a core command
             delete this.pendingSlash[data.name]
@@ -454,7 +518,7 @@ export default class CommandManager extends Manager {
         await this.registerAllPendingSlash()
         for(const { command, data } of this.slashCommands.values()) {
             try {
-                await command.onReady(this.core)
+                await command._on_ready(this.core)
             } catch(err) {
                 this.logger.error(`Slash Command \"${data.name}\" encountered an error on .ready(): `)
                 throw err
@@ -462,7 +526,7 @@ export default class CommandManager extends Manager {
         }
         for(const { command, name } of this.commands.values()) {
             try {
-                await command.onReady(this.core)
+                await command._on_ready(this.core)
             } catch(err) {
                 this.logger.error(`Traditional Command \"${name}\" encountered an error on .ready(): `)
                 throw err
@@ -510,7 +574,7 @@ export default class CommandManager extends Manager {
                         globalCommandId: storedCmd.id
                     }
                     slash.command.register.slash.globalId = storedCmd.id
-                    if(slash.command.onRegisteredGlobal) slash.command.onRegisteredGlobal(storedCmd.id)
+                    if(slash.command.onRegisteredGlobalSlash) slash.command.onRegisteredGlobalSlash(storedCmd.id)
                     this.slashCommands.set(name, registeredCommand)
                     
                 } else {
@@ -536,7 +600,7 @@ export default class CommandManager extends Manager {
                                 id: cmd.id
                             })
                             slash.command.register.slash.globalId = cmd.id
-                            if(slash.command.onRegisteredGlobal) slash.command.onRegisteredGlobal(cmd.id)
+                            if(slash.command.onRegisteredGlobalSlash) slash.command.onRegisteredGlobalSlash(cmd.id)
                             this.slashCommands.set(name, registeredCommand)
                         } catch(err) {
                             this.logger.error(`Registering global /${name} failed:`, err)
@@ -575,7 +639,7 @@ export default class CommandManager extends Manager {
                             this.logger.severe(`Registering /${name} for ${guildID} failed:`, err)
                         }
                     }
-                    if(slash.command.onRegistered) slash.command.onRegistered(guildID, guildCommands[guildID])
+                    if(slash.command.onRegisteredGuildSlash) slash.command.onRegisteredGuildSlash(guildID, guildCommands[guildID])
                 }
                 slash.command.register.slash.guildIds = guildCommands
 
