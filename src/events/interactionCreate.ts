@@ -26,12 +26,17 @@ export default class extends CoreEvent {
             if(this.selectManager.onInteract(interaction, interaction.values)) {
                 return false
             }
-        } else if(interaction.isAutocomplete() || interaction.isCommand()) {
+        } else if(interaction.isAutocomplete() || interaction.isCommand() || interaction.isContextMenu()) {
 
             const slash = this.core.commands.getSlashCommand(interaction.commandName)
             if(!slash) return;
 
-            let options: OptionResult = new OptionResult(interaction.options, slash.data.options)
+            if(interaction.isContextMenu()) {
+                this.logger.debug('context menu ->', interaction.commandName)
+                return
+            }
+
+            const options: OptionResult = new OptionResult(interaction.options, slash.data.options)
             if(interaction.isAutocomplete()) { 
                 const autocomplete: AutocompleteInteraction = interaction //Fix being set to 'never
                 const focused = autocomplete.options.getFocused(true)
@@ -46,38 +51,37 @@ export default class extends CoreEvent {
                     this.logger.error(`[cmd/${slash.data.name}] autocomplete threw an error`, err)
                 }
                 return
-            }
-
-            if (!interaction.isCommand()) return;
-            try {
-                const handler = slash.handlers.default[options.subcommand]
+            } else if(interaction.isCommand()) {
                 try {
-                    if(handler)
-                        await handler(interaction, options)
-                    else
-                        await slash.command.run(interaction, options)
-                } catch(err) {
-                    const msg = '**Command Error**\n`' + err.message + "`"
+                    const handler = slash.handlers.default[options.subcommand]
                     try {
-                        if(interaction.replied)
-                            await interaction.editReply(msg)
-                        else if(interaction.deferred) 
-                            await interaction.followUp(msg)
+                        if(handler)
+                            await handler(interaction, options)
                         else
-                            await interaction.reply(msg)
+                            await slash.command.run(interaction, options)
                     } catch(err) {
-                        this.logger.warn("Failed to send command error message",err.message)
+                        const msg = '**Command Error**\n`' + err.message + "`"
+                        try {
+                            if(interaction.replied)
+                                await interaction.editReply(msg)
+                            else if(interaction.deferred) 
+                                await interaction.followUp(msg)
+                            else
+                                await interaction.reply(msg)
+                        } catch(err) {
+                            this.logger.warn("Failed to send command error message",err.message)
+                        }
+                        this.logger.warn(`Command ${slash.data.name} had an error:\n    `, err.stack)
+                        return false
                     }
-                    this.logger.warn(`Command ${slash.data.name} had an error:\n    `, err.stack)
-                    return false
+                } catch(err) {
+                    this.logger.warn(`Command ${slash.data.name} experienced option parsing error:\n    `, err.stack)
+                    const msg = `**Internal Error**\n${err.message}`
+                    if(interaction.replied) await interaction.editReply(msg) 
+                    else await interaction.reply(msg)
                 }
-            } catch(err) {
-                this.logger.warn(`Command ${slash.data.name} experienced option parsing error:\n    `, err.stack)
-                const msg = `**Internal Error**\n${err.message}`
-                if(interaction.replied) await interaction.editReply(msg) 
-                else await interaction.reply(msg)
+                return true
             }
-            return true
         }
     }
 }
