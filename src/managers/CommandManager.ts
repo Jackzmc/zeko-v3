@@ -521,6 +521,7 @@ export default class CommandManager extends Manager {
                                     name: slash.data.name,
                                     type: slash.data.context,
                                 })
+                                this.logger.log(`Registered context menu for global.${name}: ${contextId}`)
                             }
                             const cmd = await this.client.application.commands.create(discordData)
                             const registeredCommand: RegisteredGlobalSlashCommand = {
@@ -559,6 +560,7 @@ export default class CommandManager extends Manager {
                                     name: slash.data.name,
                                     type: slash.data.context,
                                 }, guildID)
+                                this.logger.log(`Registered context menu for ${guildID}.${name}: ${contextId}`)
                             }
                             const cmd = await this.client.application.commands.create(discordData, guildID)
                             this.core.db.set(`commands.guild.${guildID}.${name}`, {
