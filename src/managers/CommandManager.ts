@@ -516,6 +516,12 @@ export default class CommandManager extends Manager {
                 } else {
                     globalCommands.push(new Promise(async(resolve) => {
                         try {
+                            if(slash.data.context) {
+                                const contextId = await this.client.application.commands.create({
+                                    name: slash.data.name,
+                                    type: slash.data.context,
+                                })
+                            }
                             const cmd = await this.client.application.commands.create(discordData)
                             const registeredCommand: RegisteredGlobalSlashCommand = {
                                 ...slash,
@@ -548,6 +554,12 @@ export default class CommandManager extends Manager {
                             this.logger.info(`Skipping /${slash.data.name} on guild ${guildID}: Checksum same (${storedCmd.checksum})`)
                     } else {
                         try {
+                            if(slash.data.context) {
+                                const contextId = await this.client.application.commands.create({
+                                    name: slash.data.name,
+                                    type: slash.data.context,
+                                }, guildID)
+                            }
                             const cmd = await this.client.application.commands.create(discordData, guildID)
                             this.core.db.set(`commands.guild.${guildID}.${name}`, {
                                 checksum,

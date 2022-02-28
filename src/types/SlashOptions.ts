@@ -6,9 +6,12 @@ import OptionResult from './OptionResult.js'
 export type SlashHandlerFunction = (interaction: CommandInteraction, options?: OptionResult) => void | Promise<any>
 export type SlashAutocompleteHandlerFunction = (interaction: AutocompleteInteraction, focused: ApplicationCommandOptionChoice) => void | Promise<any>
 
+export type SlashContextOptions = "MESSAGE" | "USER"
+
 export interface SlashOfficialConfig {
     name: string,
     description: string,
+    context?: SlashContextOptions,
     options?: SlashOption[],
 }
 
