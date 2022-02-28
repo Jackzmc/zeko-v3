@@ -25,10 +25,10 @@ export default class Select extends BaseInteraction {
      */
     constructor(choices: MessageSelectOptionData[], options: SelectMenuOptions = {}) {
         super()
-        if(choices.length == 0) throw new Error('Empty list of options was given. Minimum of one options must be given')
-        if(!options.id) options.id = Math.random().toString(16).slice(2)
-        if(options.min && options.min >= choices.length) throw new Error('Minimum number of choices cannot be greater than the number of choices')
-        if(options.min && options.max && options.max < options.min) throw new Error('Maximum number of choices cannot be less than the minimum number of choices')
+        if(choices.length == 0) throw new Error('Empty list of options was given. Minimum of one choice must be given')
+        else if(!options.id) options.id = Math.random().toString(16).slice(2)
+        else if(options.min && options.min >= choices.length) throw new Error('Minimum number of choices cannot be greater than the number of choices')
+        else if(options.min && options.max && options.max < options.min) throw new Error('Maximum number of choices cannot be less than the minimum number of choices')
         this.data = new MessageActionRow()
         .addComponents(
             new MessageSelectMenu()
