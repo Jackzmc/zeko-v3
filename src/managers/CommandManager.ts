@@ -76,6 +76,12 @@ export interface RegisteredContextMenu {
     builder: ContextMenuCommandBuilder
 }
 
+export interface BaseCommandRegister<T extends BaseCommand, C extends CommandConfigOptions> {
+    info: RegisterInfo,
+    config: C,
+    command: T
+}
+
 
 export type RegisteredCommand = RegisteredSlashCommand | RegisteredTraditionalCommand
 export type SlashCommandOption = SlashCommandBooleanOption | SlashCommandIntegerOption | SlashCommandStringOption | SlashCommandRoleOption | SlashCommandUserOption | SlashCommandNumberOption | SlashCommandChannelOption | SlashCommandMentionableOption | SlashCommandSubcommandBuilder
@@ -152,6 +158,8 @@ export default class CommandManager extends Manager {
 
         }
     }
+
+    // TODO: Need interface baseline for data to extract name and forceRegister from, base registeration
 
     private async initalizeGlobal(command: BaseCommand) {
         const name = slash.data.name.toLowerCase()
