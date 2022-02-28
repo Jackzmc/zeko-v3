@@ -5,64 +5,36 @@
 import Discord, { ApplicationCommandOptionChoice, AutocompleteInteraction, CommandInteraction, Snowflake } from 'discord.js';
 import Logger from '../Logger.js'
 import OptionResult from '../types/OptionResult.js';
+import BaseCommand, { CommandConfig } from './BaseCommand.js'
 
-import { SlashCommandConfig, SlashOption, ChannelType, SlashHandlerFunction } from './SlashOptions.js' 
+import { SlashOption, ChannelType } from './SlashOptions.js' 
 
-import { Client, ApplicationCommandOptionType } from 'discord.js';
-import Core from '../core/Core.js';
+import { Client } from 'discord.js';
 
 export { 
     OptionResult, 
     CommandInteraction, 
     Logger,
     Client,
-    SlashCommandConfig,
     SlashOption,
-    ChannelType
+    ChannelType,
 }
 
-interface CommandRegistery  {
-    guildIds?: Record<Snowflake, Snowflake>,
-    globalId?: Snowflake,
-    type: "SLASH" | "CONTEXT_MENU" 
+export interface SlashCommandConfig extends CommandConfig {
+    options?: SlashOption[],
 }
 
-interface DiscordRegistery {
-    slash: CommandRegistery,
-    context: {
-        message?: CommandRegistery,
-        user?: CommandRegistery
-    }
-}
-
-export default abstract class SlashCommand {
-    protected client: Discord.Client;
-    protected logger: Logger;
-    protected core: Core;
-    register: DiscordRegistery
-    
+export default abstract class SlashCommand extends BaseCommand {
     /**
      * Create a new command 
      */
     constructor(client: Discord.Client, logger: Logger) {
-        this.client = client;
-        this.logger = logger;
+        super(client, logger)
     }
 
-    onRegisteredGlobal?(commandId: Snowflake): any | Promise<any>
+    onRegisteredGlobalSlash?(commandId: Snowflake): any | Promise<any>
     
-    onRegistered?(guild: Snowflake, commandId: Snowflake): any | Promise<any>
-
-    /**
-     * Called when everything is ready (discord.js ready and bot core is ready)
-     */
-    ready?(core?: Core): Promise<any> | any
-
-    // Internal ready system, don't overwrite
-    onReady(core: Core) {
-        this.core = Core.getInstance()
-        return this.ready ? this.ready(core) : null
-    }
+    onRegisteredGuildSlash?(guild: Snowflake, commandId: Snowflake): any | Promise<any>
 
     /**
      * Called everytime a CommandInteraction is sent matching the defined name in slashConfig.
@@ -83,13 +55,4 @@ export default abstract class SlashCommand {
      * @returns {SlashCommandConfig} Slash command registeration data
      */
     abstract slashConfig(): SlashCommandConfig;
-
-
-    /**
-     * Called when the bot is shutting down or the command is being unloaded
-     *
-     * @param {boolean} [waitable] Can the bot wait for any cleanup, or is it shutting down right now. (Async or not)
-     * @memberof Command
-     */
-    exit?(waitable?: boolean): void | Promise<any>;
 }

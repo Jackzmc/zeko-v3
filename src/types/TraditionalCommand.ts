@@ -2,10 +2,9 @@
  @module types/Command
  @description The Commands class
 */
-import { Client, Message } from 'discord.js';
+import BaseCommand from './BaseCommand.js'
+import { Message } from 'discord.js';
 import Core from '../core/Core.js';
-import Logger from '../Logger'
-import CoreLoader from '../core/Core';
 
 export interface CommandConfigOptions {
     usageIfNotSet?: boolean,
@@ -43,28 +42,8 @@ export interface FlagList {
  * @property {Client} client Discord.js client
  * @property {Logger} logger Logger for class
  */
-export default abstract class Command {
-    protected client: Client;
-    protected logger: Logger;
-    protected core: Core
-    
-    /**
-     * Create a new command 
-     *
-     * @param {Client} client The current discord.js client
-     * @param {Logger} logger A logger for the class to use
-     */
-    constructor(client: Client, logger: Logger) {
-        this.client = client;
-        this.logger = logger;
-    }
-
-    // Called when everything is ready (discord.js ready and zeko core is ready)
-    ready(core?: Core): Promise<any> | any {
-
-    }
-
-    onReady(core: Core) {
+export default abstract class Command extends BaseCommand {
+    _on_ready(core: Core) {
         this.core = Core.getInstance()
         return this.ready(core)
     }
@@ -95,13 +74,4 @@ export default abstract class Command {
      * @returns {CommandHelpOptions} All help options
      */
     abstract help(): CommandHelpOptions;
-
-
-    /**
-     * Called when the bot is shutting down.
-     *
-     * @param {boolean} [waitable] Can the bot wait for any cleanup, or is it shutting down right now. (Async or not)
-     * @memberof Command
-     */
-    exit?(waitable?: boolean): void | Promise<any>;
 }

@@ -8,19 +8,6 @@ export type SlashAutocompleteHandlerFunction = (interaction: AutocompleteInterac
 
 export type SlashContextOptions = "MESSAGE" | "USER"
 
-export interface SlashOfficialConfig {
-    name: string,
-    description: string,
-    context?: SlashContextOptions,
-    options?: SlashOption[],
-}
-
-export interface SlashCommandConfig extends SlashOfficialConfig {
-    guilds?: Snowflake[]
-    defaultPermissions?: "ALL" | "NONE"
-    forceRegister?: boolean
-}
-
 export interface SlashOptionBase {
     name: string,
     type: ApplicationCommandOptionType,
