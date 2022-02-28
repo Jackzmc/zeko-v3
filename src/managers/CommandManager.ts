@@ -509,7 +509,7 @@ export default class CommandManager extends Manager {
                         ...slash,
                         globalCommandId: storedCmd.id
                     }
-                    slash.command.globalId = storedCmd.id
+                    slash.command.register.slash.globalId = storedCmd.id
                     if(slash.command.onRegisteredGlobal) slash.command.onRegisteredGlobal(storedCmd.id)
                     this.slashCommands.set(name, registeredCommand)
                     
@@ -517,11 +517,12 @@ export default class CommandManager extends Manager {
                     globalCommands.push(new Promise(async(resolve) => {
                         try {
                             if(slash.data.context) {
-                                const contextId = await this.client.application.commands.create({
+                                const context = await this.client.application.commands.create({
                                     name: slash.data.name,
                                     type: slash.data.context,
                                 })
-                                this.logger.log(`Registered context menu for global.${name}: ${contextId}`)
+                                slash.command.register.context.message.globalId = context.id
+                                this.logger.log(`Registered context menu for global.${name}: ${context.id}`)
                             }
                             const cmd = await this.client.application.commands.create(discordData)
                             const registeredCommand: RegisteredGlobalSlashCommand = {
@@ -534,7 +535,7 @@ export default class CommandManager extends Manager {
                                 checksum,
                                 id: cmd.id
                             })
-                            slash.command.globalId = cmd.id
+                            slash.command.register.slash.globalId = cmd.id
                             if(slash.command.onRegisteredGlobal) slash.command.onRegisteredGlobal(cmd.id)
                             this.slashCommands.set(name, registeredCommand)
                         } catch(err) {
@@ -556,11 +557,12 @@ export default class CommandManager extends Manager {
                     } else {
                         try {
                             if(slash.data.context) {
-                                const contextId = await this.client.application.commands.create({
+                                const context = await this.client.application.commands.create({
                                     name: slash.data.name,
                                     type: slash.data.context,
                                 }, guildID)
-                                this.logger.log(`Registered context menu for ${guildID}.${name}: ${contextId}`)
+                                slash.command.register.context.message.guildIds[guildID] = context.id
+                                this.logger.log(`Registered context menu for ${guildID}.${name}: ${context.id}`)
                             }
                             const cmd = await this.client.application.commands.create(discordData, guildID)
                             this.core.db.set(`commands.guild.${guildID}.${name}`, {
@@ -575,7 +577,7 @@ export default class CommandManager extends Manager {
                     }
                     if(slash.command.onRegistered) slash.command.onRegistered(guildID, guildCommands[guildID])
                 }
-                slash.command.guildIds = guildCommands
+                slash.command.register.slash.guildIds = guildCommands
 
                 const registeredCommand: RegisteredGuildsSlashCommand = {
                     ...slash,
