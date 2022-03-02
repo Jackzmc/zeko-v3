@@ -203,7 +203,7 @@ export default class CommandManager extends Manager {
                         const { autocomplete, name } = (option as SlashAutocomplete)
                         this.logger.debug(name, 'autocomplete', autocomplete)
                         if(typeof autocomplete === "function")
-                            handlers.autocomplete[name] = autocomplete.bind(command)
+                            handlers.autocomplete[name] = autocomplete
                     }
                 }
                 
@@ -211,7 +211,7 @@ export default class CommandManager extends Manager {
                     for(const option of data.options) {
                         if(option.type === "SUB_COMMAND") {
                             if(option.handler) {
-                                handlers.default[option.name] = option.handler.bind(command)
+                                handlers.default[option.name] = option.handler
                             }
                             if(option.options)
                                 for(const subOption of option.options) {

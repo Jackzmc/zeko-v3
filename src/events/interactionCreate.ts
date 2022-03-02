@@ -38,7 +38,7 @@ export default class extends CoreEvent {
                 const handler = slash.handlers.autocomplete[focused.name]
                 try {
                     if(handler) {
-                        await handler(autocomplete, focused)
+                        await handler.bind(slash)(autocomplete, focused)
                     } else {
                         await slash.command.onAutocomplete(autocomplete, focused)
                     }
@@ -53,7 +53,7 @@ export default class extends CoreEvent {
                 const handler = slash.handlers.default[options.subcommand]
                 try {
                     if(handler)
-                        await handler(interaction, options)
+                        await handler.bind(slash)(interaction, options)
                     else
                         await slash.command.run(interaction, options)
                 } catch(err) {
