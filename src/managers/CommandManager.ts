@@ -12,6 +12,7 @@ import { SlashAutocomplete, SlashAutocompleteHandlerFunction, SlashCommandConfig
 import Manager from './Manager.js';
 import Core from '../core/Core.js';
 import { SlashHandlerFunction, SlashChoicesOption } from 'SlashOptions';
+import { DiscordAPIError } from '@discordjs/rest';
 
 //TODO: Add disabling/enabling commands, for types/Command: this.setFailstate() or smthn like that (issue #6)
 /**
@@ -531,7 +532,10 @@ export default class CommandManager extends Manager {
                             if(slash.command.onRegisteredGlobal) slash.command.onRegisteredGlobal(cmd.id)
                             this.slashCommands.set(name, registeredCommand)
                         } catch(err) {
-                            this.logger.error(`Registering global /${name} failed:`, err)
+                            if(err instanceof DiscordAPIError && err.code === 50001) 
+                                this.logger.error(`Missing permissions to register global /${name}`)
+                            else
+                                this.logger.severe(`Registering global /${name} failed:`, err)
                         }
                         resolve(true)
                     }))
@@ -556,7 +560,10 @@ export default class CommandManager extends Manager {
                             guildCommands[guildID] = cmd.id
                             this.logger.log(`Registered new /${slash.data.name} with ${slash.data.options?.length} options on guild ${guildID}`)
                         } catch(err) {
-                            this.logger.severe(`Registering /${name} for ${guildID} failed:`, err)
+                            if(err instanceof DiscordAPIError && err.code === 50001) 
+                                this.logger.error(`Missing permissions to register /${name} for guild id ${guildID}`)
+                            else
+                                this.logger.severe(`Registering /${name} for guild id ${guildID} failed:`, err)
                         }
                     }
                     if(slash.command.onRegistered) slash.command.onRegistered(guildID, guildCommands[guildID])
