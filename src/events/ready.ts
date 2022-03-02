@@ -3,7 +3,7 @@ import CoreEvent from '../core/types/CoreEvent.js'
 const MAX_TIMEOUT_SEC: number = 20
 
 export default class extends CoreEvent {
-    private readyTimeout: number
+    private readyTimeout: number = 0
 
     async every() {
         this.logger.info(`Discord.js now ready`);
