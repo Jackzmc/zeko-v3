@@ -29,8 +29,7 @@ export default class extends CoreEvent {
         await Promise.all([
             this.core.modules._ready(),
             this.core.commands._ready(),
-            this.core.events._ready()
-        ])
+        ]).then(() => this.core.events._ready())
         this.logger.info(`Bot now ready`);
     }
 }
