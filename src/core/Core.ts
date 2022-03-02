@@ -55,7 +55,8 @@ export default class Core {
     }
 
     get isReady() { 
-        return this.isLoaded
+        return this.isLoaded 
+            && (this.commandManager && this.commandManager.areCommandsReady)
     }
 
     get isShuttingDown() {
