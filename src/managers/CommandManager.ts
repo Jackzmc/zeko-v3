@@ -204,11 +204,10 @@ export default class CommandManager extends Manager {
                             if(option.handler) {
                                 handlers.default[option.name] = option.handler.bind(command)
                             }
-                            if("autocomplete" in option) {
-                                const { autocomplete, name } = (option as SlashAutocomplete)
-                                if(typeof autocomplete === "function")
-                                    handlers.autocomplete[name] = autocomplete.bind(command)
-                            }
+                        } else if(option.type !== "SUB_COMMAND_GROUP" && "autocomplete" in option) {
+                            const { autocomplete, name } = (option as SlashAutocomplete)
+                            if(typeof autocomplete === "function")
+                                handlers.autocomplete[name] = autocomplete.bind(command)
                         }
                         builder = this.addSlashOption<SlashCommandBuilder>(builder, option)
                     }
