@@ -80,7 +80,7 @@ export default class CommandManager extends Manager {
     private slashCommands:  Collection<string, RegisteredSlashCommand>
     private pendingSlash: Record<string, PendingSlashCommand>
     private groups: string[]
-    private firstRegisterDone: boolean
+    private firstRegisterDone = false
     private core: Core
 
     constructor(client: Client) {
