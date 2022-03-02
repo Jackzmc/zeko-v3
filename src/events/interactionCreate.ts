@@ -35,7 +35,7 @@ export default class extends CoreEvent {
             if(interaction.isAutocomplete()) { 
                 const autocomplete: AutocompleteInteraction = interaction //Fix being set to 'never
                 const focused = autocomplete.options.getFocused(true)
-                const handler = slash.handlers.autocomplete[options.subcommand]
+                const handler = slash.handlers.autocomplete[focused.name]
                 try {
                     if(handler) {
                         await handler(autocomplete, focused)

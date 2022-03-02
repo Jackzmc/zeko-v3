@@ -8,7 +8,7 @@ import { SlashCommandBooleanOption, SlashCommandBuilder, SlashCommandChannelOpti
 import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/TraditionalCommand.js';
 import jsum from 'jsum'
 import SlashCommand from '../types/SlashCommand.js'
-import { SlashAutocomplete, SlashAutocompleteHandlerFunction, SlashCommandConfig, SlashOption } from '../types/SlashOptions.js' 
+import { SlashAutocomplete, SlashAutocompleteHandlerFunction, SlashCommandConfig, SlashOption, SlashSubCommandGroupOption, SlashSubCommandOption, SlashSubOption } from '../types/SlashOptions.js' 
 import Manager from './Manager.js';
 import Core from '../core/Core.js';
 import { SlashHandlerFunction, SlashChoicesOption } from 'SlashOptions';
@@ -197,6 +197,15 @@ export default class CommandManager extends Manager {
                 
                 if(data.defaultPermissions)
                    builder.setDefaultPermission(data.defaultPermissions === "ALL")
+
+                const parseOption = (option: SlashSubCommandGroupOption | SlashSubOption) => {
+                    if(option.type !== "SUB_COMMAND_GROUP" && "autocomplete" in option) {
+                        const { autocomplete, name } = (option as SlashAutocomplete)
+                        this.logger.debug(name, 'autocomplete', autocomplete)
+                        if(typeof autocomplete === "function")
+                            handlers.autocomplete[name] = autocomplete.bind(command)
+                    }
+                }
                 
                 if(data.options) {
                     for(const option of data.options) {
@@ -204,10 +213,12 @@ export default class CommandManager extends Manager {
                             if(option.handler) {
                                 handlers.default[option.name] = option.handler.bind(command)
                             }
-                        } else if(option.type !== "SUB_COMMAND_GROUP" && "autocomplete" in option) {
-                            const { autocomplete, name } = (option as SlashAutocomplete)
-                            if(typeof autocomplete === "function")
-                                handlers.autocomplete[name] = autocomplete.bind(command)
+                            if(option.options)
+                                for(const subOption of option.options) {
+                                    parseOption(subOption)
+                                }
+                        } else {
+                            parseOption(option)
                         }
                         builder = this.addSlashOption<SlashCommandBuilder>(builder, option)
                     }
