@@ -1,11 +1,14 @@
 import CoreEvent from '../core/types/CoreEvent.js'
+
+const MAX_TIMEOUT_SEC: number = 20
+
 export default class extends CoreEvent {
-    private fired = false
+    private readyTimeout: number
 
     async every() {
         this.logger.info(`Discord.js now ready`);
-        if(!this.fired) {
-            this.fired = true;
+        if(this.readyTimeout === 0) {
+            this.readyTimeout = 1;
             if(this.core.isReady) {
                 await this.fireReady()
             } else {
@@ -13,6 +16,8 @@ export default class extends CoreEvent {
                     if(this.core.isReady) {
                         this.fireReady()
                         clearInterval(timer)
+                    } else if(++this.readyTimeout > MAX_TIMEOUT_SEC) {
+                        this.logger.severe('Bot did not initalize in time.')
                     }
                 }, 1000)
             }
