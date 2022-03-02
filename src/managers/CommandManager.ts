@@ -213,6 +213,8 @@ export default class CommandManager extends Manager {
                     }
                 }
 
+                if(!command.onAutocomplete && process.env.NODE_ENV !== "production" && Object.keys(handlers.autocomplete).length > 0) this.logger.warn(`${data.name}: No fallback autocomplete handler 'onAutocomplete'`)
+
             } catch(err) {
                 this.logger.error(`Registering slash command "${data.name}" failed during meta processing: `, err)
                 return null
