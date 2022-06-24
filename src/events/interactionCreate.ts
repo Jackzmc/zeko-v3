@@ -5,7 +5,6 @@ import Logger from '../Logger.js';
 import OptionResult from '../types/OptionResult.js'
 import ButtonManager from '../managers/interactions/ButtonManager.js';
 import SelectManager from '../managers/interactions/SelectManager.js';
-import { isInteractionButton } from 'discord-api-types/utils/v9';
 export default class extends CoreEvent {
     private buttonManager: ButtonManager
     private selectManager: SelectManager
@@ -22,7 +21,6 @@ export default class extends CoreEvent {
                 return false
             }
         } else if(interaction.isSelectMenu()) {
-            this.logger.debug(`sel press -> ${interaction.id}`)
             if(this.selectManager.onInteract(interaction, interaction.values)) {
                 return false
             }
