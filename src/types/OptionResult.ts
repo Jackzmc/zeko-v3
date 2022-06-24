@@ -113,7 +113,7 @@ export default class OptionResult {
     }
 
     getUser(name: string): User {
-        return this.results[name].user
+        return this.results[name]?.user
     }
 
     getMember(name: string): GuildMember {
