@@ -2,7 +2,7 @@
  @module types/Command
  @description The Commands class
 */
-import Discord, { CommandInteraction, Snowflake } from 'discord.js';
+import Discord, { CommandInteraction, Snowflake, ApplicationCommandOptionType } from 'discord.js';
 import OptionResult from '../types/OptionResult.js';
 
 import { SlashCommandConfig, SlashOption } from './SlashOptions.js' 
@@ -123,8 +123,8 @@ export default abstract class SlashTraditionalCommand extends SlashCommand {
                 {
                     name: "args",
                     description: "The arguments to pass to the command",
-                    type: "STRING",
-                    required: false
+                    type: ApplicationCommandOptionType.SubcommandGroup,
+                    // required: false
                 },
                 ...flags
             ]
@@ -140,13 +140,13 @@ export default abstract class SlashTraditionalCommand extends SlashCommand {
         }
         switch(flag.type) {
             case FlagType.Boolean:
-                obj.type = "BOOLEAN"
+                obj.type = ApplicationCommandOptionType.Boolean
                 return obj as SlashBooleanOption
             case FlagType.Number:
-                obj.type = "NUMBER"
+                obj.type = ApplicationCommandOptionType.Number
                 return obj as SlashNumberOption
             default:
-                obj.type = "STRING"
+                obj.type = ApplicationCommandOptionType.String
                 return obj as SlashStringOption
         }
     }

@@ -1,4 +1,4 @@
-import { MessageActionRow, EmojiIdentifierResolvable, SelectMenuInteraction, MessageSelectOptionData, MessageSelectMenu } from "discord.js";
+import { ActionRowBuilder, EmojiIdentifierResolvable, SelectMenuInteraction, SelectMenuComponentOptionData, SelectMenuBuilder, SelectMenuComponent, ComponentType } from "discord.js";
 import BaseInteraction from "./BaseInteraction.js";
 import SelectManager from "../../managers/interactions/SelectManager.js";
 
@@ -15,7 +15,7 @@ export interface SelectMenuOptions {
     max?: number
 }
 
-export default class Select extends BaseInteraction {
+export default class Select extends BaseInteraction<SelectMenuBuilder> {
     
     /**
      * Create a new discord.js button component. If no id provided, a random id will be generated
@@ -23,15 +23,15 @@ export default class Select extends BaseInteraction {
      * @param {ButtonOptions} [options={}] Any optional options
      * @memberof Button
      */
-    constructor(choices: MessageSelectOptionData[], options: SelectMenuOptions = {}) {
+    constructor(choices: SelectMenuComponentOptionData[], options: SelectMenuOptions = {}) {
         super()
         if(choices.length == 0) throw new Error('Empty list of options was given. Minimum of one choice must be given')
         else if(!options.id) options.id = Math.random().toString(16).slice(2)
         else if(options.min && options.min >= choices.length) throw new Error('Minimum number of choices cannot be greater than the number of choices')
         else if(options.min && options.max && options.max < options.min) throw new Error('Maximum number of choices cannot be less than the minimum number of choices')
-        this.data = new MessageActionRow()
+        this.builder = new ActionRowBuilder<SelectMenuBuilder>()
         .addComponents(
-            new MessageSelectMenu()
+            new SelectMenuBuilder()
                 .setCustomId(options.id)
                 .setPlaceholder(options.placeholder)
                 .setDisabled(options.disabled === true)

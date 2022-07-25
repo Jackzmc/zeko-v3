@@ -2,13 +2,13 @@
  @module types/Command
  @description The Commands class
 */
-import Discord, { ApplicationCommandOptionChoice, AutocompleteInteraction, CommandInteraction, Snowflake } from 'discord.js';
+import Discord, { AutocompleteInteraction, CommandInteraction, Snowflake } from 'discord.js';
 import Logger from '../Logger.js'
 import OptionResult from '../types/OptionResult.js';
 
 import { SlashCommandConfig, SlashOption, ChannelType, SlashHandlerFunction } from './SlashOptions.js' 
 
-import { Client, ApplicationCommandOptionType } from 'discord.js';
+import { Client, ApplicationCommandOptionType, AutocompleteFocusedOption } from 'discord.js';
 import Core from '../core/Core.js';
 
 export { 
@@ -62,7 +62,7 @@ export default abstract class SlashCommand {
      * Called everytime a AutocompleteInteraction is sent matching the defined name in slashConfig.
      * @note Will not be called if a provided subcommand has an autocomplete handler function attached
      */
-    onAutocomplete?(interaction: AutocompleteInteraction, focused: ApplicationCommandOptionChoice): any | Promise<any>
+    onAutocomplete?(interaction: AutocompleteInteraction, focused: AutocompleteFocusedOption): any | Promise<any>
 
     /**
      * Sets the setup information for the slash command

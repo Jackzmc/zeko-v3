@@ -1,10 +1,10 @@
-import { ApplicationCommandOptionChoice, ApplicationCommandOptionType, AutocompleteInteraction, CommandInteraction, Snowflake } from 'discord.js'
+import { ApplicationCommandOptionType, AutocompleteFocusedOption, AutocompleteInteraction, CommandInteraction, Snowflake } from 'discord.js'
 import { ChannelType } from 'discord-api-types/v9'
 import OptionResult from './OptionResult.js'
 
 // Includes elements that are part of official api and not custom to zeko
 export type SlashHandlerFunction = (interaction: CommandInteraction, options?: OptionResult) => void | Promise<any>
-export type SlashAutocompleteHandlerFunction = (interaction: AutocompleteInteraction, focused: ApplicationCommandOptionChoice) => void | Promise<any>
+export type SlashAutocompleteHandlerFunction = (interaction: AutocompleteInteraction, focused: AutocompleteFocusedOption) => void | Promise<any>
 
 export interface SlashOfficialConfig {
     name: string,
@@ -42,48 +42,48 @@ export {
 }
 
 export interface SlashSubCommandOption extends SlashOptionBase {
-    type: "SUB_COMMAND",
+    type: ApplicationCommandOptionType.Subcommand,
     handler?: SlashHandlerFunction,
     options?: SlashSubOption[]
 }
 
 export interface SlashSubCommandGroupOption extends SlashOptionBase {
-    type: "SUB_COMMAND_GROUP",
+    type: ApplicationCommandOptionType.SubcommandGroup,
     options?: SlashSubOption[]
 }
 
 export interface SlashStringOption extends SlashChoicesOption<string>, SlashAutocomplete  {
-    type: "STRING",
+    type: ApplicationCommandOptionType.String,
 }
 
 export interface SlashIntegerOption extends SlashChoicesOption<Integer>, SlashAutocomplete  {
-    type: "INTEGER",
+    type: ApplicationCommandOptionType.Integer,
 }
 
 export interface SlashBooleanOption extends SlashOptionValue {
-    type: "BOOLEAN",
+    type: ApplicationCommandOptionType.Boolean,
 }
 
 export interface SlashUserOption extends SlashOptionValue {
-    type: "USER",
+    type: ApplicationCommandOptionType.User,
 }
 
 export interface SlashChannelOption extends SlashOptionValue {
-    type: "CHANNEL",
+    type: ApplicationCommandOptionType.Channel,
     channelTypes?: AllowedChannelType[] 
 }
 
 
 export interface SlashRoleOption extends SlashOptionValue {
-    type: "ROLE",
+    type: ApplicationCommandOptionType.Role,
 }
 
 export interface SlashMentionableOption extends SlashOptionValue {
-    type: "MENTIONABLE",
+    type: ApplicationCommandOptionType.Mentionable,
 }
 
 export interface SlashNumberOption extends SlashChoicesOption<number>, SlashAutocomplete  {
-    type: "NUMBER",
+    type: ApplicationCommandOptionType.Number,
 }
 
 // Subcommands do not support nesting:

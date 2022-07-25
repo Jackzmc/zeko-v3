@@ -1,4 +1,4 @@
-import { CommandInteractionOption, User, GuildMember, GuildChannel, ThreadChannel, CommandInteractionOptionResolver, Role, CacheType } from 'discord.js'
+import { CommandInteractionOption, User, GuildMember, GuildChannel, ThreadChannel, CommandInteractionOptionResolver, Role, CacheType, ApplicationCommandOptionType } from 'discord.js'
 import { SlashOption, Integer, SlashSubCommandOption, SlashSubCommandGroupOption } from '../types/SlashOptions.js'
 
 interface StoredOptionResult extends CommandInteractionOption {
@@ -75,14 +75,14 @@ export default class OptionResult {
         const result = this.results[name]
         if(!result) return null
         switch(result.type) {
-            case 'STRING': return this.getString(name)
-            case 'BOOLEAN': return this.getBoolean(name)
-            case 'INTEGER': return this.getInteger(name)
-            case 'NUMBER': return this.getNumber(name)
-            case 'USER': return this.getMember(name)
-            case 'CHANNEL': return this.getChannel(name)
-            case 'ROLE': return this.getRole(name)
-            case 'MENTIONABLE': return this.getMentionable(name)
+            case ApplicationCommandOptionType.String: return this.getString(name)
+            case ApplicationCommandOptionType.Boolean: return this.getBoolean(name)
+            case ApplicationCommandOptionType.Integer: return this.getInteger(name)
+            case ApplicationCommandOptionType.Number: return this.getNumber(name)
+            case ApplicationCommandOptionType.User: return this.getMember(name)
+            case ApplicationCommandOptionType.Channel: return this.getChannel(name)
+            case ApplicationCommandOptionType.Role: return this.getRole(name)
+            case ApplicationCommandOptionType.Mentionable: return this.getMentionable(name)
         }
         return null
     }

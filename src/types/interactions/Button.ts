@@ -1,4 +1,4 @@
-import { Snowflake, MessageActionRow, MessageButton, MessageButtonStyleResolvable, ButtonInteraction, EmojiIdentifierResolvable} from "discord.js";
+import { Snowflake, ActionRowBuilder, ButtonStyle, ButtonInteraction, EmojiIdentifierResolvable, ButtonBuilder, ButtonComponent, ComponentType} from "discord.js";
 import ButtonManager from "../../managers/interactions/ButtonManager.js";
 import BaseInteraction from './BaseInteraction.js';
 
@@ -7,13 +7,13 @@ export interface ButtonCallback {
 }
 
 export interface ButtonOptions {
-    style?: MessageButtonStyleResolvable,
+    style?: ButtonStyle,
     emoji?: EmojiIdentifierResolvable
     disabled?: boolean,
     id?: string
 }
 
-export default class Button extends BaseInteraction {
+export default class Button extends BaseInteraction<ButtonBuilder> {
 
     /**
      * Create a new discord.js button component. If no id provided, a random id will be generated
@@ -24,12 +24,12 @@ export default class Button extends BaseInteraction {
     constructor(label: string, options: ButtonOptions = {}) {
         super()
         if(!options.id) options.id = Math.random().toString(16).slice(2)
-        this.data = new MessageActionRow()
+        this.builder = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
-            new MessageButton()
+            new ButtonBuilder()
                 .setCustomId(options.id)
                 .setLabel(label)
-                .setStyle(options.style ?? "SECONDARY")
+                .setStyle(options.style ?? ButtonStyle.Secondary)
                 .setDisabled(options.disabled === true)
                 .setEmoji(options.emoji)
         )
