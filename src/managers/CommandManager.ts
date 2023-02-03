@@ -419,7 +419,8 @@ export default class CommandManager extends Manager {
                 break
             case ApplicationCommandOptionType.Channel:
                 builder.addChannelOption(opt => {
-                    return setData(opt).addChannelTypes(data.channelTypes)
+                    const copt: SlashCommandChannelOption = setData(opt)
+                    return copt.addChannelTypes(...data.channelTypes)
                 })
                 break
             case ApplicationCommandOptionType.Number:
