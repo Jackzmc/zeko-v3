@@ -3,7 +3,7 @@
  @module CommandManager
 */
 import Logger from '../Logger.js'
-import { ApplicationCommandOptionType, Client, Collection, Snowflake } from 'discord.js';
+import { ApplicationCommandOptionType, ChannelType, Client, Collection, Snowflake } from 'discord.js';
 import { SlashCommandBooleanOption, SlashCommandBuilder, SlashCommandChannelOption, SlashCommandIntegerOption, SlashCommandMentionableOption, SlashCommandNumberOption, SlashCommandRoleOption, SlashCommandStringOption, SlashCommandSubcommandBuilder, SlashCommandUserOption } from '@discordjs/builders';
 import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/TraditionalCommand.js';
 import jsum from 'jsum'
@@ -390,14 +390,18 @@ export default class CommandManager extends Manager {
             option = option.setName(data.name).setDescription(data.description)
             if('required' in data)
                 option = option.setRequired(data.required)
-            if('choices' in data) {
+            if('choices' in data && option in SlashCommandStringOption) {
+                if(!option.addChoice) {
+                    console.error('option has no addChoice', data)
+                    return option
+                }
                 if(Array.isArray(data.choices)) {
                     for(const name of data.choices) {
-                        option = option.addChoice(name, name)
+                        option = option.addChoices({ name, value: name })
                     }
                 } else {
                     for(const name in data.choices) {
-                        option = option.addChoice(name, data.choices[name])
+                        option = option.addChoices({ name, value: data.choices[name] })
                     }
                 }
             }
