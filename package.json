@@ -14,6 +14,7 @@
   "author": "Jackzmc",
   "license": "ISC",
   "dependencies": {
+    "@discordjs/opus": "^0.9.0",
     "@discordjs/rest": "^1.5.0",
     "@discordjs/voice": "^0.14.0",
     "@keyv/mysql": "^1.1.5",
@@ -30,7 +31,6 @@
     "getopts": "^2.2.5",
     "jsum": "^2.0.0-alpha.3",
     "keyv": "^4.0.3",
-    "node-opus": "^0.3.3",
     "rethinkdbdash": "^2.3.31"
   },
   "devDependencies": {
