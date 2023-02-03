@@ -3,7 +3,7 @@
  @module CommandManager
 */
 import Logger from '../Logger.js'
-import { Client, Collection, Snowflake } from 'discord.js';
+import { ApplicationCommandOptionType, Client, Collection, Snowflake } from 'discord.js';
 import { SlashCommandBooleanOption, SlashCommandBuilder, SlashCommandChannelOption, SlashCommandIntegerOption, SlashCommandMentionableOption, SlashCommandNumberOption, SlashCommandRoleOption, SlashCommandStringOption, SlashCommandSubcommandBuilder, SlashCommandUserOption } from '@discordjs/builders';
 import Command, { CommandConfigOptions, CommandHelpOptions, } from '../types/TraditionalCommand.js';
 import jsum from 'jsum'
@@ -199,7 +199,7 @@ export default class CommandManager extends Manager {
                    builder.setDefaultPermission(data.defaultPermissions === "ALL")
 
                 const parseOption = (option: SlashSubCommandGroupOption | SlashSubOption) => {
-                    if(option.type !== "SUB_COMMAND_GROUP" && "autocomplete" in option) {
+                    if(option.type !== ApplicationCommandOptionType.SubcommandGroup && "autocomplete" in option) {
                         const { autocomplete, name } = (option as SlashAutocomplete)
                         this.logger.debug(name, 'autocomplete', autocomplete)
                         if(typeof autocomplete === "function")
@@ -209,7 +209,7 @@ export default class CommandManager extends Manager {
                 
                 if(data.options) {
                     for(const option of data.options) {
-                        if(option.type === "SUB_COMMAND") {
+                        if(option.type === ApplicationCommandOptionType.Subcommand) {
                             if(option.handler) {
                                 handlers.default[option.name] = option.handler
                             }
@@ -404,38 +404,35 @@ export default class CommandManager extends Manager {
             return option
         }
 
-        const a = new SlashCommandBuilder()
         switch(data.type) {
-            case "BOOLEAN":
+            case ApplicationCommandOptionType.Boolean:
                 builder.addBooleanOption(setData)
                 break
-            case "STRING":
+            case ApplicationCommandOptionType.String:
                 builder.addStringOption(option => setData(option.setAutocomplete(data.autocomplete !== null && data.autocomplete !== undefined)))
                 break
-            case "INTEGER":
+            case ApplicationCommandOptionType.Integer:
                 builder.addIntegerOption(option => setData(option.setAutocomplete(data.autocomplete !== null && data.autocomplete !== undefined)))
                 break
-            case "USER":
+            case ApplicationCommandOptionType.User:
                 builder.addUserOption(setData)
                 break
-            case "CHANNEL":
+            case ApplicationCommandOptionType.Channel:
                 builder.addChannelOption(opt => {
                     return setData(opt).addChannelTypes(data.channelTypes)
                 })
                 break
-            case "NUMBER":
+            case ApplicationCommandOptionType.Number:
                 builder.addNumberOption(option => setData(option.setAutocomplete(data.autocomplete !== null && data.autocomplete !== undefined)))
                 break
-            case "NUMBER":
-                builder.addNumberOption(setData)
-                break
-            case "ROLE":
+            case ApplicationCommandOptionType.Role:
                 builder.addRoleOption(setData)
                 break
-            case "MENTIONABLE":
+            case ApplicationCommandOptionType.Mentionable:
                 builder.addMentionableOption(setData)
                 break    
-            case "SUB_COMMAND":
+            case ApplicationCommandOptionType.Subcommand:
+            // case "SUB_COMMAND":
                 if(builder instanceof SlashCommandBuilder) {
                     builder.addSubcommand(cmd => {
                         cmd = setData(cmd)
@@ -450,7 +447,8 @@ export default class CommandManager extends Manager {
                     throw new Error("Subcommands can only be added to SlashCommandBuilder")
                 }
                 break    
-            case "SUB_COMMAND_GROUP":
+            case ApplicationCommandOptionType.SubcommandGroup:
+            // case "SUB_COMMAND_GROUP":
                 if(builder instanceof SlashCommandBuilder) {
                     builder.addSubcommandGroup(setData)
                 } else {
