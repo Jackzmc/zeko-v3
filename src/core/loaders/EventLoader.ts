@@ -8,7 +8,7 @@ import path from 'path'
 
 import EventManager, { RegisteredCoreEvent, RegisteredCustomEvent } from '../../managers/EventManager.js'
 import Logger from '../../Logger.js';
-import { Client } from 'discord.js';
+import { Client, GatewayIntentBits } from 'discord.js';
 import Event from 'Event.js';
 import CoreEvent from '../types/CoreEvent.js';
 
@@ -19,7 +19,7 @@ interface EventBit {
     name: string
     event: Event | CoreEvent
     isCore: boolean,
-    intents?: number
+    intents: GatewayIntentBits[]
 }
 
 export default class {
@@ -81,15 +81,10 @@ export default class {
                 }
             }
         }
-        let intents = 0;
+        let intents = []
         try {
             let eventBits = await Promise.all(promises)
-            eventBits = eventBits.filter(bit => bit)
-            eventBits.forEach(bit => {
-                if(bit.intents) {
-                    intents |= bit.intents
-                }
-            })
+            eventBits.forEach(event => intents = [...intents, ...event.intents])
             return { intents, events: eventBits }
         } catch(err) {
             this.logger.severe('A failure occurred while pre-loading events.\n', err)

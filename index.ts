@@ -1,13 +1,12 @@
-import * as Discord from 'discord.js';
+import Discord from 'discord.js';
 import EnvLoader from './src/core/EnvLoader.js'
 import CoreLoader from './src/core/Core.js'
 
 // Fetch envs and any intents from env variable
 const envs = EnvLoader()
-const customIntents = new Discord.Intents();
+const customIntents = []
 if(envs.privilegedIntents)
-	customIntents.add(envs.privilegedIntents as Discord.BitFieldResolvable<Discord.IntentsString,number>[])
-
+	customIntents.push(envs.privilegedIntents)
 // All core logic moved into loader:
 new CoreLoader().load(customIntents);
 

@@ -14,7 +14,7 @@ export default class OptionResult {
     private count: number
     private subcmd: string
     private subcmdGroup: string
-    constructor(results: Omit<CommandInteractionOptionResolver<CacheType>, "getMessage" | "getFocused">, options: SlashOption[]) {
+    constructor(results: any, options: SlashOption[]) {
         this.results = {}
         this.count = 0
         if(options) {

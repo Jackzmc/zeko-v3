@@ -9,7 +9,7 @@ import ModuleLoader from './loaders/ModuleLoader.js'
 import Functions from './Functions.js'
 import Logger from '../Logger.js'
 import { promises as fs } from 'fs';
-import { Client, Intents } from 'discord.js';
+import { Client } from 'discord.js';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -62,7 +62,7 @@ export default class Core {
         return this.shuttingDown
     }
     
-    async load(customIntents: Intents) {
+    async load(mainIntents: any[]) {
         try {
             // Initialize all loaders
             const ROOT_DIR = resolve(__dirname,"../../")
@@ -74,14 +74,13 @@ export default class Core {
 
 
             // Event loader must be preloaded to grab any intents any event may need
-            const { intents, events } = await eventLoader.preload()
-            customIntents.add(intents)
-            const intentsArray = customIntents.toArray()
-            this.logger.info(`Registered ${intentsArray.length} intents ${intentsArray}`)
+            const { intents: eventIntents, events } = await eventLoader.preload()
+            const intents = [ ...mainIntents, ...eventIntents ]
+            this.logger.info(`Registered ${intents.length} intents ${intents}`)
 
             // Create client with intents
             this.client = new Client({
-                intents: customIntents
+                intents
             });
             this.client.core = this
             Functions(this.client)
