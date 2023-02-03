@@ -1,9 +1,9 @@
-import { ActionRowBuilder, EmojiIdentifierResolvable, SelectMenuInteraction, SelectMenuComponentOptionData, SelectMenuBuilder, SelectMenuComponent, ComponentType } from "discord.js";
+import { ActionRowBuilder, EmojiIdentifierResolvable, SelectMenuComponentOptionData, AnySelectMenuInteraction, StringSelectMenuBuilder, UserSelectMenuBuilder } from "discord.js";
 import BaseInteraction from "./BaseInteraction.js";
 import SelectManager from "../../managers/interactions/SelectManager.js";
 
 export interface SelectMenuCallback {
-    (interaction: SelectMenuInteraction, values: string[]): void
+    (interaction: AnySelectMenuInteraction, values: string[]): void
 }
 
 export interface SelectMenuOptions {
@@ -15,7 +15,7 @@ export interface SelectMenuOptions {
     max?: number
 }
 
-export default class Select extends BaseInteraction<SelectMenuBuilder> {
+export default class Select extends BaseInteraction<StringSelectMenuBuilder> {
     
     /**
      * Create a new discord.js button component. If no id provided, a random id will be generated
@@ -29,9 +29,9 @@ export default class Select extends BaseInteraction<SelectMenuBuilder> {
         else if(!options.id) options.id = Math.random().toString(16).slice(2)
         else if(options.min && options.min >= choices.length) throw new Error('Minimum number of choices cannot be greater than the number of choices')
         else if(options.min && options.max && options.max < options.min) throw new Error('Maximum number of choices cannot be less than the minimum number of choices')
-        this.builder = new ActionRowBuilder<SelectMenuBuilder>()
+        this.builder = new ActionRowBuilder<StringSelectMenuBuilder>()
         .addComponents(
-            new SelectMenuBuilder()
+            new StringSelectMenuBuilder()
                 .setCustomId(options.id)
                 .setPlaceholder(options.placeholder)
                 .setDisabled(options.disabled === true)
