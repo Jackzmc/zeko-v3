@@ -18,7 +18,8 @@ export {
     Client,
     SlashCommandConfig,
     SlashOption,
-    ChannelType
+    ChannelType,
+    ApplicationCommandOptionType
 }
 
 export default abstract class SlashCommand {
