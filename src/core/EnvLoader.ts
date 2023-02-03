@@ -1,4 +1,4 @@
-import { Client, EnvVariable } from 'discord.js';
+import { Client, EnvVariable, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -23,7 +23,7 @@ export default function() {
 
     if(process.env.DISCORD_INTENTS) {
         const intents = process.env.DISCORD_INTENTS.split(",")
-        envs.privilegedIntents = intents
+        envs.privilegedIntents = intents.map(str => GatewayIntentBits[str])
     }
 
     return envs;

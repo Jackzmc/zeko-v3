@@ -84,6 +84,7 @@ export default class {
         let intents = []
         try {
             let eventBits = await Promise.all(promises)
+            eventBits = eventBits.filter(event => event)
             eventBits.forEach(event => intents = [...intents, ...event.intents])
             return { intents, events: eventBits }
         } catch(err) {
@@ -137,6 +138,6 @@ async function loadEvent(rootPath: string, filename: string, isCore: boolean): P
         name: eventName[0],
         event,
         isCore,
-        intents: event.INTENTS
+        intents: event.INTENTS || []
     }
 }
