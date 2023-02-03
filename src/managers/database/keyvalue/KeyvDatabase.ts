@@ -20,14 +20,18 @@ export interface ConnectionSQLDetails extends ConnectionDetails {
 }
 
 
-export default abstract class KeyvDatabase extends Database implements Keyv {
+export default abstract class KeyvDatabase extends Database{
     protected keyv: Keyv
-    constructor(namespace: string) {
+    constructor(namespace: string, connectUri: string) {
         super(namespace)
+        this.keyv =  new Keyv(connectUri, { namespace })
+        this.keyv.on('error', (err: Error) => {
+            this.logger.severe(`KeyV connection error: `, err)
+        });
     }
 
     get<T>(key: string, defaultValue?: T): Promise<T> {
-        return this.keyv.get(key) || defaultValue
+        return this.keyv.get(key) || Promise.resolve(defaultValue)
     }
 
     set(key: string, value: any, ttlMS?: number): Promise<boolean> {
@@ -43,7 +47,8 @@ export default abstract class KeyvDatabase extends Database implements Keyv {
     }
 
     clear(): Promise<boolean> {
-        return this.keyv.clear()
+        this.keyv.clear()
+        return Promise.resolve(true)
     }
 
      /**
