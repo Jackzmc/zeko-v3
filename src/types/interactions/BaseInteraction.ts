@@ -22,7 +22,7 @@ export default class BaseInteraction<T extends MessageActionRowComponentBuilder>
 
     get id() {
         const data = this.builder.components[0].data
-        if (data.type === ComponentType.Button && data.style != ButtonStyle.Link) {
+        if (data.type === ComponentType.Button && data.style === ButtonStyle.Link) {
             throw new Error("No ID exists for buttons with links")
         }
         // @ts-ignore
