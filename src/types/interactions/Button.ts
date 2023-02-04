@@ -25,14 +25,14 @@ export default class Button extends BaseInteraction<ButtonBuilder> {
         super()
         if(!options.id) options.id = Math.random().toString(16).slice(2)
         this.builder = new ActionRowBuilder<ButtonBuilder>()
-        .addComponents(
-            new ButtonBuilder()
-                .setCustomId(options.id)
-                .setLabel(label)
-                .setStyle(options.style ?? ButtonStyle.Secondary)
-                .setDisabled(options.disabled === true)
-                .setEmoji(options.emoji)
-        )
+        let buttonBuilder = new ButtonBuilder()
+            .setCustomId(options.id)
+            .setLabel(label)
+            .setStyle(options.style ?? ButtonStyle.Secondary)
+            .setDisabled(options.disabled === true)
+        if(options.emoji)
+            buttonBuilder = buttonBuilder.setEmoji(options.emoji)
+        this.builder.addComponents(buttonBuilder)
     }
 
     onPress(callback: ButtonCallback) {
