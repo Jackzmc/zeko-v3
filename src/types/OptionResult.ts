@@ -120,7 +120,7 @@ export default class OptionResult {
         return this.results[name]?.member as GuildMember
     }
 
-    getChannel<T extends GuildChannel | ThreadChannel>(name: string, type?: ChannelType): T {
+    getChannel<T>(name: string, type?: ChannelType): T {
         const channel = this.results[name]?.channel
         if(!type) return channel as T
         if(channel.type == type) return channel as T
