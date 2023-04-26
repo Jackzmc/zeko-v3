@@ -1,4 +1,4 @@
-import { CommandInteractionOption, User, GuildMember, GuildChannel, ThreadChannel, CommandInteractionOptionResolver, Role, CacheType, ApplicationCommandOptionType } from 'discord.js'
+import { CommandInteractionOption, User, GuildMember, GuildChannel, ThreadChannel, CommandInteractionOptionResolver, Role, CacheType, ApplicationCommandOptionType, ChannelType } from 'discord.js';
 import { SlashOption, Integer, SlashSubCommandOption, SlashSubCommandGroupOption } from '../types/SlashOptions.js'
 
 interface StoredOptionResult extends CommandInteractionOption {
@@ -120,12 +120,22 @@ export default class OptionResult {
         return this.results[name]?.member as GuildMember
     }
 
-    getChannel(name: string): GuildChannel | ThreadChannel {
-        return this.results[name]?.channel as (GuildChannel | ThreadChannel)
+    getChannel<T extends GuildChannel | ThreadChannel>(name: string, type?: ChannelType): T {
+        const channel = this.results[name]?.channel
+        if(!type) return channel as T
+        if(channel.type == type) return channel as T
+        return null
     }
 
-    getMentionable(name: string) {
-        return this.results[name]?.member || this.results[name].user|| this.results[name].role
+    getMentionable(name: string, type?: ApplicationCommandOptionType): GuildMember | User | Role {
+        if(type) {
+            if(type == ApplicationCommandOptionType.Role && this.results[name].role)    
+                return this.results[name].role as Role
+            else if(type == ApplicationCommandOptionType.User) {
+                return this.results[name].member as GuildMember || this.results[name].user as User || null
+            }
+        }
+        return (this.results[name]?.member || this.results[name].user || this.results[name].role) as (GuildMember | User | Role )
     }
 
     getRole(name: string): Role {
